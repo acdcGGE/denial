@@ -2335,6 +2335,6220 @@ index d08c7d5f..5dd495d6 100644
      public_deps += [ "$dart_src/runtime/bin:analyze_snapshot($host_toolchain)" ]
    }
  }
+diff --git a/engine/src/flutter/loong64/icu/flutter/icudtl.dat b/engine/src/flutter/loong64/icu/flutter/icudtl.dat
+new file mode 100644
+index 00000000..8f3adcfc
+Binary files /dev/null and b/engine/src/flutter/loong64/icu/flutter/icudtl.dat differ
+diff --git a/engine/src/flutter/loong64/third_party_gn/accessibility/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/accessibility/BUILD.gn
+new file mode 100644
+index 00000000..0ef1c499
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/accessibility/BUILD.gn
+@@ -0,0 +1,128 @@
++# Copyright 2013 The Flutter Authors. All rights reserved.
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//flutter/common/config.gni")
++import("//flutter/testing/testing.gni")
++
++config("accessibility_config") {
++  visibility = [
++    "//flutter/shell/platform/common:common_cpp_accessibility",
++    "//flutter/third_party/accessibility/*",
++  ]
++  if (is_win) {
++    # TODO(cbracken): https://github.com/flutter/flutter/issues/92229
++    defines = [ "_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING" ]
++  }
++  include_dirs = [ "//flutter/third_party/accessibility" ]
++}
++
++source_set("accessibility") {
++  defines = []
++
++  public_deps = [
++    "ax",
++    "ax_build",
++    "base",
++    "gfx",
++  ]
++
++  public_configs = [ ":accessibility_config" ]
++
++  if (is_mac) {
++    frameworks = [
++      "AppKit.framework",
++      "CoreFoundation.framework",
++      "CoreGraphics.framework",
++      "CoreText.framework",
++      "IOSurface.framework",
++    ]
++  }
++}
++
++if (enable_unittests) {
++  test_fixtures("accessibility_fixtures") {
++    fixtures = []
++  }
++
++  executable("accessibility_unittests") {
++    testonly = true
++
++    public_configs = [ ":accessibility_config" ]
++
++    if (is_mac || is_win) {
++      sources = [
++        "ax/ax_enum_util_unittest.cc",
++        "ax/ax_event_generator_unittest.cc",
++        "ax/ax_node_data_unittest.cc",
++        "ax/ax_node_position_unittest.cc",
++        "ax/ax_range_unittest.cc",
++        "ax/ax_role_properties_unittest.cc",
++        "ax/ax_table_info_unittest.cc",
++        "ax/ax_tree_unittest.cc",
++        "ax/test_ax_node_helper.cc",
++        "ax/test_ax_node_helper.h",
++        "ax/test_ax_tree_manager.cc",
++        "ax/test_ax_tree_manager.h",
++      ]
++
++      sources += [
++        "ax/platform/ax_platform_node_base_unittest.cc",
++        "ax/platform/ax_platform_node_unittest.cc",
++        "ax/platform/ax_platform_node_unittest.h",
++        "ax/platform/ax_unique_id_unittest.cc",
++        "ax/platform/test_ax_node_wrapper.cc",
++        "ax/platform/test_ax_node_wrapper.h",
++      ]
++
++      if (is_mac) {
++        cflags_objc = flutter_cflags_objc
++        cflags_objcc = flutter_cflags_objcc
++        ldflags = [ "-ObjC" ]
++
++        sources += [ "ax/platform/ax_platform_node_mac_unittest.mm" ]
++        frameworks = [
++          "AppKit.framework",
++          "CoreFoundation.framework",
++          "CoreGraphics.framework",
++          "CoreText.framework",
++          "IOSurface.framework",
++        ]
++      }
++      if (is_win) {
++        sources += [
++          "ax/platform/ax_fragment_root_win_unittest.cc",
++          "ax/platform/ax_platform_node_textprovider_win_unittest.cc",
++          "ax/platform/ax_platform_node_textrangeprovider_win_unittest.cc",
++          "ax/platform/ax_platform_node_win_unittest.cc",
++          "base/win/dispatch_stub.cc",
++          "base/win/dispatch_stub.h",
++          "base/win/display_unittest.cc",
++          "base/win/scoped_bstr_unittest.cc",
++          "base/win/scoped_safearray_unittest.cc",
++          "base/win/scoped_variant_unittest.cc",
++        ]
++      }
++
++      sources += [
++        "base/logging_unittests.cc",
++        "base/string_utils_unittest.cc",
++        "gfx/geometry/insets_unittest.cc",
++        "gfx/geometry/point_unittest.cc",
++        "gfx/geometry/rect_unittest.cc",
++        "gfx/geometry/size_unittest.cc",
++        "gfx/geometry/vector2d_unittest.cc",
++        "gfx/range/range_unittest.cc",
++        "gfx/test/gfx_util.cc",
++        "gfx/test/gfx_util.h",
++      ]
++
++      deps = [
++        ":accessibility",
++        ":accessibility_fixtures",
++        "//flutter/testing",
++        "//flutter/testing:dart",
++      ]
++    }
++  }
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/ai/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/ai/BUILD.gn
+new file mode 100644
+index 00000000..ee2914b0
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/ai/BUILD.gn
+@@ -0,0 +1,4 @@
++source_set("ai") {
++  sources = []
++  include_dirs = [ "." ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/angle/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/angle/BUILD.gn
+new file mode 100644
+index 00000000..3af5c5e6
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/angle/BUILD.gn
+@@ -0,0 +1,18 @@
++# Stub: angle removed from DEPS, not needed for Linux release
++source_set("angle") {
++  sources = []
++}
++source_set("libEGL_static") {
++  sources = []
++}
++source_set("libGLESv2_static") {
++  sources = []
++}
++source_set("libANGLE_static") {
++  sources = []
++}
++config("external_config") {
++}
++source_set("gl_prototypes") {
++  sources = []
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/benchmark/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/benchmark/BUILD.gn
+new file mode 100644
+index 00000000..1aa2263f
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/benchmark/BUILD.gn
+@@ -0,0 +1,41 @@
++# benchmark (google/benchmark) — compile upstream source.
++
++config("benchmark_public") {
++  include_dirs = [ "include" ]
++}
++
++source_set("benchmark") {
++  sources = [
++    "src/benchmark.cc",
++    "src/benchmark_api_internal.cc",
++    "src/benchmark_name.cc",
++    "src/benchmark_register.cc",
++    "src/check.cc",
++    "src/colorprint.cc",
++    "src/commandlineflags.cc",
++    "src/complexity.cc",
++    "src/console_reporter.cc",
++    "src/counter.cc",
++    "src/csv_reporter.cc",
++    "src/json_reporter.cc",
++    "src/perf_counters.cc",
++    "src/reporter.cc",
++    "src/statistics.cc",
++    "src/string_util.cc",
++    "src/sysinfo.cc",
++    "src/timers.cc",
++  ]
++  include_dirs = [ "include", "src" ]
++  public_configs = [ ":benchmark_public" ]
++}
++
++source_set("benchmark_main") {
++  sources = [ "src/benchmark_main.cc" ]
++  include_dirs = [ "include", "src" ]
++  deps = [ ":benchmark" ]
++  public_configs = [ ":benchmark_public" ]
++}
++
++config("benchmark_config") {
++  defines = []
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/boringssl/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/boringssl/BUILD.gn
+new file mode 100644
+index 00000000..acf5cacf
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/boringssl/BUILD.gn
+@@ -0,0 +1,93 @@
++# Copyright 2014 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//build/config/android/config.gni")
++import("//build/config/arm.gni")
++import("//build/config/compiler/compiler.gni")
++import("//build/config/sanitizers/sanitizers.gni")
++import("//build_overrides/build.gni")
++import("src/gen/sources.gni")
++
++# Config for us and everybody else depending on BoringSSL.
++config("external_config") {
++  include_dirs = [ "src/include" ]
++  if (is_component_build) {
++    defines = [ "BORINGSSL_SHARED_LIBRARY" ]
++  }
++}
++
++# The config used by the :boringssl component itself, and the fuzzer copies.
++config("component_config") {
++  visibility = [ ":*" ]
++  configs = [ ":internal_config" ]
++  defines = [ "BORINGSSL_IMPLEMENTATION" ]
++
++  cflags_c = [ "-std=c17" ]
++}
++
++# This config is used by anything that consumes internal headers. Tests consume
++# this rather than :component_config.
++config("internal_config") {
++  visibility = [ ":*" ]
++  defines = [
++    "OPENSSL_SMALL",
++    "OPENSSL_STATIC_ARMCAP",
++  ]
++  if (is_posix) {
++    defines += [ "_XOPEN_SOURCE=700" ]
++  }
++}
++
++config("no_asm_config") {
++  visibility = [ ":*" ]
++  defines = [ "OPENSSL_NO_ASM" ]
++}
++
++# TODO(crbug.com/42290535): Move Chromium's use of libpki to the public API and
++# unexport pki_internal_headers.
++all_sources = bcm_internal_headers + bcm_sources + crypto_internal_headers +
++              crypto_sources + ssl_internal_headers + ssl_sources + pki_sources
++all_headers = crypto_headers + ssl_headers + pki_headers + pki_internal_headers
++
++if (is_msan) {
++  # MSan instrumentation is incompatible with assembly optimizations.
++  # BoringSSL's GAS-compatible assembly knows how to detect MSan, but the NASM
++  # assembly does not, so we check for MSan explicitly.
++  source_set("boringssl_asm") {
++    visibility = [ ":*" ]
++    public_configs = [ ":no_asm_config" ]
++  }
++} else if (is_win && (current_cpu == "x86" || current_cpu == "x64")) {
++  # Windows' x86 and x86_64 assembly is built with NASM.
++  source_set("boringssl_asm") {
++    visibility = [ ":*" ]
++    public_configs = [ ":no_asm_config" ]
++  }
++} else {
++  # All other targets use GAS-compatible assembler. BoringSSL's assembly files
++  # are all wrapped in processor checks for the corresponding target, so there
++  # is no need to add target conditions in the build.
++  source_set("boringssl_asm") {
++    visibility = [ ":*" ]
++    sources = rebase_path(bcm_sources_asm + crypto_sources_asm, ".", "src")
++    include_dirs = [ "src/include" ]
++  }
++}
++
++source_set("boringssl") {
++  sources = rebase_path(all_sources, ".", "src")
++  public = rebase_path(all_headers, ".", "src")
++
++  if (is_win) {
++    configs += [ ":no_asm_config" ]
++  } else {
++    deps = [ ":boringssl_asm" ]
++  }
++
++  public_configs = [ ":external_config" ]
++  configs += [ ":component_config" ]
++
++  configs -= [ "//build/config/compiler:chromium_code" ]
++  configs += [ "//build/config/compiler:no_chromium_code" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/brotli/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/brotli/BUILD.gn
+new file mode 100644
+index 00000000..1f3c352b
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/brotli/BUILD.gn
+@@ -0,0 +1,46 @@
++# brotli — prebuilt from sysroot.
++# Use plain lib names so each toolchain resolves from its own sysroot.
++
++config("brotli_public") {
++  include_dirs = [ "c/include" ]
++}
++
++config("brotli_link") {
++  libs = [ "brotlienc" ]
++}
++
++config("brotlidec_link") {
++  libs = [ "brotlidec" ]
++}
++
++config("brotlienc_link") {
++  libs = [ "brotlienc" ]
++}
++
++config("brotlicommon_link") {
++  libs = [ "brotlicommon" ]
++}
++
++source_set("brotli") {
++  sources = []
++  all_dependent_configs = [ ":brotli_link" ]
++  public_configs = [ ":brotli_public" ]
++}
++
++source_set("brotlidec") {
++  sources = []
++  all_dependent_configs = [ ":brotlidec_link" ]
++  public_configs = [ ":brotli_public" ]
++}
++
++source_set("brotlienc") {
++  sources = []
++  all_dependent_configs = [ ":brotlienc_link" ]
++  public_configs = [ ":brotli_public" ]
++}
++
++source_set("brotlicommon") {
++  sources = []
++  all_dependent_configs = [ ":brotlicommon_link" ]
++  public_configs = [ ":brotli_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/canvaskit/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/canvaskit/BUILD.gn
+new file mode 100644
+index 00000000..92536dda
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/canvaskit/BUILD.gn
+@@ -0,0 +1,205 @@
++# Copyright 2013 The Flutter Authors. All rights reserved.
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//build/toolchain/wasm.gni")
++
++# This toolchain is only to be used by canvaskit_group below.
++wasm_toolchain("canvaskit") {
++  extra_toolchain_args = {
++    # Include ICU data.
++    skia_use_icu = true
++    skia_use_client_icu = false
++
++    # Include image codecs.
++    skia_use_libjpeg_turbo_decode = true
++    skia_use_libpng_decode = true
++    skia_use_libwebp_decode = true
++
++    # Disable LTO.
++    enable_lto = false
++  }
++}
++
++copy("canvaskit_group") {
++  visibility = [ "//flutter/web_sdk:*" ]
++  public_deps = [ "//flutter/skia/modules/canvaskit(:canvaskit)" ]
++
++  sources = [
++    "$root_out_dir/canvaskit/canvaskit.js",
++    "$root_out_dir/canvaskit/canvaskit.js.symbols",
++    "$root_out_dir/canvaskit/canvaskit.wasm",
++  ]
++  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
++}
++
++# This toolchain is only to be used by canvaskit_chromium_group below.
++wasm_toolchain("canvaskit_chromium") {
++  extra_toolchain_args = {
++    # In Chromium browsers, we can use the browser's APIs to get the necessary
++    # ICU data.
++    skia_use_icu = false
++    skia_use_client_icu = true
++    skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
++
++    skia_use_libjpeg_turbo_decode = false
++    skia_use_libpng_decode = false
++    skia_use_libwebp_decode = false
++
++    # Disable LTO.
++    enable_lto = false
++  }
++}
++
++copy("canvaskit_chromium_group") {
++  visibility = [ "//flutter/web_sdk:*" ]
++  public_deps = [ "//flutter/skia/modules/canvaskit(:canvaskit_chromium)" ]
++
++  sources = [
++    "$root_out_dir/canvaskit_chromium/canvaskit.js",
++    "$root_out_dir/canvaskit_chromium/canvaskit.js.symbols",
++    "$root_out_dir/canvaskit_chromium/canvaskit.wasm",
++  ]
++  outputs = [
++    "$root_out_dir/flutter_web_sdk/canvaskit/chromium/{{source_file_part}}",
++  ]
++}
++
++# This toolchain is only to be used by canvaskit_webparagraph_group below.
++wasm_toolchain("canvaskit_webparagraph") {
++  extra_toolchain_args = {
++    # In Chromium browsers, we can use the browser's APIs to get the necessary
++    # ICU data.
++    skia_use_icu = false
++    skia_use_client_icu = false
++
++    # We still need BiDi information since there's no browser API for it.
++    skia_use_bidi = true
++    skia_canvaskit_enable_bidi = true
++    skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
++
++    # Remove all other text-related features that we don't need with WebParagraph.
++    skia_enable_skparagraph = false
++    skia_canvaskit_enable_paragraph = false
++    skia_enable_skshaper = false
++    skia_use_harfbuzz = false
++    skia_use_freetype = false
++    flutter_use_freetype_woff2 = false
++    skia_enable_fontmgr_custom_embedded = false
++    skia_enable_fontmgr_custom_empty = false
++    skia_canvaskit_enable_font = false
++    skia_canvaskit_enable_alias_font = false
++
++    skia_use_libjpeg_turbo_decode = false
++    skia_use_libpng_decode = false
++    skia_use_libwebp_decode = false
++
++    # Disable LTO.
++    enable_lto = false
++  }
++}
++
++copy("canvaskit_webparagraph_group") {
++  visibility = [ "//flutter/web_sdk:*" ]
++  public_deps = [ "//flutter/skia/modules/canvaskit(:canvaskit_webparagraph)" ]
++
++  sources = [
++    "$root_out_dir/canvaskit_webparagraph/canvaskit.js",
++    "$root_out_dir/canvaskit_webparagraph/canvaskit.js.symbols",
++    "$root_out_dir/canvaskit_webparagraph/canvaskit.wasm",
++  ]
++  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/webparagraph/{{source_file_part}}" ]
++}
++
++# This toolchain is only to be used by skwasm_group below.
++template("skwasm_toolchain") {
++  assert(defined(invoker.skwasm_is_heavy))
++  forward_variables_from(invoker,
++                         [
++                           "skwasm_is_mt",
++                           "skwasm_is_heavy",
++                         ])
++  wasm_toolchain(target_name) {
++    extra_toolchain_args = {
++      # In Chromium browsers, we can use the browser's APIs to get the necessary
++      # ICU data. So we use built-in ICU data only in the heavy (non-chromium) case
++      skia_use_icu = skwasm_is_heavy
++      skia_use_client_icu = !skwasm_is_heavy
++      if (!skwasm_is_heavy) {
++        skia_icu_bidi_third_party_dir =
++            "//flutter/third_party/canvaskit/icu_bidi"
++      }
++
++      skia_use_libjpeg_turbo_decode = skwasm_is_heavy
++      skia_use_libpng_decode = skwasm_is_heavy
++      skia_use_libwebp_decode = skwasm_is_heavy
++
++      # We use OffscreenCanvas to produce PNG data instead of skia
++      skia_use_no_png_encode = true
++      skia_use_libpng_encode = false
++
++      # skwasm is multithreaded
++      wasm_use_workers = true
++      wasm_prioritize_size = true
++    }
++  }
++}
++
++skwasm_toolchain("skwasm") {
++  skwasm_is_heavy = false
++}
++
++skwasm_toolchain("skwasm_heavy") {
++  skwasm_is_heavy = true
++}
++
++copy("skwasm_group") {
++  visibility = [ "//flutter/web_sdk:*" ]
++  public_deps = [ "//flutter/skwasm(:skwasm)" ]
++
++  sources = [
++    "$root_out_dir/skwasm/skwasm.js",
++    "$root_out_dir/skwasm/skwasm.js.symbols",
++    "$root_out_dir/skwasm/skwasm.wasm",
++  ]
++  if (is_debug) {
++    if (!wasm_use_dwarf) {
++      sources += [ "$root_out_dir/skwasm/skwasm.wasm.map" ]
++    }
++  }
++  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
++}
++
++copy("skwasm_heavy_group") {
++  visibility = [ "//flutter/web_sdk:*" ]
++  public_deps = [ "//flutter/skwasm:skwasm_heavy(:skwasm_heavy)" ]
++
++  sources = [
++    "$root_out_dir/skwasm_heavy/skwasm_heavy.js",
++    "$root_out_dir/skwasm_heavy/skwasm_heavy.js.symbols",
++    "$root_out_dir/skwasm_heavy/skwasm_heavy.wasm",
++  ]
++  if (is_debug) {
++    if (!wasm_use_dwarf) {
++      sources += [ "$root_out_dir/skwasm_heavy/skwasm_heavy.wasm.map" ]
++    }
++  }
++  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
++}
++
++copy("wimp_group") {
++  visibility = [ "//flutter/web_sdk:*" ]
++  public_deps = [ "//flutter/skwasm:wimp(:skwasm)" ]
++
++  sources = [
++    "$root_out_dir/skwasm/wimp.js",
++    "$root_out_dir/skwasm/wimp.js.symbols",
++    "$root_out_dir/skwasm/wimp.wasm",
++  ]
++  if (is_debug) {
++    if (!wasm_use_dwarf) {
++      sources += [ "$root_out_dir/skwasm/wimp.wasm.map" ]
++    }
++  }
++  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/cpu_features/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/cpu_features/BUILD.gn
+new file mode 100644
+index 00000000..45e51b32
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/cpu_features/BUILD.gn
+@@ -0,0 +1,61 @@
++# Copyright 2013 The Flutter Authors. All rights reserved.
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++config("cpu_features_config") {
++  cflags = [ "-Wno-unused-function" ]
++  defines = [
++    "STACK_LINE_READER_BUFFER_SIZE=1024",
++    "HAVE_STRONG_GETAUXVAL",
++  ]
++  include_dirs = [ "src/include" ]
++}
++
++config("ndk_compat_headers") {
++  include_dirs = [ "src/ndk_compat" ]
++}
++
++source_set("cpuinfo") {
++  sources = [
++    "src/src/copy.inl",
++    "src/src/define_introspection.inl",
++    "src/src/define_introspection_and_hwcaps.inl",
++    "src/src/equals.inl",
++    "src/src/filesystem.c",
++    "src/src/hwcaps.c",
++    "src/src/stack_line_reader.c",
++    "src/src/string_view.c",
++  ]
++  if (current_cpu == "x86" || current_cpu == "x64") {
++    sources += [
++      "src/src/impl_x86__base_implementation.inl",
++      "src/src/impl_x86_freebsd.c",
++      "src/src/impl_x86_linux_or_android.c",
++      "src/src/impl_x86_macos.c",
++      "src/src/impl_x86_windows.c",
++    ]
++  } else if (current_cpu == "arm") {
++    sources += [ "src/src/impl_arm_linux_or_android.c" ]
++  } else if (current_cpu == "arm64") {
++    sources += [ "src/src/impl_aarch64_linux_or_android.c" ]
++  } else if (current_cpu == "mips") {
++    sources += [ "src/src/impl_mips_linux_or_android.c" ]
++  } else if (current_cpu == "ppc") {
++    sources += [ "src/src/impl_ppc_linux.c" ]
++  } else if (current_cpu == "riscv64") {
++    sources += [ "src/src/impl_riscv_linux.c" ]
++  } else {
++    error("Missing definition for architecture: $current_cpu")
++  }
++  configs += [ ":cpu_features_config" ]
++}
++
++source_set("ndk_compat") {
++  sources = [
++    "src/ndk_compat/cpu-features.c",
++    "src/ndk_compat/cpu-features.h",
++  ]
++  configs += [ ":cpu_features_config" ]
++  public_configs = [ ":ndk_compat_headers" ]
++  deps = [ ":cpuinfo" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/dart/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/dart/BUILD.gn
+new file mode 100644
+index 00000000..1aa77bea
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/dart/BUILD.gn
+@@ -0,0 +1,513 @@
++# Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
++# for details. All rights reserved. Use of this source code is governed by a
++# BSD-style license that can be found in the LICENSE file.
++
++import("build/config/gclient_args.gni")
++import("sdk_args.gni")
++
++# This target will be built if no target is specified when invoking ninja.
++group("default") {
++  deps = [ ":runtime" ]
++}
++
++group("most") {
++  deps = [
++    ":analysis_server",
++    ":create_sdk",
++    ":dart2js",
++    ":dartanalyzer",
++    ":ddc",
++    ":runtime",
++  ]
++}
++
++group("runtime") {
++  import("runtime/runtime_args.gni")
++
++  deps = [
++    "runtime/bin:dart",
++    "runtime/bin:dartvm",
++    "runtime/bin:ffi_test_dynamic_library",
++    "runtime/bin:ffi_test_functions",
++    "runtime/bin:process_test",
++    "runtime/bin:run_vm_tests",
++    "runtime/vm:kernel_platform_files($host_toolchain)",
++    "samples/embedder:kernel",
++    "samples/ffi/http:fake_http",
++    "samples/ffi/httpIG:fake_httpIG",
++    "utils/kernel-service",
++  ]
++
++  # The following dependencies allow dartdev to start the resident frontend
++  # server and DDS.
++  if (dart_target_arch != "ia32" && dart_target_arch != "x86") {
++    deps += [
++      "runtime/bin:dartaotruntime",
++      "runtime/bin:dartaotruntime_product",
++      "utils/dart_runtime_service_vm",
++      "utils/dart_runtime_service_vm:dart_runtime_service_vm_aot_snapshot",
++      "utils/dartdev:dartdev_aot_snapshot",
++      "utils/dds:dds_aot",
++      "utils/dtd:dtd_aot",
++      "utils/kernel-service:frontend_server_aot_product",
++    ]
++  } else {
++    deps += [
++      "utils/dart_runtime_service_vm",
++      "utils/dartdev",
++      "utils/dds",
++      "utils/dtd",
++      "utils/kernel-service:frontend_server",
++    ]
++  }
++
++  # AOT samples use dlopen to load AOT snapshots and it works only on
++  # 64-bit Linux right now.
++  if ((is_linux || is_mac) &&
++      (dart_target_arch == "x64" || dart_target_arch == "arm64")) {
++    deps += [ "samples/embedder:aot" ]
++  }
++
++  if (!is_win) {
++    # The test isn't run on windows
++    deps += [ "runtime/bin:entrypoints_verification_test" ]
++  }
++
++  # This flag is set in runtime/runtime_args.gni
++  # The analyze_snapshot tool is only supported on 64 bit AOT builds running
++  # under linux and android platforms
++  if (build_analyze_snapshot) {
++    deps += [
++      # The `analyze_snapshot` tests require the `analyze_snapshot` as well as
++      # `gen_snapshot` binaries.
++      "runtime/bin:analyze_snapshot",
++      "runtime/bin:analyze_snapshot($host_toolchain)",
++      "runtime/bin:gen_snapshot",
++      "runtime/bin:gen_snapshot($host_toolchain)",
++    ]
++  }
++
++  if (is_linux || is_android) {
++    deps += [ "runtime/bin:abstract_socket_test" ]
++  } else if (is_fuchsia) {
++    deps += [ ":fuchsia_test_package" ]
++  } else if (is_win) {
++    deps += [ "runtime/bin:create_process_test_helper" ]
++  }
++}
++
++# A separate target and not included in group("runtime"). This way the target\
++# "runtime" does not get many executables extra as build output.
++group("run_ffi_unit_tests") {
++  deps = [ "runtime/bin/ffi_unit_test:run_ffi_unit_tests" ]
++}
++
++group("runtime_precompiled") {
++  import("runtime/runtime_args.gni")
++  deps = [
++    "runtime/bin:dartaotruntime",
++    "runtime/bin:gen_snapshot",
++    "runtime/bin:gen_snapshot($host_toolchain)",
++    "runtime/bin:process_test",
++    "runtime/vm:kernel_platform_files($host_toolchain)",
++  ]
++  if (is_linux || is_android) {
++    deps += [ "runtime/bin:abstract_socket_test" ]
++  }
++  if (dart_dynamic_modules) {
++    deps += [ "utils/dart2bytecode:dart2bytecode_snapshot" ]
++    deps += [ "utils/modular_aot_compiler:modular_aot_compiler_snapshot" ]
++    deps += [ "utils/dynamic_module_runner:dynamic_module_runner_snapshot" ]
++  }
++}
++
++group("create_sdk") {
++  public_deps = [ "sdk:create_sdk" ]
++}
++
++group("dart2js") {
++  import("runtime/runtime_args.gni")
++  if (dart_target_arch != "ia32" && dart_target_arch != "x86") {
++    deps = [
++      ":runtime_precompiled",
++      "utils/compiler:dart2js_sdk_aot",
++    ]
++  } else {
++    deps = [ "utils/compiler:dart2js" ]
++  }
++}
++
++group("dart2wasm_platform") {
++  deps = [
++    ":runtime_precompiled",
++    "utils/dart2wasm:dart2wasm_js_compatibility_platform",
++    "utils/dart2wasm:dart2wasm_platform",
++    "utils/dart2wasm:dart2wasm_snapshot",
++    "utils/dart2wasm:dart2wasm_standalone_platform",
++  ]
++  if (defined(is_product)) {
++    if (is_product) {
++      deps += [ "utils/dart2wasm:dart2wasm_product_snapshot" ]
++    } else {
++      deps += [ "utils/dart2wasm:dart2wasm_asserts_snapshot" ]
++    }
++  }
++}
++
++group("dart2wasm") {
++  deps = [
++    ":dart2wasm_platform",
++    "utils/dart2wasm:test_wasm_modules",
++  ]
++}
++
++group("dart2wasm_benchmark") {
++  deps = [
++    ":dart2wasm_platform",
++    "third_party/binaryen:wasm-opt",
++  ]
++}
++
++group("dartanalyzer") {
++  deps = [ "utils/dartanalyzer" ]
++}
++
++group("ddc") {
++  import("runtime/runtime_args.gni")
++  if (dart_target_arch != "ia32" && dart_target_arch != "x86") {
++    deps = [
++      ":runtime_precompiled",
++      "utils/bazel:kernel_worker_aot",
++      "utils/ddc:dartdevc_aot",
++    ]
++  } else {
++    deps = [
++      "utils/bazel:kernel_worker",
++      "utils/ddc:dartdevc",
++    ]
++  }
++}
++
++group("dartpad") {
++  deps = [ "utils/dartpad" ]
++}
++
++group("analysis_server") {
++  deps = [ "utils/analysis_server" ]
++}
++
++group("tools") {
++  deps = [
++    "utils:bootstrap_compile_platform.exe",
++    "utils:bootstrap_gen_kernel.exe",
++  ]
++}
++
++# This is the target that is built on the dart2js build bots.
++# It must depend on anything that is required by the dart2js
++# test suites.
++group("dart2js_bot") {
++  deps = [ "sdk:create_most_sdk" ]
++}
++
++group("dart2wasm_bot") {
++  deps = [
++    "sdk:create_most_sdk",
++    "utils/dart2wasm:test_wasm_modules",
++  ]
++}
++
++group("front-end_bot") {
++  deps = [ "sdk:create_most_sdk" ]
++}
++
++group("analyzer_bot") {
++  deps = [
++    "sdk:create_most_sdk",
++    "utils/dartanalyzer",
++  ]
++}
++
++group("benchmark_bot") {
++  deps = [
++    ":dart2wasm_benchmark",
++    "runtime/bin:run_vm_tests",
++    "sdk:create_most_sdk",
++    "utils/ddc:ddc_canary_test",
++    "utils/ddc:ddc_stable_test",
++    "utils/kernel-service",
++  ]
++}
++
++group("pkg_bot") {
++  deps = [
++    ":create_sdk",
++    ":dartpad",
++  ]
++}
++
++group("android_bot") {
++  deps = [
++    "runtime/bin:abstract_socket_test",
++    "runtime/bin:dartaotruntime",
++    "runtime/bin:dartvm",
++    "runtime/bin:ffi_test_dynamic_library",
++    "runtime/bin:ffi_test_functions",
++    "runtime/bin:gen_snapshot($host_toolchain)",
++    "runtime/bin:process_test",
++    "runtime/bin:run_vm_tests",
++    "samples/ffi/http:fake_http",
++    "samples/ffi/httpIG:fake_httpIG",
++  ]
++}
++
++group("dartfuzz") {
++  deps = [
++    "runtime/bin:dartaotruntime",
++    "runtime/bin:dartvm",
++    "utils/compiler:dart2js_platform",
++    "utils/dart2wasm:dart2wasm_platform",
++    "utils/kernel-service",
++  ]
++}
++
++group("iso_stress") {
++  deps = [
++    "runtime/bin:dartaotruntime",
++    "runtime/bin:dartvm",
++    "runtime/bin:ffi_test_dynamic_library",
++    "runtime/bin:ffi_test_functions",
++    "runtime/bin:process_test",
++  ]
++}
++
++if (is_fuchsia) {
++  import("third_party/fuchsia/gn-sdk/src/component.gni")
++  import("third_party/fuchsia/gn-sdk/src/package.gni")
++  import("utils/aot_snapshot.gni")
++  import("utils/application_snapshot.gni")
++
++  # TODO(b/399714829): Test packages should be created at test-time, not
++  # build-time.
++
++  # tests/ffi/**_test.dart except those with compile-time errors
++  ffi_test_sources = rebase_path(exec_script("tools/list_dart_tests.py",
++                                             [ rebase_path("tests/ffi/") ],
++                                             "list lines"),
++                                 ".",
++                                 root_build_dir)
++  ffi_test_sources -= [
++    "tests/ffi/abi_specific_int_incomplete_aot_test.dart",
++    "tests/ffi/abi_specific_int_incomplete_jit_test.dart",
++    "tests/ffi/isolate_group_bound_callback_test.dart",
++    "tests/ffi/isolate_group_bound_init_test.dart",
++    "tests/ffi/run_isolate_group_run_test.dart",
++    "tests/ffi/static_checks/address_of_cast_test.dart",
++    "tests/ffi/static_checks/address_position_cascade_test.dart",
++    "tests/ffi/static_checks/regress_44985_test.dart",
++    "tests/ffi/static_checks/regress_44986_test.dart",
++    "tests/ffi/static_checks/regress_46085_test.dart",
++    "tests/ffi/static_checks/regress_47673_2_test.dart",
++    "tests/ffi/static_checks/regress_51041_test.dart",
++    "tests/ffi/static_checks/regress_60250_test.dart",
++    "tests/ffi/static_checks/regress_62693_test.dart",
++    "tests/ffi/static_checks/regress_62716_test.dart",
++    "tests/ffi/static_checks/regress_flutter_188175_test.dart",
++    "tests/ffi/static_checks/vmspecific_function_callbacks_negative_test.dart",
++    "tests/ffi/static_checks/vmspecific_regress_38993_test.dart",
++    "tests/ffi/static_checks/vmspecific_static_checks_address_of_test.dart",
++    "tests/ffi/static_checks/vmspecific_static_checks_array_test.dart",
++    "tests/ffi/static_checks/vmspecific_static_checks_ffinative_test.dart",
++    "tests/ffi/static_checks/vmspecific_static_checks_native_test.dart",
++    "tests/ffi/static_checks/vmspecific_static_checks_test.dart",
++    "tests/ffi/static_checks/vmspecific_static_checks_varargs_test.dart",
++    "tests/ffi/static_checks/vmspecific_variance_function_checks_test.dart",
++    "tests/ffi/threading_pinning_test.dart",
++    "tests/ffi/threading_reentrant_test.dart",
++    "tests/ffi/threading_runeventloop_test.dart",
++    "tests/ffi/threading_test.dart",
++  ]
++
++  # tests/standalone/io/**_test.dart except those with compile-time errors
++  io_test_sources = rebase_path(
++          exec_script("tools/list_dart_tests.py",
++                      [ rebase_path("tests/standalone/io/", root_build_dir) ],
++                      "list lines"),
++          ".",
++          root_build_dir)
++  io_test_sources -= []
++
++  jit_test_sources = ffi_test_sources
++  aot_test_sources = ffi_test_sources
++  if (current_cpu == "x64") {
++    jit_test_sources += io_test_sources
++  } else {
++    not_needed(io_test_sources)
++  }
++
++  test_deps = []
++  test_resources = []
++  foreach(test_source, jit_test_sources) {
++    label = string_replace(test_source, "/", "_")
++    application_snapshot(label) {
++      dart_snapshot_kind = "kernel"
++      main_dart = test_source
++      training_args = []  # Not used
++      output = "$target_out_dir/$test_source.dill"
++    }
++    test_deps += [ ":$label" ]
++    test_resources += [
++      {
++        path = "$target_out_dir/$test_source.dill"
++        dest = "data/$test_source"
++      },
++    ]
++  }
++  foreach(test_source, aot_test_sources) {
++    label = string_replace(test_source, "/", "_") + "_aot"
++    aot_snapshot(label) {
++      main_dart = test_source
++      output = "$target_out_dir/$test_source.elf"
++    }
++    test_deps += [ ":$label" ]
++    test_resources += [
++      {
++        path = "$target_out_dir/$test_source.elf"
++        dest = "data/$test_source.elf"
++      },
++    ]
++  }
++
++  test_binaries = [
++    "dartvm",
++    "dartaotruntime",
++  ]
++
++  foreach(binary, test_binaries) {
++    fuchsia_component("${binary}_test_component") {
++      manifest = "runtime/bin/${binary}_test_component.cml"
++      data_deps = [
++        "runtime/bin:${binary}",
++        "runtime/bin:ffi_callback_stub_bin",
++        "runtime/bin:ffi_test_dynamic_library",
++        "runtime/bin:ffi_test_functions",
++      ]
++      library_files = [
++        "libffi_test_dynamic_library.so",
++        "libffi_test_functions.so",
++      ]
++      resource_files = [
++        ".dart_tool/package_config.json",
++        "tests/standalone/io/addlatexhash_test_src.tex",
++        "tests/standalone/io/certificates/bad_server_chain.pem",
++        "tests/standalone/io/certificates/bad_server_key.pem",
++        "tests/standalone/io/certificates/client1.p12",
++        "tests/standalone/io/certificates/client1.pem",
++        "tests/standalone/io/certificates/client1_key.p12",
++        "tests/standalone/io/certificates/client1_key.pem",
++        "tests/standalone/io/certificates/client1_key_malformed.pem",
++        "tests/standalone/io/certificates/client2.pem",
++        "tests/standalone/io/certificates/client2_key.pem",
++        "tests/standalone/io/certificates/client_authority.p12",
++        "tests/standalone/io/certificates/client_authority.pem",
++        "tests/standalone/io/certificates/client_authority_malformed.pem",
++        "tests/standalone/io/certificates/server_chain.p12",
++        "tests/standalone/io/certificates/server_chain.pem",
++        "tests/standalone/io/certificates/server_chain_malformed1.pem",
++        "tests/standalone/io/certificates/server_chain_malformed2.pem",
++        "tests/standalone/io/certificates/server_key.p12",
++        "tests/standalone/io/certificates/server_key.pem",
++        "tests/standalone/io/certificates/server_trusted.pem",
++        "tests/standalone/io/certificates/trusted_certs.p12",
++        "tests/standalone/io/certificates/trusted_certs.pem",
++        "tests/standalone/io/certificates/trusted_certs_malformed.pem",
++        "tests/standalone/io/certificates/untrusted_server_chain.pem",
++        "tests/standalone/io/certificates/untrusted_server_key.pem",
++        "tests/standalone/io/create_sample_certificates.sh",
++        "tests/standalone/io/empty_file",
++        "tests/standalone/io/file_test.txt",
++        "tests/standalone/io/fixed_length_file",
++        "tests/standalone/io/fixed_length_file_out",
++        "tests/standalone/io/localhost.crt",
++        "tests/standalone/io/localhost.key",
++        "tests/standalone/io/read_as_text.dat",
++        "tests/standalone/io/readline_test1.dat",
++        "tests/standalone/io/readline_test2.dat",
++        "tests/standalone/io/readuntil_test.dat",
++        "tests/standalone/io/sample_certificate_v3_extensions",
++      ]
++      resources = []
++      foreach(file, library_files) {
++        resources += [
++          {
++            path = root_out_dir + "/" + file
++            dest = "lib/" + file
++          },
++        ]
++      }
++      resources += [
++        {
++          path = get_label_info("runtime/bin:ffi_callback_stub_bin",
++                                "target_out_dir") + "/ffi_callback_stub.bin"
++          dest = "lib/ffi_callback_stub.bin"
++        },
++      ]
++      foreach(file, resource_files) {
++        resources += [
++          {
++            path = file
++            dest = "data/" + file
++          },
++        ]
++      }
++      deps = test_deps
++      resources += test_resources
++
++      # Should the GN SDK be doing this?
++      if (current_cpu == "x64") {
++        triple = "x86_64-unknown-fuchsia"
++      } else if (current_cpu == "arm64") {
++        triple = "aarch64-unknown-fuchsia"
++      } else if (current_cpu == "riscv64") {
++        triple = "riscv64-unknown-fuchsia"
++      } else {
++        assert(false, "What cpu?")
++      }
++      if (is_asan) {
++        resources += [
++          {
++            path = "//third_party/fuchsia/sdk/linux/arch/$current_cpu/sysroot/dist/lib/asan/ld.so.1"
++            dest = "lib/asan/ld.so.1"
++          },
++          {
++            path = "//buildtools/linux-x64/clang/lib/clang/23/lib/$triple/libclang_rt.asan.so"
++            dest = "lib/libclang_rt.asan.so"
++          },
++        ]
++      } else if (is_ubsan) {
++        resources += [
++          {
++            path = "//buildtools/linux-x64/clang/lib/clang/23/lib/$triple/libclang_rt.ubsan_standalone.so"
++            dest = "lib/libclang_rt.ubsan_standalone.so"
++          },
++        ]
++      } else {
++        not_needed([ "triple" ])
++      }
++    }
++  }
++
++  fuchsia_package("fuchsia_test_package") {
++    package_name = "dart_test"
++    deps = []
++    foreach(binary, test_binaries) {
++      deps += [ ":${binary}_test_component" ]
++    }
++  }
++}
++
++if (is_linux && current_cpu != "riscv32") {
++  group("debian_package") {
++    public_deps = [ "tools/debian_package" ]
++  }
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/expat/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/expat/BUILD.gn
+new file mode 100644
+index 00000000..21649ceb
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/expat/BUILD.gn
+@@ -0,0 +1,16 @@
++# expat — prebuilt from sysroot.
++# Use plain lib names so each toolchain resolves from its own sysroot.
++
++config("expat_public") {
++  include_dirs = [ "expat/lib" ]
++}
++
++config("expat_link") {
++  libs = [ "expat" ]
++}
++
++source_set("expat") {
++  sources = []
++  all_dependent_configs = [ ":expat_link" ]
++  public_configs = [ ":expat_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/flatbuffers/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/flatbuffers/BUILD.gn
+new file mode 100644
+index 00000000..e6204818
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/flatbuffers/BUILD.gn
+@@ -0,0 +1,16 @@
++config("flatbuffers_public") {
++  include_dirs = [ "include" ]
++}
++
++source_set("flatbuffers") {
++  sources = []
++  public_configs = [ ":flatbuffers_public" ]
++}
++
++# flatc - flatbuffers schema compiler (host tool, needed by impeller).
++# Use a prebuilt binary copied from /tmp/flatc instead of linking a stub.
++action("flatc") {
++  script = "copy_flatc.py"
++  sources = []
++  outputs = [ "$root_out_dir/flatc" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/flatbuffers/copy_flatc.py b/engine/src/flutter/loong64/third_party_gn/flatbuffers/copy_flatc.py
+new file mode 100644
+index 00000000..7349ec24
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/flatbuffers/copy_flatc.py
+@@ -0,0 +1,27 @@
++#!/usr/bin/env python3
++"""Copy prebuilt flatc binary to the build output directory."""
++import os
++import shutil
++import sys
++
++src = "/tmp/flatc"
++if len(sys.argv) >= 2:
++    # GN passes --target_gen_dir as last arg, but we actually want $root_out_dir/flatc
++    # GN action args are: script outputs... let's handle it simply.
++    # Actually GN calls: python copy_flatc.py $output
++    dst = sys.argv[-1]
++else:
++    dst = os.path.join(os.environ.get("ROOT_OUT_DIR", "."), "flatc")
++
++# The GN action output list has only one entry: $root_out_dir/flatc
++# GN invokes: python copy_flatc.py $output_from_outputs
++# So sys.argv[1] should be the destination path.
++
++if os.path.exists(src):
++    os.makedirs(os.path.dirname(dst) or ".", exist_ok=True)
++    shutil.copy2(src, dst)
++    os.chmod(dst, 0o755)
++    print(f"Copied flatc: {src} -> {dst}")
++else:
++    print(f"ERROR: prebuilt flatc not found at {src}", file=sys.stderr)
++    sys.exit(1)
+diff --git a/engine/src/flutter/loong64/third_party_gn/freetype2/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/freetype2/BUILD.gn
+new file mode 100644
+index 00000000..b8ccf1a3
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/freetype2/BUILD.gn
+@@ -0,0 +1,16 @@
++# FreeType — prebuilt from sysroot.
++# Use plain lib names so each toolchain resolves from its own sysroot.
++
++config("freetype2_public") {
++  include_dirs = [ "include" ]
++}
++
++config("freetype2_link") {
++  libs = [ "freetype" ]
++}
++
++source_set("freetype2") {
++  sources = []
++  all_dependent_configs = [ ":freetype2_link" ]
++  public_configs = [ ":freetype2_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/glfw/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/glfw/BUILD.gn
+new file mode 100644
+index 00000000..922d8d77
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/glfw/BUILD.gn
+@@ -0,0 +1,38 @@
++# GLFW — compile upstream source (Linux/X11/Wayland + common posix).
++
++config("glfw_public") {
++  include_dirs = [ "include" ]
++}
++
++source_set("glfw") {
++  sources = [
++    # core
++    "src/context.c",
++    "src/init.c",
++    "src/input.c",
++    "src/monitor.c",
++    "src/platform.c",
++    "src/vulkan.c",
++    "src/window.c",
++    # posix shared
++    "src/posix_module.c",
++    "src/posix_poll.c",
++    "src/posix_thread.c",
++    "src/posix_time.c",
++    # linux joystick
++    "src/linux_joystick.c",
++    # null backend (required at least one platform)
++    "src/null_init.c",
++    "src/null_input.c",
++    "src/null_monitor.c",
++    "src/null_window.c",
++    # x11 backend
++    "src/glx_context.c",
++    "src/x11_init.c",
++    "src/x11_monitor.c",
++    "src/x11_window.c",
++    "src/xkb_unicode.c",
++  ]
++  include_dirs = [ "include", "src" ]
++  public_configs = [ ":glfw_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/googletest/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/googletest/BUILD.gn
+new file mode 100644
+index 00000000..7633da6f
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/googletest/BUILD.gn
+@@ -0,0 +1,55 @@
++# googletest + googlemock — compile upstream source.
++
++config("gtest_public") {
++  include_dirs = [ "googletest/include" ]
++}
++
++config("gmock_public") {
++  include_dirs = [
++    "googletest/include",
++    "googlemock/include",
++  ]
++}
++
++source_set("gtest") {
++  sources = [
++    "googletest/src/gtest.cc",
++    "googletest/src/gtest-assertion-result.cc",
++    "googletest/src/gtest-death-test.cc",
++    "googletest/src/gtest-filepath.cc",
++    "googletest/src/gtest-matchers.cc",
++    "googletest/src/gtest-port.cc",
++    "googletest/src/gtest-printers.cc",
++    "googletest/src/gtest-test-part.cc",
++    "googletest/src/gtest-typed-test.cc",
++  ]
++  include_dirs = [ "googletest" ]
++  public_configs = [ ":gtest_public" ]
++}
++
++source_set("gtest_main") {
++  sources = [ "googletest/src/gtest_main.cc" ]
++  include_dirs = [ "googletest" ]
++  deps = [ ":gtest" ]
++  public_configs = [ ":gtest_public" ]
++}
++
++source_set("gmock") {
++  sources = [
++    "googlemock/src/gmock.cc",
++    "googlemock/src/gmock-cardinalities.cc",
++    "googlemock/src/gmock-internal-utils.cc",
++    "googlemock/src/gmock-matchers.cc",
++    "googlemock/src/gmock-spec-builders.cc",
++  ]
++  include_dirs = [ "googlemock", "googletest" ]
++  deps = [ ":gtest" ]
++  public_configs = [ ":gmock_public" ]
++}
++
++source_set("gmock_main") {
++  sources = [ "googlemock/src/gmock_main.cc" ]
++  include_dirs = [ "googlemock", "googletest" ]
++  deps = [ ":gmock", ":gtest" ]
++  public_configs = [ ":gmock_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/gtest-parallel/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/gtest-parallel/BUILD.gn
+new file mode 100644
+index 00000000..f23dd397
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/gtest-parallel/BUILD.gn
+@@ -0,0 +1,4 @@
++source_set("gtest-parallel") {
++  sources = []
++  include_dirs = [ "." ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/harfbuzz/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/harfbuzz/BUILD.gn
+new file mode 100644
+index 00000000..e30a98a0
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/harfbuzz/BUILD.gn
+@@ -0,0 +1,26 @@
++# harfbuzz — prebuilt from sysroot.
++# Use plain lib names so each toolchain resolves from its own sysroot.
++
++config("harfbuzz_public") {
++  include_dirs = [ "src" ]
++}
++
++config("harfbuzz_link") {
++  libs = [ "harfbuzz" ]
++}
++
++config("harfbuzz_subset_link") {
++  libs = [ "harfbuzz-subset" ]
++}
++
++source_set("harfbuzz") {
++  sources = []
++  all_dependent_configs = [ ":harfbuzz_link" ]
++  public_configs = [ ":harfbuzz_public" ]
++}
++
++source_set("harfbuzz_subset") {
++  sources = []
++  all_dependent_configs = [ ":harfbuzz_subset_link" ]
++  public_configs = [ ":harfbuzz_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/icu/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/icu/BUILD.gn
+new file mode 100644
+index 00000000..290dd191
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/icu/BUILD.gn
+@@ -0,0 +1,63 @@
++# ICU (International Components for Unicode) — prebuilt from sysroot.
++# Use plain lib names so each toolchain resolves from its own sysroot.
++
++config("icuuc_link") {
++  libs = [ "icuuc" ]
++}
++
++config("icui18n_link") {
++  libs = [ "icui18n" ]
++}
++
++config("icudata_link") {
++  libs = [ "icudata" ]
++}
++
++source_set("icuuc") {
++  sources = []
++  all_dependent_configs = [ ":icuuc_link" ]
++  include_dirs = [ "source/common" ]
++}
++
++source_set("icui18n") {
++  sources = []
++  all_dependent_configs = [ ":icui18n_link" ]
++  include_dirs = [ "source/i18n", "source/common" ]
++}
++
++# icudata is required at link/runtime for ICU data tables.
++source_set("icudata") {
++  sources = []
++  all_dependent_configs = [ ":icudata_link" ]
++}
++
++# Header-only alias target used by skunicode and other consumers
++# that only need ICU headers, no link dep.
++source_set("headers") {
++  sources = []
++  include_dirs = [ "source/common", "source/i18n" ]
++}
++
++# Hidden-visibility aliases — GN cannot express symbol visibility on
++# prebuilt targets, so these just forward to the prebuilt targets.
++group("icuuc_hidden_visibility") {
++  public_deps = [ ":icuuc" ]
++}
++
++group("icui18n_hidden_visibility") {
++  public_deps = [ ":icui18n" ]
++}
++
++# Umbrella target — matches upstream consumer usage like "//flutter/third_party/icu".
++group("icu") {
++  public_deps = [ ":icuuc", ":icui18n" ]
++}
++
++# Config used by fml and other targets that only include ICU headers.
++# Critical: include_dirs must come BEFORE --sysroot so that clang finds
++# the bundled platform.h (with U_LIFETIME_BOUND defined) instead of
++# the sysroot's older ICU headers.
++config("icu_config") {
++  defines = [ "U_ENABLE_DYNAMIC_LOADING=0" ]
++  include_dirs = [ "source/common", "source/i18n" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/imgui/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/imgui/BUILD.gn
+new file mode 100644
+index 00000000..b585dbf7
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/imgui/BUILD.gn
+@@ -0,0 +1,23 @@
++# dear imgui — compile upstream core source (excluding demo).
++
++config("imgui_public") {
++  include_dirs = [ "." ]
++}
++
++source_set("imgui") {
++  sources = [
++    "imgui.cpp",
++    "imgui_draw.cpp",
++    "imgui_tables.cpp",
++    "imgui_widgets.cpp",
++  ]
++  public_configs = [ ":imgui_public" ]
++}
++
++# imgui_glfw backend — stubbed because no glfw backend source is
++# present in this checkout. Consumers that need imgui + glfw should
++# provide imgui_impl_glfw.cpp themselves.
++source_set("imgui_glfw") {
++  sources = []
++  public_configs = [ ":imgui_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/inja/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/inja/BUILD.gn
+new file mode 100644
+index 00000000..4f6099c0
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/inja/BUILD.gn
+@@ -0,0 +1,8 @@
++config("inja_public") {
++  include_dirs = [ "include" ]
++}
++
++source_set("inja") {
++  sources = []
++  public_configs = [ ":inja_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/json/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/json/BUILD.gn
+new file mode 100644
+index 00000000..1a8dd22d
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/json/BUILD.gn
+@@ -0,0 +1,8 @@
++config("json_public") {
++  include_dirs = [ "include" ]
++}
++
++source_set("json") {
++  sources = []
++  public_configs = [ ":json_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/libcxx/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/libcxx/BUILD.gn
+new file mode 100644
+index 00000000..7090e012
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/libcxx/BUILD.gn
+@@ -0,0 +1,7 @@
++# Stub: libcxx for loong64 build
++config("libcxx_config") {
++}
++
++source_set("libcxx") {
++  sources = []
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/libcxxabi/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/libcxxabi/BUILD.gn
+new file mode 100644
+index 00000000..933bf7ec
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/libcxxabi/BUILD.gn
+@@ -0,0 +1,3 @@
++# Stub: libcxxabi config for loong64 build
++config("libcxxabi_config") {
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/libjpeg-turbo/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/libjpeg-turbo/BUILD.gn
+new file mode 100644
+index 00000000..1519a7e6
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/libjpeg-turbo/BUILD.gn
+@@ -0,0 +1,27 @@
++# libjpeg-turbo — prebuilt from sysroot.
++# Use plain lib names so each toolchain resolves from its own sysroot.
++
++config("libjpeg_config") {
++  include_dirs = [ "src/src" ]
++  defines = [
++    "WITH_SIMD",
++    "NO_GETENV",
++  ]
++}
++
++config("libjpeg_link") {
++  libs = [ "jpeg" ]
++}
++
++source_set("simd") {
++  sources = []
++  configs += [ ":libjpeg_config" ]
++}
++
++source_set("libjpeg") {
++  sources = []
++  all_dependent_configs = [ ":libjpeg_link" ]
++  configs += [ ":libjpeg_config" ]
++  public_configs = [ ":libjpeg_config" ]
++  deps = [ ":simd" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/libpng/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/libpng/BUILD.gn
+new file mode 100644
+index 00000000..3de745a0
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/libpng/BUILD.gn
+@@ -0,0 +1,16 @@
++# libpng — prebuilt from sysroot.
++# Use plain lib names so each toolchain resolves from its own sysroot.
++
++config("libpng_public") {
++  include_dirs = [ "." ]
++}
++
++config("libpng_link") {
++  libs = [ "png" ]
++}
++
++source_set("libpng") {
++  sources = []
++  all_dependent_configs = [ ":libpng_link" ]
++  public_configs = [ ":libpng_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/libtess2/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/libtess2/BUILD.gn
+new file mode 100644
+index 00000000..b9b51882
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/libtess2/BUILD.gn
+@@ -0,0 +1,18 @@
++# libtess2 — compile upstream Source/.
++
++config("libtess2_public") {
++  include_dirs = [ "." ]
++}
++
++source_set("libtess2") {
++  sources = [
++    "Source/bucketalloc.c",
++    "Source/dict.c",
++    "Source/geom.c",
++    "Source/mesh.c",
++    "Source/priorityq.c",
++    "Source/sweep.c",
++    "Source/tess.c",
++  ]
++  public_configs = [ ":libtess2_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/libwebp/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/libwebp/BUILD.gn
+new file mode 100644
+index 00000000..e211b063
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/libwebp/BUILD.gn
+@@ -0,0 +1,46 @@
++# libwebp — prebuilt from sysroot.
++# Use plain lib names so each toolchain resolves from its own sysroot.
++
++config("libwebp_public") {
++  include_dirs = [ "src" ]
++}
++
++config("libwebp_link") {
++  libs = [ "webp" ]
++}
++
++config("libwebpdecoder_link") {
++  libs = [ "webpdecoder" ]
++}
++
++config("libwebpdemux_link") {
++  libs = [ "webpdemux" ]
++}
++
++config("libwebpmux_link") {
++  libs = [ "webpmux" ]
++}
++
++source_set("libwebp") {
++  sources = []
++  all_dependent_configs = [ ":libwebp_link" ]
++  public_configs = [ ":libwebp_public" ]
++}
++
++source_set("libwebpdecoder") {
++  sources = []
++  all_dependent_configs = [ ":libwebpdecoder_link" ]
++  public_configs = [ ":libwebp_public" ]
++}
++
++source_set("libwebpdemux") {
++  sources = []
++  all_dependent_configs = [ ":libwebpdemux_link" ]
++  public_configs = [ ":libwebp_public" ]
++}
++
++source_set("libwebpmux") {
++  sources = []
++  all_dependent_configs = [ ":libwebpmux_link" ]
++  public_configs = [ ":libwebp_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/ocmock/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/ocmock/BUILD.gn
+new file mode 100644
+index 00000000..ba28625b
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/ocmock/BUILD.gn
+@@ -0,0 +1,4 @@
++# Stub: ocmock is darwin test framework
++source_set("ocmock") {
++  sources = []
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/pyyaml/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/pyyaml/BUILD.gn
+new file mode 100644
+index 00000000..0ef76add
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/pyyaml/BUILD.gn
+@@ -0,0 +1,4 @@
++source_set("pyyaml") {
++  sources = []
++  include_dirs = [ "." ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/rapidjson/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/rapidjson/BUILD.gn
+new file mode 100644
+index 00000000..035370c0
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/rapidjson/BUILD.gn
+@@ -0,0 +1,8 @@
++config("rapidjson_public") {
++  include_dirs = [ "include" ]
++}
++
++source_set("rapidjson") {
++  sources = []
++  public_configs = [ ":rapidjson_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/re2/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/re2/BUILD.gn
+new file mode 100644
+index 00000000..969518a8
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/re2/BUILD.gn
+@@ -0,0 +1,35 @@
++# re2 — compile upstream source directly (no sysroot prebuilt available).
++# 23 source files from re2/ and util/ subdirs (testing/ and fuzzing/ excluded).
++
++config("re2_public") {
++  include_dirs = [ "." ]
++}
++
++source_set("re2") {
++  sources = [
++    "re2/bitmap256.cc",
++    "re2/bitstate.cc",
++    "re2/compile.cc",
++    "re2/dfa.cc",
++    "re2/filtered_re2.cc",
++    "re2/mimics_pcre.cc",
++    "re2/nfa.cc",
++    "re2/onepass.cc",
++    "re2/parse.cc",
++    "re2/prefilter.cc",
++    "re2/prefilter_tree.cc",
++    "re2/prog.cc",
++    "re2/re2.cc",
++    "re2/regexp.cc",
++    "re2/set.cc",
++    "re2/simplify.cc",
++    "re2/tostring.cc",
++    "re2/unicode_casefold.cc",
++    "re2/unicode_groups.cc",
++    "util/pcre.cc",
++    "util/rune.cc",
++    "util/strutil.cc",
++  ]
++  include_dirs = [ "." ]
++  public_configs = [ ":re2_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/shaderc/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/shaderc/BUILD.gn
+new file mode 100644
+index 00000000..9fb5fb7a
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/shaderc/BUILD.gn
+@@ -0,0 +1,101 @@
++# Copyright 2018 The Shaderc Authors. All rights reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import("//build_overrides/build.gni")
++import("//build_overrides/shaderc.gni")
++
++glslang_dir = shaderc_glslang_dir
++spirv_tools_dir = shaderc_spirv_tools_dir
++
++config("shaderc_util_public") {
++  include_dirs = [ "libshaderc_util/include" ]
++}
++
++source_set("shaderc_util_sources") {
++  sources = [
++    "libshaderc_util/include/libshaderc_util/counting_includer.h",
++    "libshaderc_util/include/libshaderc_util/exceptions.h",
++    "libshaderc_util/include/libshaderc_util/file_finder.h",
++    "libshaderc_util/include/libshaderc_util/format.h",
++    "libshaderc_util/include/libshaderc_util/io_shaderc.h",
++    "libshaderc_util/include/libshaderc_util/message.h",
++    "libshaderc_util/include/libshaderc_util/mutex.h",
++    "libshaderc_util/include/libshaderc_util/resources.h",
++    "libshaderc_util/include/libshaderc_util/spirv_tools_wrapper.h",
++    "libshaderc_util/include/libshaderc_util/string_piece.h",
++    "libshaderc_util/include/libshaderc_util/universal_unistd.h",
++    "libshaderc_util/include/libshaderc_util/version_profile.h",
++    "libshaderc_util/src/compiler.cc",
++    "libshaderc_util/src/file_finder.cc",
++    "libshaderc_util/src/io_shaderc.cc",
++    "libshaderc_util/src/message.cc",
++    "libshaderc_util/src/resources.cc",
++    "libshaderc_util/src/shader_stage.cc",
++    "libshaderc_util/src/spirv_tools_wrapper.cc",
++    "libshaderc_util/src/version_profile.cc",
++  ]
++
++  # Configure Glslang's interface to include HLSL-related entry points.
++  defines = [ "ENABLE_HLSL=1" ]
++
++  public_configs = [ ":shaderc_util_public" ]
++
++  deps = [
++    "${glslang_dir}:glslang_sources",
++    "${spirv_tools_dir}:spvtools",
++  ]
++
++  if (build_with_chromium) {
++    configs -= [ "//build/config/compiler:chromium_code" ]
++    configs += [ "//build/config/compiler:no_chromium_code" ]
++  }
++}
++
++config("shaderc_public") {
++  include_dirs = [ "libshaderc/include" ]
++  if (is_component_build) {
++    defines = [ "SHADERC_SHAREDLIB" ]
++  }
++}
++
++component("libshaderc") {
++  public_configs = [
++    ":shaderc_public",
++    ":shaderc_util_public",
++  ]
++
++  defines = [ "SHADERC_IMPLEMENTATION" ]
++
++  sources = [
++    "libshaderc/include/shaderc/env.h",
++    "libshaderc/include/shaderc/shaderc.h",
++    "libshaderc/include/shaderc/shaderc.hpp",
++    "libshaderc/include/shaderc/status.h",
++    "libshaderc/include/shaderc/visibility.h",
++    "libshaderc/src/shaderc.cc",
++    "libshaderc/src/shaderc_private.h",
++  ]
++
++  deps = [
++    ":shaderc_util_sources",
++    "${spirv_tools_dir}:spvtools",
++    "${spirv_tools_dir}:spvtools_val",
++    "${glslang_dir}:glslang_sources",
++  ]
++
++  if (build_with_chromium) {
++    configs -= [ "//build/config/compiler:chromium_code" ]
++    configs += [ "//build/config/compiler:no_chromium_code" ]
++  }
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/skia/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/skia/BUILD.gn
+new file mode 100644
+index 00000000..88bdd46c
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/skia/BUILD.gn
+@@ -0,0 +1,3991 @@
++# Copyright 2016 Google Inc.
++#
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("gn/codec.gni")
++import("gn/pathops.gni")
++import("gn/rust.gni")
++import("gn/shared_sources.gni")
++import("gn/skia.gni")
++import("gn/toolchain/wasm.gni")
++
++if (defined(skia_settings)) {
++  import(skia_settings)
++}
++
++import("gn/ios.gni")
++import("third_party/dawn/args.gni")
++
++# Skia public API, generally provided by :skia.
++config("skia_public") {
++  include_dirs = [ "." ]
++
++  defines = [
++    "SK_CODEC_DECODES_BMP",
++    "SK_CODEC_DECODES_WBMP",
++  ]
++  cflags_objcc = []
++  if (is_component_build) {
++    defines += [ "SKIA_DLL" ]
++  }
++  if (is_linux) {
++    defines += [ "SK_R32_SHIFT=16" ]
++  }
++  if (skia_enable_optimize_size) {
++    defines += [ "SK_ENABLE_OPTIMIZE_SIZE" ]
++  }
++  if (skia_enable_precompile) {
++    defines += [ "SK_ENABLE_PRECOMPILE" ]
++  }
++  if (is_wasm) {
++    defines += wasm_defines
++  }
++  if (skia_gl_standard == "gles") {
++    defines += [ "SK_ASSUME_GL_ES=1" ]
++  } else if (skia_gl_standard == "gl") {
++    defines += [ "SK_ASSUME_GL=1" ]
++  } else if (skia_gl_standard == "webgl") {
++    defines += [ "SK_ASSUME_WEBGL=1" ]
++  }
++  if (skia_enable_ganesh) {
++    defines += [ "SK_GANESH" ]
++  }
++  if (skia_enable_graphite) {
++    defines += [ "SK_GRAPHITE" ]
++  }
++  if (skia_disable_tracing) {
++    defines += [ "SK_DISABLE_TRACING" ]
++  }
++  if (skia_use_perfetto) {
++    defines += [ "SK_USE_PERFETTO" ]
++  }
++  if (!skia_disable_tracing && skia_enable_pipeline_label_tracing) {
++    defines += [ "SK_TRACE_GRAPHITE_PIPELINE_USE" ]
++  }
++  if (skia_use_safe_libcxx) {
++    defines += [ "_LIBCPP_ENABLE_ASSERTIONS=1" ]
++  }
++  if (skia_build_fuzzers) {
++    defines += [ "SK_BUILD_FOR_FUZZER" ]
++  }
++
++  # Some older versions of the Clang toolchain change the visibility of
++  # symbols decorated with API_AVAILABLE macro to be visible. Users of such
++  # toolchains suppress the use of this macro till toolchain updates are made.
++  if (is_mac || is_ios) {
++    if (skia_enable_api_available_macro) {
++      defines += [ "SK_ENABLE_API_AVAILABLE" ]
++    } else {
++      cflags_objcc += [ "-Wno-unguarded-availability" ]
++    }
++  }
++}
++
++# Skia internal APIs, used by Skia itself and a few test tools.
++config("skia_private") {
++  visibility = [ "./*" ]
++
++  defines = [ "SK_GAMMA_APPLY_TO_A8" ]
++  if (skia_use_fixed_gamma_text) {
++    defines += [
++      "SK_GAMMA_EXPONENT=1.4",
++      "SK_GAMMA_CONTRAST=0.0",
++    ]
++  }
++  if (is_skia_dev_build && !is_canvaskit) {
++    defines += [
++      "SK_ALLOW_STATIC_GLOBAL_INITIALIZERS=1",
++      "GPU_TEST_UTILS=1",
++    ]
++  }
++  libs = []
++  lib_dirs = []
++  if (skia_use_gl && skia_use_angle) {
++    defines += [ "SK_ANGLE" ]
++  }
++  if (skia_enable_winuwp) {
++    defines += [ "SK_WINUWP" ]
++  }
++  if (skia_print_sksl_shaders) {
++    defines += [ "SK_PRINT_SKSL_SHADERS" ]
++  }
++  if (skia_print_native_shaders) {
++    defines += [ "SK_PRINT_NATIVE_SHADERS" ]
++  }
++
++  if (skia_dump_tasks) {
++    defines += [ "SK_DUMP_TASKS" ]
++  }
++
++  if (skia_use_partition_alloc) {
++    defines += [ "SK_USE_PARTITION_ALLOC" ]
++  }
++
++  # Temporary staging flag:
++  defines += [ "SK_ENABLE_AVX512_OPTS" ]
++}
++
++# Any code that's linked into Skia-the-library should use this config via += skia_library_configs.
++config("skia_library") {
++  visibility = [ "./*" ]
++  defines = [ "SKIA_IMPLEMENTATION=1" ]
++}
++
++skia_library_configs = [
++  ":skia_public",
++  ":skia_private",
++  ":skia_library",
++]
++
++# Use for CPU-specific Skia code that needs particular compiler flags.
++template("opts") {
++  if (invoker.enabled) {
++    skia_source_set(target_name) {
++      visibility = [ ":*" ]
++      check_includes = false
++      configs = skia_library_configs
++      forward_variables_from(invoker, "*")
++      if (defined(invoker.configs)) {
++        configs += invoker.configs
++      }
++    }
++  } else {
++    # If not enabled, a phony empty target that swallows all otherwise unused variables.
++    skia_source_set(target_name) {
++      visibility = [ ":*" ]
++      check_includes = false
++      forward_variables_from(invoker,
++                             "*",
++                             [
++                               "sources",
++                               "cflags",
++                             ])
++    }
++  }
++}
++
++is_x86 = current_cpu == "x64" || current_cpu == "x86"
++is_loong64 = current_cpu == "loong64"
++
++opts("ml3") {
++  enabled = is_x86
++  sources = skia_opts.ml3_sources
++  if (is_win) {
++    cflags = [ "/arch:AVX2" ]
++  } else if (current_cpu == "x86") {
++    cflags = [ "-march=haswell" ]
++  } else {
++    cflags = [ "-march=x86-64-v3" ]
++  }
++}
++
++opts("ml4") {
++  enabled = is_x86
++  sources = skia_opts.ml4_sources
++  if (is_win) {
++    cflags = [ "/arch:AVX512" ]
++  } else if (current_cpu == "x86") {
++    cflags = [ "-march=skylake-avx512" ]
++  } else {
++    cflags = [
++      "-march=x86-64-v4",
++      "-mprefer-vector-width=512",
++    ]
++  }
++}
++
++opts("lasx") {
++  enabled = is_loong64
++  sources = skia_opts.lasx_sources
++  cflags = [ "-mlasx" ]
++}
++
++# Any feature of Skia that requires third-party code should be optional and use this template.
++template("optional") {
++  if (invoker.enabled) {
++    config(target_name + "_public") {
++      if (defined(invoker.public_defines)) {
++        defines = invoker.public_defines
++      }
++      if (defined(invoker.public_configs)) {
++        configs = invoker.public_configs
++      }
++    }
++    skia_source_set(target_name) {
++      visibility = [ ":*" ]
++      check_includes = false
++      configs = skia_library_configs
++
++      # "*" clobbers the current scope; append to existing configs
++      forward_variables_from(invoker,
++                             "*",
++                             [
++                               "configs",
++                               "public_defines",
++                               "sources_for_tests",
++                               "sources_when_disabled",
++                             ])
++      if (defined(invoker.configs)) {
++        configs += invoker.configs
++      }
++      all_dependent_configs = [ ":" + target_name + "_public" ]
++    }
++
++    if (defined(invoker.sources_for_tests) && skia_enable_tools) {
++      skia_source_set(target_name + "_tests") {
++        visibility = [ ":*" ]
++        check_includes = false
++        configs = skia_library_configs
++
++        # "*" clobbers the current scope; append to existing configs
++        forward_variables_from(invoker,
++                               "*",
++                               [
++                                 "configs",
++                                 "public_defines",
++                                 "sources",
++                                 "sources_for_tests",
++                                 "sources_when_disabled",
++                               ])
++        if (defined(invoker.configs)) {
++          configs += invoker.configs
++        }
++        testonly = true
++        sources = invoker.sources_for_tests
++        if (!defined(deps)) {
++          deps = []
++        }
++        deps += [
++          ":test",
++          ":" + target_name,
++        ]
++        all_dependent_configs = [ ":" + target_name + "_public" ]
++      }
++    }
++  } else {
++    skia_source_set(target_name) {
++      visibility = [ ":*" ]
++      configs = skia_library_configs
++
++      # "*" clobbers the current scope; append to existing configs
++      forward_variables_from(invoker,
++                             "*",
++                             [
++                               "configs",
++                               "public",
++                               "public_configs",
++                               "public_defines",
++                               "public_deps",
++                               "deps",
++                               "libs",
++                               "frameworks",
++                               "sources",
++                               "sources_for_tests",
++                               "sources_when_disabled",
++                             ])
++      if (defined(invoker.configs)) {
++        configs += invoker.configs
++      }
++      if (defined(invoker.sources_when_disabled)) {
++        sources = invoker.sources_when_disabled
++      }
++    }
++
++    if (defined(invoker.sources_for_tests) && skia_enable_tools) {
++      skia_source_set(target_name + "_tests") {
++        visibility = [ ":*" ]
++      }
++    }
++  }
++}
++
++optional("android_utils") {
++  enabled = skia_enable_android_utils
++
++  public = [
++    "client_utils/android/BRDAllocator.h",
++    "client_utils/android/BitmapRegionDecoder.h",
++    "client_utils/android/FrontBufferedStream.h",
++  ]
++  public_defines = [ "SK_ENABLE_ANDROID_UTILS" ]
++  sources = [
++    "client_utils/android/BitmapRegionDecoder.cpp",
++    "client_utils/android/FrontBufferedStream.cpp",
++  ]
++}
++
++optional("fontmgr_android_parser") {
++  enabled = skia_use_expat
++
++  deps = [ "//third_party/expat" ]
++  sources = skia_ports_fontmgr_android_parser_sources
++}
++
++optional("fontmgr_android") {
++  enabled = skia_enable_fontmgr_android
++
++  deps = [
++    ":fontmgr_android_parser",
++    ":typeface_proxy",
++  ]
++  public_defines = [ "SK_FONTMGR_ANDROID_AVAILABLE" ]
++  public = skia_ports_fontmgr_android_public
++  sources = skia_ports_fontmgr_android_sources
++  sources_for_tests = [ "tests/FontMgrAndroidParserTest.cpp" ]
++}
++
++# if building Skia for API >= 30 and not using custom fonts, enable
++# skia_enable_fontmgr_android_ndk and disable skia_enable_fontmgr_android
++optional("fontmgr_android_ndk") {
++  enabled = skia_enable_fontmgr_android_ndk
++
++  deps = [
++    ":fontmgr_android_parser",
++    ":typeface_proxy",
++  ]
++  libs = [ "android" ]
++  if (defined(ndk_api) && ndk_api >= 31) {
++    libs += [ "icu" ]
++  }
++  public_defines = [ "SK_FONTMGR_ANDROID_NDK_AVAILABLE" ]
++  public = skia_ports_fontmgr_android_ndk_public
++  sources = skia_ports_fontmgr_android_ndk_sources
++}
++
++optional("fontmgr_custom") {
++  enabled =
++      skia_enable_fontmgr_custom_directory ||
++      skia_enable_fontmgr_custom_embedded || skia_enable_fontmgr_custom_empty
++
++  deps = [ ":typeface_freetype" ]
++  sources = skia_ports_fontmgr_custom_sources
++}
++
++optional("fontmgr_custom_directory") {
++  enabled = skia_enable_fontmgr_custom_directory
++  public_defines = [ "SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE" ]
++  deps = [
++    ":fontmgr_custom",
++    ":typeface_freetype",
++  ]
++  public = skia_ports_fontmgr_directory_public
++  sources = skia_ports_fontmgr_directory_sources
++}
++
++optional("fontmgr_custom_embedded") {
++  enabled = skia_enable_fontmgr_custom_embedded
++  public_defines = [ "SK_FONTMGR_FREETYPE_EMBEDDED_AVAILABLE" ]
++  deps = [
++    ":fontmgr_custom",
++    ":typeface_freetype",
++  ]
++  public = skia_ports_fontmgr_embedded_public
++  sources = skia_ports_fontmgr_embedded_sources
++}
++
++optional("fontmgr_custom_empty") {
++  enabled = skia_enable_fontmgr_custom_empty
++  public_defines = [ "SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE" ]
++  deps = [
++    ":fontmgr_custom",
++    ":typeface_freetype",
++  ]
++  public = skia_ports_fontmgr_empty_public
++  sources = skia_ports_fontmgr_empty_sources
++}
++
++skia_source_set("typeface_proxy") {
++  configs = [ ":skia_public" ]
++  sources = skia_ports_typeface_proxy_sources
++}
++
++optional("fontmgr_fontconfig") {
++  enabled = skia_enable_fontmgr_fontconfig
++  public_defines = [ "SK_FONTMGR_FONTCONFIG_AVAILABLE" ]
++
++  # The public header includes fontconfig.h and uses FcConfig*
++  public_deps = [ "//third_party:fontconfig" ]
++  public = skia_ports_fontmgr_fontconfig_public
++  deps = [ ":typeface_proxy" ]
++  sources = skia_ports_fontmgr_fontconfig_sources
++  sources_for_tests = [ "tests/FontMgrFontConfigTest.cpp" ]
++}
++
++skia_source_set("fontscanner_tests") {
++  testonly = true
++
++  deps = [ ":skia" ]
++  sources = [
++    "tests/FontScanner.cpp",
++    "tests/FontScanner.h",
++  ]
++}
++
++optional("fontmgr_FontConfigInterface") {
++  enabled = skia_enable_fontmgr_FontConfigInterface
++  public_defines = [ "SK_FONTMGR_FCI_AVAILABLE" ]
++  deps = [ "//third_party:fontconfig" ]
++  public = skia_ports_fci_public
++  sources = skia_ports_fci_sources
++  sources_for_tests = [ "tests/FCITest.cpp" ]
++}
++
++optional("fontmgr_fontations_empty") {
++  enabled = skia_enable_fontmgr_fontations_empty
++  public_defines = [ "SK_FONTMGR_FONTATIONS_AVAILABLE" ]
++
++  deps = [ ":typeface_fontations" ]
++  public = skia_ports_fontmgr_fontations_public
++  sources = skia_ports_fontmgr_fontations_sources
++}
++
++optional("fontmgr_mac_ct") {
++  enabled = skia_use_fonthost_mac
++
++  public_defines = [
++    "SK_TYPEFACE_FACTORY_CORETEXT",
++    "SK_FONTMGR_CORETEXT_AVAILABLE",
++  ]
++  public = skia_ports_fontmgr_coretext_public
++  sources = skia_ports_fontmgr_coretext_sources
++  sources_for_tests = [ "tests/TypefaceMacTest.cpp" ]
++
++  if (is_mac) {
++    frameworks = [
++      # AppKit symbols NSFontWeightXXX may be dlsym'ed.
++      "AppKit.framework",
++      "ApplicationServices.framework",
++    ]
++  }
++
++  if (is_ios) {
++    frameworks = [
++      "CoreFoundation.framework",
++      "CoreGraphics.framework",
++      "CoreText.framework",
++
++      # UIKit symbols UIFontWeightXXX may be dlsym'ed.
++      "UIKit.framework",
++    ]
++  }
++}
++
++optional("fontmgr_win") {
++  enabled = skia_enable_fontmgr_win
++
++  public_defines = [
++    "SK_TYPEFACE_FACTORY_DIRECTWRITE",
++    "SK_FONTMGR_DIRECTWRITE_AVAILABLE",
++  ]
++  public = skia_ports_windows_fonts_public
++  sources = skia_ports_windows_fonts_sources
++  if (skia_dwritecore_sdk != "") {
++    defines = [ "DWRITE_CORE" ]
++    if (is_win && is_clang) {
++      # Clang complains about these headers, so mark them as system. These
++      # headers are hiding SDK headers of the same name, which are also
++      # included as system headers, so these need to go first in the cflags
++      # "includes" before the SDK. gn appends configs in the order listed,
++      # so these flags will be first.
++      cflags = [
++        "-imsvc",
++        "${skia_dwritecore_sdk}/include",
++      ]
++    } else {
++      include_dirs = [ "${skia_dwritecore_sdk}/include" ]
++    }
++  }
++}
++
++optional("fontmgr_win_gdi") {
++  enabled = skia_enable_fontmgr_win_gdi
++  public_defines = [ "SK_FONTMGR_GDI_AVAILABLE" ]
++  public = skia_ports_windows_fonts_public
++  sources = skia_ports_fonthost_win_sources
++  libs = [ "Gdi32.lib" ]
++}
++
++if (skia_lex) {
++  skia_executable("sksllex") {
++    sources = [
++      "src/sksl/lex/DFA.h",
++      "src/sksl/lex/DFAState.h",
++      "src/sksl/lex/LexUtil.h",
++      "src/sksl/lex/Main.cpp",
++      "src/sksl/lex/NFA.cpp",
++      "src/sksl/lex/NFA.h",
++      "src/sksl/lex/NFAState.h",
++      "src/sksl/lex/NFAtoDFA.h",
++      "src/sksl/lex/RegexNode.cpp",
++      "src/sksl/lex/RegexNode.h",
++      "src/sksl/lex/RegexParser.cpp",
++      "src/sksl/lex/RegexParser.h",
++      "src/sksl/lex/TransitionTable.cpp",
++      "src/sksl/lex/TransitionTable.h",
++    ]
++    include_dirs = [ "." ]
++  }
++
++  action("run_sksllex") {
++    script = "gn/run_sksllex.py"
++    deps = [ ":sksllex(//gn/toolchain:$host_toolchain)" ]
++    sources = [ "src/sksl/lex/sksl.lex" ]
++
++    # GN insists its outputs should go somewhere underneath target_out_dir, so we trick it with a
++    # path that starts with target_out_dir and then uses ".." to back up into the src dir.
++    outputs = [
++      "$target_out_dir/" + rebase_path("src/sksl/SkSLLexer.h", target_out_dir),
++      # the script also modifies the corresponding .cpp file, but if we tell GN that it gets
++      # confused due to the same file being named by two different paths
++    ]
++    sksllex_path = "$root_out_dir/"
++    if (host_toolchain != default_toolchain_name) {
++      sksllex_path += "$host_toolchain/"
++    }
++    sksllex_path += "sksllex"
++    if (host_os == "win") {
++      sksllex_path += ".exe"
++    }
++    args = [
++      rebase_path(sksllex_path),
++      rebase_path("bin/clang-format"),
++      rebase_path("bin/fetch-clang-format"),
++      rebase_path("src"),
++    ]
++  }
++} else {
++  group("run_sksllex") {
++  }
++}
++
++if (skia_compile_modules || skia_compile_sksl_tests) {
++  # Copy the module source files into the same directory as skslc.
++  copy("sksl_modules") {
++    sources = [
++      "src/sksl/sksl_compute.sksl",
++      "src/sksl/sksl_frag.sksl",
++      "src/sksl/sksl_gpu.sksl",
++      "src/sksl/sksl_graphite_frag.sksl",
++      "src/sksl/sksl_graphite_vert.sksl",
++      "src/sksl/sksl_public.sksl",
++      "src/sksl/sksl_rt_shader.sksl",
++      "src/sksl/sksl_shared.sksl",
++      "src/sksl/sksl_vert.sksl",
++    ]
++    skslc_dir = "$root_out_dir/"
++    if (host_toolchain != default_toolchain_name) {
++      skslc_dir += "$host_toolchain/"
++    }
++    outputs = [ "$skslc_dir/{{source_file_part}}" ]
++  }
++}
++
++if (skia_compile_modules) {
++  # Generate the sksl-minify binary.
++  skia_executable("sksl-minify") {
++    defines = [
++      "SKSL_STANDALONE",
++      "SK_DISABLE_TRACING",
++    ]
++    sources = skslc_deps
++    sources += [
++      "tools/sksl-minify/SkSLMinify.cpp",
++      "tools/skslc/ProcessWorklist.cpp",
++      "tools/skslc/ProcessWorklist.h",
++    ]
++    libs = []
++    if (is_win) {
++      sources += [ "src/utils/SkGetExecutablePath_win.cpp" ]
++    } else if (is_mac || is_ios) {
++      sources += [ "src/utils/SkGetExecutablePath_mac.cpp" ]
++    } else if (is_linux || is_android) {
++      sources += [ "src/utils/SkGetExecutablePath_linux.cpp" ]
++    }
++    if (is_win) {
++      sources += skia_ports_windows_sources
++    } else {
++      sources += [ "src/ports/SkOSFile_posix.cpp" ]
++      libs += [ "dl" ]
++    }
++    sources += skia_sksl_core_sources
++    sources += skia_sksl_codegen_sources
++    include_dirs = [ "." ]
++    deps = [
++      ":run_sksllex",
++      "//src/partition_alloc:raw_ptr",
++    ]
++  }
++
++  sksl_minify_path = "$root_out_dir/"
++  if (host_toolchain != default_toolchain_name) {
++    sksl_minify_path += "$host_toolchain/"
++  }
++  sksl_minify_path += "sksl-minify"
++  if (host_os == "win") {
++    sksl_minify_path += ".exe"
++  }
++
++  # Use minify_sksl.py to precompile all of the modules.
++  minify_sksl_sources = get_target_outputs(":sksl_modules")
++
++  minify_sksl_outputs = []
++  foreach(src, minify_sksl_sources) {
++    name = get_path_info(src, "name")
++
++    # GN insists its outputs should go somewhere underneath target_out_dir, so we trick it with a
++    # path that starts with target_out_dir and then uses ".." to back up into the src dir.
++    minify_sksl_outputs += [ "$target_out_dir/" + rebase_path(
++                                 "src/sksl/generated/$name.minified.sksl",
++                                 target_out_dir) ]
++    minify_sksl_outputs += [ "$target_out_dir/" + rebase_path(
++                                 "src/sksl/generated/$name.unoptimized.sksl",
++                                 target_out_dir) ]
++  }
++
++  action("minify_sksl") {
++    script = "gn/minify_sksl.py"
++    deps = [
++      ":sksl-minify(//gn/toolchain:$host_toolchain)",
++      ":sksl_modules",
++    ]
++    sources = minify_sksl_sources
++    outputs = minify_sksl_outputs
++    args = [
++      rebase_path(sksl_minify_path),
++      rebase_path("src/sksl/generated"),
++    ]
++    args += rebase_path(minify_sksl_sources)
++  }
++
++  if (skia_compile_sksl_tests) {
++    # Minify our existing .rts files into golden minified outputs.
++    import("gn/sksl_tests.gni")
++    action("minify_sksl_tests") {
++      script = "gn/minify_sksl_tests.py"
++      deps = [
++        ":sksl-minify(//gn/toolchain:$host_toolchain)",
++        ":sksl_modules",
++      ]
++      sources = []
++      outputs = []
++      response_file_contents = []
++      args = [
++        # Comments match the variable names in minify_sksl_tests.py
++        rebase_path(sksl_minify_path),  # sksl_minify
++        rebase_path("src/sksl/sksl_shared.sksl"),  # shared_module
++        rebase_path("src/sksl/sksl_public.sksl"),  # public_module
++        rebase_path("src/sksl/sksl_rt_shader.sksl"),  # public_module
++        rebase_path("resources"),  # input_root_dir
++        rebase_path("tests"),  # output_root_dir
++        "{{response_file_name}}",  # input_file
++      ]
++
++      testsDir = get_path_info("tests/sksl/", "abspath")
++      resourcesDir = get_path_info("resources/sksl/", "abspath")
++
++      foreach(partialPath, sksl_minify_tests_sources) {
++        dst = testsDir + partialPath
++        src = resourcesDir + partialPath
++
++        dir = get_path_info(dst, "dir")
++        name = get_path_info(dst, "name")
++        ext = get_path_info(dst, "extension")
++        if (ext == "rts" || ext == "privrts" || ext == "rtcf" || ext == "rtb" ||
++            ext == "mfrag" || ext == "mvert") {
++          response_file_contents += [ rebase_path(src) ]
++          sources += [ src ]
++          outputs += [ target_out_dir + "/" +
++                       rebase_path(dir + "/" + name + ".minified.sksl",
++                                   target_out_dir) ]
++        }
++      }
++    }
++  }
++} else {
++  group("minify_sksl") {
++  }
++  group("minify_sksl_tests") {
++  }
++}
++
++# `Compile SkSL Tests` relies on skslc and the precompiled modules.
++if (skia_compile_sksl_tests) {
++  # Build skslc.
++  skia_executable("skslc") {
++    defines = [
++      "SKSL_STANDALONE",
++      "SK_DISABLE_TRACING",
++      "SK_COMPILE_WITH_GN",
++    ]
++    sources = skslc_deps
++    sources += [
++      "tools/skslc/Main.cpp",
++      "tools/skslc/ProcessWorklist.cpp",
++      "tools/skslc/ProcessWorklist.h",
++    ]
++    libs = []
++    if (is_win) {
++      sources += [ "src/utils/SkGetExecutablePath_win.cpp" ]
++    } else if (is_mac || is_ios) {
++      sources += [ "src/utils/SkGetExecutablePath_mac.cpp" ]
++    } else if (is_linux || is_android) {
++      sources += [ "src/utils/SkGetExecutablePath_linux.cpp" ]
++    }
++    if (is_win) {
++      sources += skia_ports_windows_sources
++    } else {
++      sources += [ "src/ports/SkOSFile_posix.cpp" ]
++      libs += [ "dl" ]
++    }
++    sources += skia_sksl_codegen_sources
++    sources += skia_sksl_core_sources
++    sources += skia_sksl_hlsl_sources
++    sources += skia_sksl_pipeline_sources
++    sources += skia_sksl_tracing_sources
++    sources += skia_sksl_validate_spirv_sources
++    sources += skia_sksl_validate_wgsl_sources
++    include_dirs = [ "." ]
++    deps = [
++      ":run_sksllex",
++      "//src/partition_alloc:raw_ptr",
++      "//third_party/dawn:tint",
++      "//third_party/externals/spirv-tools:spvtools",
++      "//third_party/externals/spirv-tools:spvtools_val",
++      "//third_party/spirv-cross:spirv_cross",
++    ]
++  }
++
++  skslc_path = "$root_out_dir/"
++  if (host_toolchain != default_toolchain_name) {
++    skslc_path += "$host_toolchain/"
++  }
++  skslc_path += "skslc"
++  if (host_os == "win") {
++    skslc_path += ".exe"
++  }
++
++  # Build the test files using skslc.
++  import("gn/sksl_tests.gni")
++  template("compile_sksl") {
++    # Compile the passed-in `sources` into `outputs` using skslc, with the given language/settings.
++    action("compile_sksl_${target_name}") {
++      script = "gn/compile_sksl_tests.py"
++      deps = [
++        ":sksl_modules",
++        ":skslc(//gn/toolchain:$host_toolchain)",
++      ]
++      sources = []
++      outputs = []
++      response_file_contents = []
++      args = [
++        # Comments are the variable name in compile_sksl_tests.py
++        rebase_path(skslc_path),  # skslc
++        invoker.lang,  # lang
++        invoker.settings,  # settings
++        rebase_path("resources"),  # input_root_dir
++        rebase_path("tests"),  # output_root_dir
++        "{{response_file_name}}",  # input_file
++      ]
++
++      testsDir = get_path_info("tests/sksl/", "abspath")
++      resourcesDir = get_path_info("resources/sksl/", "abspath")
++
++      foreach(partialPath, invoker.sources) {
++        dst = testsDir + partialPath
++        src = resourcesDir + partialPath
++
++        dir = get_path_info(dst, "dir")
++        name = get_path_info(dst, "name")
++        ext = get_path_info(dst, "extension")
++        response_file_contents += [ rebase_path(src) ]
++        sources += [ src ]
++
++        foreach(outExtension, invoker.outExtensions) {
++          # SPIR-V uses separate extensions for .vert and .compute shaders.
++          if (ext == "vert" && outExtension == ".asm.frag") {
++            outExtension = ".asm.vert"
++          } else if (ext == "compute" && outExtension == ".asm.frag") {
++            outExtension = ".asm.comp"
++          }
++          outputs +=
++              [ target_out_dir + "/" +
++                rebase_path(dir + "/" + name + outExtension, target_out_dir) ]
++        }
++      }
++    }
++  }
++  compile_sksl("glsl_tests") {
++    sources = sksl_glsl_tests_sources + sksl_glsl_settings_tests_sources
++    outExtensions = [ ".glsl" ]
++    lang = "--glsl"
++    settings = "--settings"
++  }
++  compile_sksl("glsl_nosettings_tests") {
++    sources = sksl_glsl_settings_tests_sources
++    outExtensions = [ "StandaloneSettings.glsl" ]
++    lang = "--glsl"
++    settings = "--nosettings"
++  }
++  compile_sksl("metal_tests") {
++    sources = sksl_metal_tests_sources
++    outExtensions = [ ".metal" ]
++    lang = "--metal"
++    settings = "--settings"
++  }
++  compile_sksl("hlsl_tests") {
++    sources = sksl_hlsl_tests_sources
++    outExtensions = [ ".hlsl" ]
++    lang = "--hlsl"
++    settings = "--settings"
++  }
++  compile_sksl("skrp_tests") {
++    sources = sksl_skrp_tests_sources
++    outExtensions = [ ".skrp" ]
++    lang = "--skrp"
++    settings = "--settings"
++  }
++  compile_sksl("stage_tests") {
++    sources = sksl_stage_tests_sources
++    outExtensions = [ ".stage" ]
++    lang = "--stage"
++    settings = "--settings"
++  }
++  compile_sksl("spirv_tests") {
++    sources = sksl_spirv_tests_sources
++    outExtensions = [ ".asm.frag" ]
++    lang = "--spirv"
++    settings = "--settings"
++  }
++  compile_sksl("wgsl_tests") {
++    sources = sksl_wgsl_tests_sources
++    outExtensions = [ ".wgsl" ]
++    lang = "--wgsl"
++    settings = "--settings"
++  }
++} else {
++  group("compile_sksl_glsl_tests") {
++  }
++  group("compile_sksl_glsl_nosettings_tests") {
++  }
++  group("compile_sksl_metal_tests") {
++  }
++  group("compile_sksl_hlsl_tests") {
++  }
++  group("compile_sksl_skrp_tests") {
++  }
++  group("compile_sksl_spirv_tests") {
++  }
++  group("compile_sksl_wgsl_tests") {
++  }
++}
++
++group("compile_all_sksl_tests") {
++  deps = [
++    ":compile_sksl_glsl_nosettings_tests",
++    ":compile_sksl_glsl_tests",
++    ":compile_sksl_hlsl_tests",
++    ":compile_sksl_metal_tests",
++    ":compile_sksl_skrp_tests",
++    ":compile_sksl_spirv_tests",
++    ":compile_sksl_wgsl_tests",
++  ]
++}
++
++optional("gpu_shared") {
++  enabled = skia_enable_ganesh || skia_enable_graphite
++
++  configs = []
++  deps = []
++  libs = []
++  public_defines = []
++  public_deps = []
++  frameworks = []
++
++  sources = skia_shared_gpu_sources
++  sources += skia_sksl_pipeline_sources
++  sources += skia_sksl_codegen_sources
++
++  if (skia_use_dawn) {
++    public_defines += [ "SK_DAWN" ]
++    public_deps += [ "//third_party/dawn" ]
++  }
++
++  if (skia_use_direct3d) {
++    sources += skia_sksl_hlsl_sources
++    deps += [ "//third_party/spirv-cross:spirv_cross" ]
++  }
++
++  if (skia_use_vulkan) {
++    public_defines += [ "SK_VULKAN" ]
++    sources += skia_shared_vk_sources
++    configs += [ ":use_skia_vulkan_headers" ]
++    if (skia_enable_vulkan_debug_layers) {
++      public_defines += [ "SK_ENABLE_VK_LAYERS" ]
++    }
++    if (skia_use_vma) {
++      sources += skia_vma_sources
++      public_deps += [ "src/gpu/vk/vulkanmemoryallocator" ]
++    }
++  }
++
++  if (skia_use_metal) {
++    public_defines += [ "SK_METAL" ]
++    sources += skia_shared_mtl_sources
++  }
++
++  if (is_android) {
++    sources += skia_shared_android_sources
++  }
++}
++
++optional("gpu") {
++  enabled = skia_enable_ganesh
++  deps = [
++    ":gpu_shared",
++    ":minify_sksl",
++    ":run_sksllex",
++  ]
++  if (skia_generate_workarounds) {
++    deps += [ ":workaround_list" ]
++  }
++  configs = []
++  public_defines = []
++  public_configs = []
++  public_deps = []
++
++  public = skia_gpu_public
++  sources = skia_ganesh_private
++
++  libs = []
++  frameworks = []
++
++  if (is_android) {
++    public += skia_gpu_android_private_hdrs
++    sources += skia_gpu_android_private
++
++    # this lib is required to link against AHardwareBuffer
++    if (defined(ndk_api) && ndk_api >= 26) {
++      libs += [ "android" ]
++    }
++  }
++
++  if (skia_use_gl) {
++    public_defines += [ "SK_GL" ]
++    if (is_android) {
++      sources += [
++        "src/gpu/ganesh/gl/egl/GrGLMakeEGLInterface.cpp",
++        "src/gpu/ganesh/gl/egl/GrGLMakeNativeInterface_egl.cpp",
++      ]
++      sources += skia_android_gl_sources
++
++      # this lib is required to link against AHardwareBuffer
++      if (defined(ndk_api) && ndk_api >= 26) {
++        libs += [ "android" ]
++      }
++    } else if (skia_use_egl) {
++      if (skia_use_epoxy_egl) {
++        sources += [ "src/gpu/ganesh/gl/epoxy/GrGLMakeEpoxyEGLInterface.cpp" ]
++        libs += [ "epoxy" ]
++      } else {
++        sources += [
++          "src/gpu/ganesh/gl/egl/GrGLMakeEGLInterface.cpp",
++          "src/gpu/ganesh/gl/egl/GrGLMakeNativeInterface_egl.cpp",
++        ]
++        libs += [ "EGL" ]
++      }
++    } else if (skia_use_webgl) {
++      sources += [ "src/gpu/ganesh/gl/webgl/GrGLMakeNativeInterface_webgl.cpp" ]
++    } else if (is_linux && skia_use_x11) {
++      sources += [
++        "src/gpu/ganesh/gl/glx/GrGLMakeGLXInterface.cpp",
++        "src/gpu/ganesh/gl/glx/GrGLMakeNativeInterface_glx.cpp",
++      ]
++      libs += [ "GL" ]
++    } else if (is_mac) {
++      sources += [ "src/gpu/ganesh/gl/mac/GrGLMakeNativeInterface_mac.cpp" ]
++    } else if (is_ios) {
++      sources += [ "src/gpu/ganesh/gl/iOS/GrGLMakeNativeInterface_iOS.cpp" ]
++    } else if (is_win && !skia_enable_winuwp) {
++      sources += [
++        "src/gpu/ganesh/gl/win/GrGLMakeNativeInterface_win.cpp",
++        "src/gpu/ganesh/gl/win/GrGLMakeWinInterface.cpp",
++      ]
++      if (target_cpu != "arm64") {
++        libs += [ "OpenGL32.lib" ]
++      }
++    } else {
++      sources += [ "src/gpu/ganesh/gl/GrGLMakeNativeInterface_none.cpp" ]
++    }
++    public += skia_gpu_gl_public
++    sources += skia_gpu_gl_private
++  }
++
++  if (skia_use_vulkan) {
++    public += skia_gpu_vk_public
++    sources += skia_gpu_vk_private
++    configs += [ ":use_skia_vulkan_headers" ]
++    if (is_android) {
++      sources += skia_gpu_vk_android_private
++    }
++  }
++
++  if (skia_use_direct3d) {
++    public_defines += [ "SK_DIRECT3D" ]
++    deps += [ "//third_party/d3d12allocator" ]
++    public += skia_ganesh_d3d_public
++    sources += skia_ganesh_d3d_private
++    if (skia_enable_direct3d_debug_layer) {
++      public_defines += [ "SK_ENABLE_D3D_DEBUG_LAYER" ]
++    }
++    libs += [
++      "d3d12.lib",
++      "dxgi.lib",
++      "d3dcompiler.lib",
++    ]
++  }
++
++  cflags_objcc = []
++  if (skia_use_metal) {
++    public_defines += [ "SK_METAL" ]
++    public += skia_gpu_metal_public
++    sources += skia_gpu_metal_private
++    sources += skia_gpu_metal_cpp
++    if (skia_enable_metal_debug_info) {
++      public_defines += [ "SK_ENABLE_MTL_DEBUG_INFO" ]
++    }
++    frameworks += [ "Metal.framework" ]
++    frameworks += [ "Foundation.framework" ]
++    if (is_ios) {
++      frameworks += [ "UIKit.framework" ]
++    }
++    cflags_objcc += [ "-fobjc-arc" ]
++  }
++
++  if (is_debug || skia_build_for_debugger) {
++    public_defines += [ "SK_ENABLE_DUMP_GPU" ]
++  }
++}
++
++optional("vello") {
++  enabled = skia_enable_vello_shaders
++  public_defines = [ "SK_ENABLE_VELLO_SHADERS" ]
++  public_deps = [ "//third_party/vello" ]
++}
++
++optional("avif") {
++  enabled = skia_use_libavif
++  public_defines = [ "SK_CODEC_DECODES_AVIF" ]
++
++  deps = [ "//third_party/libavif" ]
++
++  sources = [ "src/codec/SkAvifCodec.cpp" ]
++}
++
++optional("crabbyavif") {
++  enabled = skia_use_crabbyavif
++  public_defines = [ "SK_CODEC_DECODES_AVIF" ]
++
++  # AVIF decoding is provided by CrabbyAvif (a Rust library). Since skia's
++  # standalone builds do not support Rust, it is only being enabled when
++  # building for the Android framework.
++  # The dependency for Android is set in gn_to_bp.py
++  deps = []
++  sources = [ "src/codec/SkCrabbyAvifCodec.cpp" ]
++}
++
++optional("jpeg_mpf") {
++  enabled = skia_use_jpeg_gainmaps &&
++            (skia_use_libjpeg_turbo_encode || skia_use_libjpeg_turbo_decode)
++  sources = [
++    "src/codec/SkJpegMultiPicture.cpp",
++    "src/codec/SkJpegSegmentScan.cpp",
++  ]
++}
++
++optional("jpeg_decode") {
++  enabled = skia_use_libjpeg_turbo_decode
++  public_defines = [ "SK_CODEC_DECODES_JPEG" ]
++
++  deps = [ "//third_party/libjpeg-turbo:libjpeg" ]
++  sources = [
++    "src/codec/SkJpegCodec.cpp",
++    "src/codec/SkJpegDecoderMgr.cpp",
++    "src/codec/SkJpegMetadataDecoderImpl.cpp",
++    "src/codec/SkJpegSourceMgr.cpp",
++    "src/codec/SkJpegUtility.cpp",
++  ]
++  if (skia_use_jpeg_gainmaps) {
++    # Theoretically this doesn't need to be public, but this allows gn_to_bp.py to see it, and seems
++    # to align with other codec support. See b/265939413
++    public_defines += [ "SK_CODEC_DECODES_JPEG_GAINMAPS" ]
++    deps += [
++      ":jpeg_mpf",
++      ":xml",
++    ]
++    sources += skia_codec_jpeg_xmp
++  }
++}
++
++optional("jpeg_encode") {
++  enabled = skia_use_libjpeg_turbo_encode && !skia_use_ndk_images
++  public_defines = [ "SK_CODEC_ENCODES_JPEG" ]
++
++  deps = [ "//third_party/libjpeg-turbo:libjpeg" ]
++  public = skia_encode_jpeg_public
++  sources = skia_encode_jpeg_srcs
++
++  if (skia_use_jpeg_gainmaps) {
++    deps += [ ":jpeg_mpf" ]
++    sources += [ "src/encode/SkJpegGainmapEncoder.cpp" ]
++  }
++}
++
++optional("jpegxl_decode") {
++  enabled = skia_use_libjxl_decode
++  public_defines = [ "SK_CODEC_DECODES_JPEGXL" ]
++
++  deps = [ "//third_party/libjxl" ]
++  sources = [ "src/codec/SkJpegxlCodec.cpp" ]
++}
++
++optional("ndk_images") {
++  enabled = skia_use_ndk_images
++  public_defines = [ "SK_ENABLE_NDK_IMAGES" ]
++  sources = [
++    "src/ports/SkImageEncoder_NDK.cpp",
++    "src/ports/SkImageGeneratorNDK.cpp",
++    "src/ports/SkNDKConversions.cpp",
++  ]
++  libs = [ "jnigraphics" ]
++}
++
++optional("graphite") {
++  configs = []
++  libs = []
++  frameworks = []
++  public_defines = []
++  public_configs = []
++
++  enabled = skia_enable_graphite
++  deps = [
++    ":gpu_shared",
++    ":vello",
++  ]
++  public = skia_graphite_public
++  sources = skia_graphite_sources
++  sources += skia_sksl_graphite_modules_sources
++
++  if (is_android) {
++    sources += skia_graphite_android_private
++  }
++
++  if (skia_enable_vello_shaders) {
++    sources += skia_graphite_vello_sources
++  }
++
++  if (skia_enable_sparse_strips) {
++    sources += skia_graphite_sparse_strips_sources
++    public_defines += [ "SK_ENABLE_SPARSE_STRIPS" ]
++  }
++
++  if (skia_use_dawn) {
++    public += skia_graphite_dawn_public
++    sources += skia_graphite_dawn_sources
++  }
++  if (skia_use_metal) {
++    public_defines += [ "SK_METAL" ]
++    public += skia_graphite_mtl_public
++    sources += skia_graphite_mtl_sources
++    if (skia_enable_metal_debug_info) {
++      public_defines += [ "SK_ENABLE_MTL_DEBUG_INFO" ]
++    }
++    frameworks += [ "Metal.framework" ]
++    frameworks += [ "Foundation.framework" ]
++    if (is_ios) {
++      frameworks += [ "UIKit.framework" ]
++    }
++  }
++  if (skia_use_vulkan) {
++    public += skia_graphite_vk_public
++    sources += skia_graphite_vk_sources
++    configs += [ ":use_skia_vulkan_headers" ]
++    if (skia_enable_precompile) {
++      public += skia_graphite_vk_precompile_public
++      sources += skia_graphite_vk_precompile_sources
++    }
++    if (is_debug) {
++      sources += skia_sksl_validate_spirv_sources
++      deps += [
++        "//third_party/externals/spirv-tools:spvtools",
++
++        #spvtools depends on this but doesn't deps it in.
++        "//third_party/externals/spirv-tools:spvtools_val",
++      ]
++    }
++  }
++  if (skia_enable_precompile) {
++    public += skia_graphite_precompile_public
++    sources += skia_graphite_precompile_sources
++  }
++  if (is_debug) {
++    public_defines += [ "SK_PIPELINE_LIFETIME_LOGGING" ]
++  }
++}
++
++skia_source_set("pathops") {
++  configs = skia_library_configs
++  public = skia_pathops_public
++  sources = skia_pathops_sources
++  deps = [ ":core" ]
++}
++
++skia_source_set("clipstack_utils") {
++  configs = skia_library_configs
++  sources = skia_clipstack_utils_sources
++  deps = [
++    ":core",
++    ":pathops",
++  ]
++}
++
++optional("pdf") {
++  enabled = skia_use_zlib && skia_enable_pdf
++  public_defines = [ "SK_SUPPORT_PDF" ]
++
++  deps = [
++    ":clipstack_utils",
++    ":pathops",
++    "//third_party/zlib",
++  ]
++  public = skia_pdf_public
++  sources = skia_pdf_sources
++  sources_when_disabled = [ "src/pdf/SkDocument_PDF_None.cpp" ]
++  if (skia_pdf_subset_harfbuzz) {
++    deps += [ "//third_party/harfbuzz" ]
++    defines = [ "SK_PDF_USE_HARFBUZZ_SUBSET" ]
++  }
++}
++
++optional("pdf_jpeg_helpers") {
++  enabled = skia_use_zlib && skia_enable_pdf && skia_use_libjpeg_turbo_decode &&
++            skia_use_libjpeg_turbo_encode
++  deps = [
++    ":jpeg_decode",
++    ":jpeg_encode",
++    ":pdf",
++  ]
++  public = skia_pdf_jpeg_public
++}
++
++optional("xps") {
++  enabled = skia_use_xps && is_win
++  public_defines = [ "SK_SUPPORT_XPS" ]
++  deps = [
++    ":clipstack_utils",
++    ":pathops",
++  ]
++  public = skia_xps_public
++  sources = skia_xps_sources
++}
++
++optional("png_decode_common") {
++  enabled = skia_use_libpng_decode || skia_use_rust_png_decode
++  public = skia_codec_png_public
++  sources = skia_codec_png_base
++}
++
++optional("png_decode_libpng") {
++  enabled = skia_use_libpng_decode
++  public_defines = [
++    "SK_CODEC_DECODES_ICO",
++    "SK_CODEC_DECODES_PNG",
++    "SK_CODEC_DECODES_PNG_WITH_LIBPNG",
++  ]
++  sources_for_tests = [ "tests/PngGainmapTest.cpp" ]
++
++  deps = [
++    ":png_decode_common",
++    "//third_party/libpng",
++  ]
++  sources = [ "src/codec/SkIcoCodec.cpp" ] + skia_codec_libpng_srcs
++
++  # Export this so fiddles could decode png using libpng
++  public = skia_codec_libpng_public
++}
++
++optional("png_encode_common") {
++  enabled = skia_use_libpng_encode || skia_use_rust_png_encode
++  sources = skia_encode_png_base
++}
++
++optional("png_encode_libpng") {
++  enabled = skia_use_libpng_encode && !skia_use_ndk_images
++  public_defines = [
++    "SK_CODEC_ENCODES_PNG",
++    "SK_CODEC_ENCODES_PNG_WITH_LIBPNG",
++  ]
++
++  public = skia_encode_libpng_public
++  deps = [
++    ":png_encode_common",
++    "//third_party/libpng",
++  ]
++  sources = skia_encode_libpng_srcs
++}
++
++optional("raw") {
++  enabled = skia_use_dng_sdk && skia_use_libjpeg_turbo_decode && skia_use_piex
++  public_defines = [ "SK_CODEC_DECODES_RAW" ]
++
++  deps = [
++    "//third_party/dng_sdk",
++    "//third_party/libjpeg-turbo:libjpeg",
++    "//third_party/piex",
++  ]
++
++  # SkRawCodec catches any exceptions thrown by dng_sdk, insulating the rest of
++  # Skia.
++  configs = [ "gn/portable:add_exceptions" ]
++
++  sources = [ "src/codec/SkRawCodec.cpp" ]
++}
++
++optional("typeface_freetype") {
++  enabled = skia_use_freetype
++
++  public_defines = [ "SK_TYPEFACE_FACTORY_FREETYPE" ]
++  deps = [ "//third_party/freetype2" ]
++  sources = skia_ports_freetype_sources
++  sources_for_tests = [ "tests/FontScanner_FreeTypeTest.cpp" ]
++}
++
++bazel_args = []
++if (is_mac) {
++  if (target_cpu == "arm64") {
++    bazel_args += [ "--platforms=//bazel/platform:mac_arm64_hermetic" ]
++  } else {
++    bazel_args += [ "--platforms=//bazel/platform:mac_x64_hermetic" ]
++  }
++}
++if (is_debug) {
++  bazel_args += [ "--compilation_mode=dbg" ]
++} else {
++  bazel_args += [ "--compilation_mode=opt" ]
++}
++
++# Unified Rust Bazel Build Action
++# This single action builds all Rust targets to avoid duplicate symbol issues
++# from having multiple copies of the Rust standard library.
++
++if (skia_use_fontations || skia_use_rust_png_decode ||
++    skia_use_rust_png_encode || skia_use_rust_bmp_decode || skia_use_rust_icc ||
++    skia_use_rust_exif) {
++  # Collect all Rust targets, sources, outputs based on what's enabled
++  _rust_targets = []
++  _rust_sources = []
++  _rust_outputs = []
++  _rust_output_mappings = []
++
++  # Add cxx dependency if any feature that needs it is enabled
++  _needs_cxx = skia_use_fontations || skia_use_rust_png_decode ||
++               skia_use_rust_png_encode || skia_use_rust_bmp_decode ||
++               skia_use_rust_icc || skia_use_rust_exif
++  if (_needs_cxx) {
++    _rust_targets += [ "@crates//:cxx_cc" ]
++    _rust_sources += [
++      "MODULE.bazel",
++      "MODULE.bazel.lock",
++      "bazel/external/cxx/BUILD.bazel",
++      "bazel/external/cxx/BUILD.bazel.skia",
++    ]
++    _rust_outputs += [
++      "$root_out_dir/libcxx_cc.a",
++      "$root_out_dir/third_party/rust/cxx/v1/cxx.h",
++    ]
++    _rust_output_mappings += [
++      rebase_path(
++              "//bazel-bin/external/rules_rust++crate+crates__cxx-1.0.168/libcxx_cc.a",
++              root_build_dir) + "=libcxx_cc.a",
++      rebase_path(
++              "//bazel-bin/external/rules_rust++crate+crates__cxx-1.0.168/_virtual_includes/cxx_cc/third_party/rust/cxx/v1/cxx.h",
++              root_build_dir) + "=third_party/rust/cxx/v1/cxx.h",
++    ]
++  }
++
++  if (skia_use_fontations) {
++    _rust_targets += [
++      "//src/ports/fontations:bridge_rust_side",
++      "//src/ports/fontations:fontations_ffi",
++    ]
++    _rust_sources += [ "src/ports/fontations/BUILD.bazel" ]
++    _rust_sources += skia_ports_fontations_bridge_rust_side_sources
++    _rust_outputs += [
++      "$root_out_dir/libbridge_rust_side.a",
++      "$root_out_dir/src/ports/fontations/src/ffi.rs.h",
++      "$root_out_dir/src/ports/fontations/src/ffi.rs.cc",
++    ]
++    _rust_output_mappings += [
++      rebase_path("//bazel-bin/src/ports/fontations/libbridge_rust_side.a",
++                  root_build_dir),
++      rebase_path("//bazel-bin/src/ports/fontations/src/ffi.rs.h",
++                  root_build_dir) + "=src/ports/fontations/src/ffi.rs.h",
++      rebase_path("//bazel-bin/src/ports/fontations/src/ffi.rs.cc",
++                  root_build_dir) + "=src/ports/fontations/src/ffi.rs.cc",
++    ]
++  }
++
++  if (skia_use_rust_png_decode || skia_use_rust_png_encode) {
++    _rust_targets += [ "//rust/png:ffi_rs" ]
++    _rust_sources += [
++      "rust/png/BUILD.bazel",
++      "rust/png/FFI.h",
++      "rust/png/FFI.rs",
++    ]
++    _rust_outputs += [
++      "$root_out_dir/librust_png_ffi_rs.a",
++      "$root_out_dir/rust/png/FFI.rs.h",
++      "$root_out_dir/rust/png/FFI.rs.cc",
++    ]
++    _rust_output_mappings += [
++      rebase_path("//bazel-bin/rust/png/libffi_rs.a", root_build_dir) +
++          "=librust_png_ffi_rs.a",
++      rebase_path("//bazel-bin/rust/png/FFI.rs.h", root_build_dir) +
++          "=rust/png/FFI.rs.h",
++      rebase_path("//bazel-bin/rust/png/FFI.rs.cc", root_build_dir) +
++          "=rust/png/FFI.rs.cc",
++    ]
++    if (skia_use_rust_png_for_android) {
++      bazel_args += [ "--//rust/png:for_android=true" ]
++    } else {
++      bazel_args += [ "--//rust/png:for_android=false" ]
++    }
++  }
++
++  if (skia_use_rust_bmp_decode) {
++    _rust_targets += [ "//experimental/rust_bmp/ffi:ffi_rs" ]
++    _rust_sources += [
++      "experimental/rust_bmp/ffi/BUILD.bazel",
++      "experimental/rust_bmp/ffi/FFI.rs",
++    ]
++    _rust_outputs += [
++      "$root_out_dir/librust_bmp_ffi_rs.a",
++      "$root_out_dir/experimental/rust_bmp/ffi/FFI.rs.h",
++      "$root_out_dir/experimental/rust_bmp/ffi/FFI.rs.cc",
++    ]
++    _rust_output_mappings += [
++      rebase_path("//bazel-bin/experimental/rust_bmp/ffi/libffi_rs.a",
++                  root_build_dir) + "=librust_bmp_ffi_rs.a",
++      rebase_path("//bazel-bin/experimental/rust_bmp/ffi/FFI.rs.h",
++                  root_build_dir) + "=experimental/rust_bmp/ffi/FFI.rs.h",
++      rebase_path("//bazel-bin/experimental/rust_bmp/ffi/FFI.rs.cc",
++                  root_build_dir) + "=experimental/rust_bmp/ffi/FFI.rs.cc",
++    ]
++  }
++
++  if (skia_use_rust_icc) {
++    _rust_targets += [ "//rust/icc:ffi_rs" ]
++    _rust_sources += [
++      "rust/icc/BUILD.bazel",
++      "rust/icc/FFI.h",
++      "rust/icc/FFI.rs",
++    ]
++    _rust_outputs += [
++      "$root_out_dir/librust_icc_ffi_rs.a",
++      "$root_out_dir/rust/icc/FFI.rs.h",
++      "$root_out_dir/rust/icc/FFI.rs.cc",
++    ]
++    _rust_output_mappings += [
++      rebase_path("//bazel-bin/rust/icc/libffi_rs.a", root_build_dir) +
++          "=librust_icc_ffi_rs.a",
++      rebase_path("//bazel-bin/rust/icc/FFI.rs.h", root_build_dir) +
++          "=rust/icc/FFI.rs.h",
++      rebase_path("//bazel-bin/rust/icc/FFI.rs.cc", root_build_dir) +
++          "=rust/icc/FFI.rs.cc",
++    ]
++  }
++
++  if (skia_use_rust_exif) {
++    _rust_targets += [ "//rust/exif:ffi_rs" ]
++    _rust_sources += [
++      "rust/exif/BUILD.bazel",
++      "rust/exif/FFI.h",
++      "rust/exif/FFI.rs",
++    ]
++    _rust_outputs += [
++      "$root_out_dir/librust_exif_ffi_rs.a",
++      "$root_out_dir/rust/exif/FFI.rs.h",
++      "$root_out_dir/rust/exif/FFI.rs.cc",
++    ]
++    _rust_output_mappings += [
++      rebase_path("//bazel-bin/rust/exif/libffi_rs.a", root_build_dir) +
++          "=librust_exif_ffi_rs.a",
++      rebase_path("//bazel-bin/rust/exif/FFI.rs.h", root_build_dir) +
++          "=rust/exif/FFI.rs.h",
++      rebase_path("//bazel-bin/rust/exif/FFI.rs.cc", root_build_dir) +
++          "=rust/exif/FFI.rs.cc",
++    ]
++  }
++
++  # Single unified action that builds all Rust FFI library targets
++  action("rust_all_ffi_bazel_build") {
++    script = "gn/bazel_build.py"
++    sources = _rust_sources
++    outputs = _rust_outputs
++    args = _rust_targets + _rust_output_mappings + bazel_args
++  }
++
++  # This group collects all Rust static libraries that should be linked together.
++  group("rust_ffi_libs") {
++    deps = [ ":rust_all_ffi_bazel_build" ]
++
++    # Collect all the Rust .a files based on what's enabled
++    _all_rust_libs = []
++    if (_needs_cxx) {
++      _all_rust_libs += [ "$root_out_dir/libcxx_cc.a" ]
++    }
++    if (skia_use_fontations) {
++      _all_rust_libs += [ "$root_out_dir/libbridge_rust_side.a" ]
++    }
++    if (skia_use_rust_png_decode || skia_use_rust_png_encode) {
++      _all_rust_libs += [ "$root_out_dir/librust_png_ffi_rs.a" ]
++    }
++    if (skia_use_rust_bmp_decode) {
++      _all_rust_libs += [ "$root_out_dir/librust_bmp_ffi_rs.a" ]
++    }
++    if (skia_use_rust_icc) {
++      _all_rust_libs += [ "$root_out_dir/librust_icc_ffi_rs.a" ]
++    }
++    if (skia_use_rust_exif) {
++      _all_rust_libs += [ "$root_out_dir/librust_exif_ffi_rs.a" ]
++    }
++
++    public_configs = [ ":rust_ffi_libs_config" ]
++    all_dependent_configs = [ ":rust_ffi_libs_config" ]
++  }
++
++  config("rust_ffi_libs_config") {
++    _all_rust_libs = []
++    if (_needs_cxx) {
++      _all_rust_libs += [ "$root_out_dir/libcxx_cc.a" ]
++    }
++    if (skia_use_fontations) {
++      _all_rust_libs += [ "$root_out_dir/libbridge_rust_side.a" ]
++    }
++    if (skia_use_rust_png_decode || skia_use_rust_png_encode) {
++      _all_rust_libs += [ "$root_out_dir/librust_png_ffi_rs.a" ]
++    }
++    if (skia_use_rust_bmp_decode) {
++      _all_rust_libs += [ "$root_out_dir/librust_bmp_ffi_rs.a" ]
++    }
++    if (skia_use_rust_icc) {
++      _all_rust_libs += [ "$root_out_dir/librust_icc_ffi_rs.a" ]
++    }
++    if (skia_use_rust_exif) {
++      _all_rust_libs += [ "$root_out_dir/librust_exif_ffi_rs.a" ]
++    }
++    libs = _all_rust_libs
++
++    # Allow multiple definitions because Bazel's rust_static_library includes
++    # transitive C++ dependencies, which can lead to duplicate symbols when
++    # linking multiple Rust libraries together.
++    if (!is_mac) {
++      ldflags = [ "-Wl,--allow-multiple-definition" ]
++    }
++  }
++}
++
++if (skia_use_fontations) {
++  config("fontations_ffi_public_config") {
++    include_dirs = [
++      # This is where `src/ports/fontations/src/ffi.rs.h` was put by Bazel
++      "$root_out_dir",
++    ]
++  }
++  config("fontations_ffi_private_config") {
++    include_dirs = [
++      # This entry is needed so that `ffi.rs.cc` can resolve
++      # `#include "src/ports/fontations/src/ffi.rs.h"`
++      ".",
++    ]
++  }
++  skia_source_set("fontations_ffi") {
++    deps = [
++      ":rust_all_ffi_bazel_build",
++      ":rust_ffi_libs",
++    ]
++    public = [ "${root_out_dir}/src/ports/fontations/src/ffi.rs.h" ]
++    sources = [ "${root_out_dir}/src/ports/fontations/src/ffi.rs.cc" ]
++    libs = [ "c++" ]
++    public_configs = [ ":fontations_ffi_public_config" ]
++    configs = [ ":fontations_ffi_private_config" ]
++  }
++}
++
++optional("typeface_fontations") {
++  public_defines = [ "SK_TYPEFACE_FACTORY_FONTATIONS" ]
++  enabled = skia_use_fontations
++  public_deps = [ ":fontations_ffi" ]
++  deps = []
++  if (skia_use_rust_png_decode) {
++    deps += [ ":png_decode_rust" ]
++  } else if (skia_use_libpng_decode) {
++    deps += [ ":png_decode_libpng" ]
++  } else {
++    assert(!enabled, "Fontations requires a PNG decoder")
++  }
++  sources = skia_ports_typeface_fontations_sources
++  sources_for_tests = [
++    "tests/FontationsTest.cpp",
++    "tests/FontationsFtCompTest.cpp",
++    "tests/FontScanner_FontationsTest.cpp",
++  ]
++}
++
++if (skia_use_rust_png_decode || skia_use_rust_png_encode) {
++  config("rust_png_cxx_bridge_private_config") {
++    include_dirs = [
++      # This entry is needed so that `FFI.rs.cc` can resolve
++      # `#include "rust/png/FFI.h"`
++      ".",
++    ]
++  }
++  skia_source_set("rust_png_cxx_bridge") {
++    deps = [ ":rust_all_ffi_bazel_build" ]
++    public = [ "${root_out_dir}/rust/png/FFI.rs.h" ]
++    sources = [ "${root_out_dir}/rust/png/FFI.rs.cc" ]
++    public_configs = [ ":rust_common_cxx_bridge_public_config" ]
++    configs = [ ":rust_png_cxx_bridge_private_config" ]
++  }
++}
++
++if (skia_use_rust_icc) {
++  config("rust_icc_cxx_bridge_private_config") {
++    include_dirs = [
++      # This entry is needed so that `FFI.rs.cc` can resolve
++      # `#include "rust/icc/FFI.h"`
++      ".",
++    ]
++  }
++  skia_source_set("rust_icc_cxx_bridge") {
++    deps = [ ":rust_all_ffi_bazel_build" ]
++    public = [ "${root_out_dir}/rust/icc/FFI.rs.h" ]
++    sources = [ "${root_out_dir}/rust/icc/FFI.rs.cc" ]
++    public_configs = [ ":rust_common_cxx_bridge_public_config" ]
++    configs = [ ":rust_icc_cxx_bridge_private_config" ]
++  }
++}
++
++config("rust_common_cxx_bridge_public_config") {
++  include_dirs = [
++    # This is where `rust/.../*.rs.h` and
++    # `third_party/rust/cxx/v1/cxx.h` were put by Bazel
++    "$root_out_dir",
++  ]
++}
++
++optional("rust_common") {
++  enabled = skia_use_rust_png_decode || skia_use_rust_png_encode
++  public_defines = []
++  if (skia_use_rust_png_for_android) {
++    public_defines += [ "SK_CODEC_USES_PNG_WITH_RUST_FOR_ANDROID" ]
++  }
++  public = skia_rust_common_ffi_cpp_hdrs
++  sources = skia_rust_common_ffi_cpp_srcs
++  public_configs = [ ":rust_common_cxx_bridge_public_config" ]
++  deps = [ ":rust_all_ffi_bazel_build" ]
++}
++
++optional("rust_icc") {
++  enabled = skia_use_rust_icc
++  public_defines = [ "SK_CODEC_COLOR_PROFILE_PARSE_WITH_RUST" ]
++  public = skia_rust_icc_ffi_cpp_hdrs + skia_codec_rust_icc_codec_hdrs
++  sources = skia_rust_icc_ffi_cpp_srcs + skia_codec_rust_icc_codec_srcs
++  sources_for_tests = [ "tests/RustIccTest.cpp" ]
++  public_configs = [ ":rust_common_cxx_bridge_public_config" ]
++  deps = [
++    ":rust_common",
++    ":rust_ffi_libs",
++    ":rust_icc_cxx_bridge",
++    "//modules/skcms",
++  ]
++}
++
++if (skia_use_rust_exif) {
++  config("rust_exif_cxx_bridge_private_config") {
++    include_dirs = [
++      # This entry is needed so that `FFI.rs.cc` can resolve
++      # `#include "rust/exif/FFI.h"`
++      ".",
++    ]
++  }
++  skia_source_set("rust_exif_cxx_bridge") {
++    deps = [ ":rust_all_ffi_bazel_build" ]
++    public = [ "${root_out_dir}/rust/exif/FFI.rs.h" ]
++    sources = [ "${root_out_dir}/rust/exif/FFI.rs.cc" ]
++    public_configs = [ ":rust_common_cxx_bridge_public_config" ]
++    configs = [ ":rust_exif_cxx_bridge_private_config" ]
++  }
++}
++
++optional("rust_exif") {
++  enabled = skia_use_rust_exif
++  public_defines = [ "SK_EXIF_PARSE_WITH_RUST" ]
++  public = skia_rust_exif_ffi_cpp_hdrs
++  sources = skia_rust_exif_ffi_cpp_srcs
++  sources_for_tests = [ "tests/RustExifTest.cpp" ]
++  public_configs = [ ":rust_common_cxx_bridge_public_config" ]
++  deps = [
++    ":rust_exif_cxx_bridge",
++    ":rust_ffi_libs",
++  ]
++}
++
++optional("png_decode_rust") {
++  public_defines = [ "SK_CODEC_DECODES_PNG_WITH_RUST" ]
++  enabled = skia_use_rust_png_decode
++  public = skia_codec_rust_png_public
++  sources = skia_codec_rust_png
++  sources_for_tests = [ "tests/SkPngRustDecoderTest.cpp" ]
++
++  deps = [
++    ":png_decode_common",
++    ":rust_common",
++    ":rust_ffi_libs",
++    ":rust_png_cxx_bridge",
++  ]
++  libs = [ "c++" ]
++}
++
++optional("png_encode_rust") {
++  public_defines = [ "SK_CODEC_ENCODES_PNG_WITH_RUST" ]
++  enabled = skia_use_rust_png_encode
++  public = skia_encode_rust_png_public  # From `gn/core.gni`
++  sources = skia_encode_rust_png_srcs  # From `gn/core.gni`
++  sources_for_tests = [ "tests/SkPngRustEncoderTest.cpp" ]
++  deps = [
++    ":png_encode_common",
++    ":rust_common",
++    ":rust_ffi_libs",
++    ":rust_png_cxx_bridge",
++  ]
++  libs = [ "c++" ]
++}
++
++if (skia_use_rust_bmp_decode) {
++  config("rust_bmp_cxx_bridge_public_config") {
++    include_dirs = [ "$root_out_dir" ]
++  }
++  config("rust_bmp_cxx_bridge_private_config") {
++    include_dirs = [ "." ]
++  }
++  skia_source_set("rust_bmp_cxx_bridge") {
++    deps = [ ":rust_all_ffi_bazel_build" ]
++    public = [ "${root_out_dir}/experimental/rust_bmp/ffi/FFI.rs.h" ]
++    sources = [ "${root_out_dir}/experimental/rust_bmp/ffi/FFI.rs.cc" ]
++    public_configs = [ ":rust_bmp_cxx_bridge_public_config" ]
++    configs = [ ":rust_bmp_cxx_bridge_private_config" ]
++  }
++}
++
++optional("bmp_decode_rust") {
++  public_defines = [ "SK_CODEC_DECODES_BMP_WITH_RUST" ]
++  enabled = skia_use_rust_bmp_decode
++  public = [ "experimental/rust_bmp/decoder/SkBmpRustDecoder.h" ]
++  sources = [
++    "experimental/rust_bmp/decoder/SkBmpRustDecoder.cpp",
++    "experimental/rust_bmp/decoder/SkBmpRustDecoder.h",
++    "experimental/rust_bmp/decoder/impl/SkBmpRustCodec.cpp",
++    "experimental/rust_bmp/decoder/impl/SkBmpRustCodec.h",
++  ]
++  sources_for_tests = [ "tests/SkBmpRustDecoderTest.cpp" ]
++  deps = [
++    ":rust_bmp_cxx_bridge",
++    ":rust_ffi_libs",
++  ]
++  libs = [ "c++" ]
++}
++
++optional("webp_decode") {
++  enabled = skia_use_libwebp_decode
++  public_defines = [ "SK_CODEC_DECODES_WEBP" ]
++
++  deps = [ "//third_party/libwebp" ]
++  sources = [ "src/codec/SkWebpCodec.cpp" ]
++}
++
++optional("webp_encode") {
++  enabled = skia_use_libwebp_encode && !skia_use_ndk_images
++  public_defines = [ "SK_CODEC_ENCODES_WEBP" ]
++  public = skia_encode_webp_public
++
++  deps = [ "//third_party/libwebp" ]
++  sources = skia_encode_webp_srcs
++}
++
++optional("wuffs") {
++  enabled = skia_use_wuffs
++  public_defines = [
++    "SK_HAS_WUFFS_LIBRARY",
++    "SK_CODEC_DECODES_GIF",
++  ]
++
++  deps = [ "//third_party/wuffs" ]
++  sources = [ "src/codec/SkWuffsCodec.cpp" ]
++}
++
++optional("xml") {
++  enabled = skia_use_expat || skia_use_jpeg_gainmaps
++  public_defines = [ "SK_XML" ]
++
++  deps = [ "//third_party/expat" ]
++  sources = skia_xml_sources
++  sources += skia_codec_xmp
++  sources += skia_svg_writer_sources
++  sources += skia_svg_writer_public
++
++  # TODO(lukasza, kjlubick, bungeman): Remove the `deps` below once the legacy
++  # SVG factories (see `SK_DISABLE_LEGACY_SVG_FACTORIES`) are not supported
++  # anymore.
++  if (skia_use_libpng_encode) {
++    deps += [ ":png_encode_libpng" ]
++  }
++  if (skia_use_rust_png_encode) {
++    deps += [ ":png_encode_rust" ]
++  }
++}
++
++if (skia_enable_ganesh && skia_generate_workarounds) {
++  action("workaround_list") {
++    script = "tools/build_workaround_header.py"
++
++    inputs = [ "src/gpu/gpu_workaround_list.txt" ]
++
++    # GN insists its outputs should go somewhere underneath root_out_dir, so we trick it with a
++    # path that starts with root_out_dir and then uses ".." to back up into the src dir.
++    output_file =
++        rebase_path("include/gpu/ganesh/GrDriverBugWorkaroundsAutogen.h",
++                    root_out_dir)
++
++    outputs = [ "$root_out_dir/$output_file" ]
++    args = [
++      "--output-file",
++      "$output_file",
++    ]
++
++    foreach(file, inputs) {
++      args += [ rebase_path(file, root_build_dir) ]
++    }
++  }
++}
++
++import("gn/codec.gni")
++
++skia_source_set("core") {
++  public_configs = [ ":skia_public" ]
++  configs = skia_library_configs
++  public = skia_core_public
++  sources = skia_core_sources
++
++  # These deps don't belong to :core, but they are currently needed to support (de)serialization.
++  deps = [
++    ":fontmgr_mac_ct",
++    ":fontmgr_win",
++    ":fontmgr_win_gdi",
++    ":png_decode_libpng",
++    ":png_encode_libpng",
++    ":typeface_fontations",
++    ":typeface_freetype",
++  ]
++}
++
++skia_component("skia") {
++  public_configs = [ ":skia_public" ]
++  configs = skia_library_configs
++
++  public_deps = [
++    ":core",
++    ":fontmgr_FontConfigInterface",
++    ":fontmgr_android",
++    ":fontmgr_android_ndk",
++    ":fontmgr_custom_directory",
++    ":fontmgr_custom_embedded",
++    ":fontmgr_custom_empty",
++    ":fontmgr_fontations_empty",
++    ":fontmgr_fontconfig",
++    ":fontmgr_mac_ct",
++    ":fontmgr_win",
++    ":fontmgr_win_gdi",
++    ":gpu",
++    ":graphite",
++    ":jpeg_encode",
++    ":pdf",
++    ":pdf_jpeg_helpers",
++    ":png_decode_common",
++    ":png_decode_libpng",
++    ":png_encode_libpng",
++    ":webp_encode",
++    ":xps",
++  ]
++
++  deps = [
++    ":android_utils",
++    ":avif",
++    ":crabbyavif",
++    ":jpeg_decode",
++    ":jpegxl_decode",
++    ":lasx",
++    ":minify_sksl",
++    ":ml3",
++    ":ml4",
++    ":ndk_images",
++    ":png_decode_rust",
++    ":raw",
++    ":rust_icc",
++    ":typeface_fontations",
++    ":typeface_freetype",
++    ":vello",
++    ":webp_decode",
++    ":wuffs",
++    ":xml",
++    "modules/skcms",
++    "//src/partition_alloc:raw_ptr",
++  ]
++
++  public = []
++  public += skia_codec_public
++  public += skia_utils_public
++  public += skia_effects_public
++  public += skia_effects_imagefilter_public
++  public += skia_android_core_hdrs
++
++  sources = []
++  sources += skia_utils_private
++  sources += skia_utils_chromium
++  sources += skia_effects_sources
++  sources += skia_colorfilters_sources
++  sources += skia_effects_imagefilter_sources
++  sources += skia_codec_shared
++  sources += skia_codec_decode_bmp
++  sources += skia_encode_srcs
++  sources += skia_sksl_core_sources
++  sources += skia_sksl_core_module_sources
++  sources += skia_sksl_tracing_sources
++  sources += skia_ports_sources
++  sources += skia_android_core_srcs
++  sources += [
++    "src/android/SkAndroidFrameworkUtils.cpp",
++    "src/codec/SkAndroidCodec.cpp",
++    "src/codec/SkAndroidCodecAdapter.cpp",
++    "src/codec/SkSampledCodec.cpp",
++    "src/ports/SkDiscardableMemory_none.cpp",
++    "src/ports/SkMemory_malloc.cpp",
++    "src/sfnt/SkOTTable_name.cpp",
++    "src/sfnt/SkOTUtils.cpp",
++  ]
++
++  # TODO(fmalita): remove from skia_utils_private after clients are migrated to
++  # skia_clipstack_utils_sources
++  sources -= skia_clipstack_utils_sources
++
++  defines = []
++  libs = []
++
++  if (is_win && sanitize == "ASAN") {
++    deps += [ "gn/skia:copy_asan_runtime" ]
++  }
++
++  if (skia_build_for_debugger) {
++    defines += [ "SK_BUILD_FOR_DEBUGGER" ]
++  }
++
++  if (skia_use_no_jpeg_encode) {
++    sources += skia_no_encode_jpeg_srcs
++  }
++  if (skia_use_no_png_encode) {
++    sources += skia_no_encode_png_srcs
++  }
++  if (skia_use_no_webp_encode) {
++    sources += skia_no_encode_webp_srcs
++  }
++
++  if (is_win) {
++    sources += skia_ports_windows_sources + [
++                 "src/ports/SkImageGeneratorWIC.cpp",
++                 "src/ports/SkLog_win.cpp",
++               ]
++    libs += [
++      "Ole32.lib",
++      "OleAut32.lib",
++    ]
++
++    if (!skia_enable_winuwp) {
++      libs += [
++        "FontSub.lib",
++        "User32.lib",
++        "Usp10.lib",
++      ]
++    }
++  } else {
++    sources += [ "src/ports/SkOSFile_posix.cpp" ]
++    if (is_ios) {
++      sources += [ "src/ports/SkOSFile_ios.h" ]
++    }
++    libs += [ "dl" ]
++  }
++
++  if (is_android) {
++    deps += [ "//third_party/expat" ]
++    if (defined(ndk) && ndk != "") {
++      deps += [ "//third_party/cpu-features" ]
++    }
++    sources += [ "src/ports/SkLog_android.cpp" ]
++    libs += [
++      "EGL",
++      "GLESv2",
++      "log",
++    ]
++  }
++
++  if (is_linux || is_wasm) {
++    sources += [ "src/ports/SkLog_stdio.cpp" ]
++    if (skia_use_egl) {
++      libs += [ "GLESv2" ]
++    }
++  }
++
++  if (is_mac) {
++    public += [ "include/ports/SkCFObject.h" ]
++    sources += [
++      "src/ports/SkImageGeneratorCG.cpp",
++      "src/ports/SkLog_stdio.cpp",
++    ]
++    frameworks = [
++      "ApplicationServices.framework",
++      "OpenGL.framework",
++    ]
++  }
++
++  if (is_ios) {
++    public += [ "include/ports/SkCFObject.h" ]
++    sources += [
++      "src/ports/SkImageGeneratorCG.cpp",
++      "src/ports/SkLog_stdio.cpp",
++    ]
++    frameworks = [
++      "CoreFoundation.framework",
++      "ImageIO.framework",
++      "MobileCoreServices.framework",
++    ]
++  }
++
++  if (skia_enable_spirv_validation) {
++    deps += [ "//third_party/externals/spirv-tools:spvtools_val" ]
++    defines += [ "SK_ENABLE_SPIRV_VALIDATION" ]
++  }
++
++  if (skia_include_multiframe_procs) {
++    sources += [ "tools/SkSharingProc.cpp" ]
++  }
++
++  # Overrides TRACE_EVENT0..2 macros (etc) to map to Perfetto's tracing macros.
++  # Currently only supported in Android framework.
++  if (skia_android_framework_use_perfetto) {
++    defines += [ "SK_ANDROID_FRAMEWORK_USE_PERFETTO" ]
++    sources += [ "src/android/SkAndroidFrameworkPerfettoStaticStorage.cpp" ]
++  }
++}
++
++# DebugCanvas used in experimental/wasm-skp-debugger
++if (is_canvaskit) {
++  skia_static_library("debugcanvas") {
++    public_configs = [ ":skia_public" ]
++
++    sources = [
++      "tools/SkSharingProc.cpp",
++      "tools/UrlDataManager.cpp",
++      "tools/debugger/DebugCanvas.cpp",
++      "tools/debugger/DebugLayerManager.cpp",
++      "tools/debugger/DrawCommand.cpp",
++      "tools/debugger/JsonWriteBuffer.cpp",
++    ]
++  }
++}
++
++group("modules") {
++  deps = [
++    "modules/bentleyottmann",
++    "modules/skottie",
++    "modules/skparagraph",
++    "modules/skshaper",
++    "modules/svg",
++  ]
++
++  if (is_canvaskit) {
++    deps += [ "modules/canvaskit" ]
++  }
++}
++
++config("use_skia_vulkan_headers") {
++  include_dirs = [ "include/third_party/vulkan" ]
++  defines = [ "SK_USE_INTERNAL_VULKAN_HEADERS" ]
++}
++
++config("vulkan_memory_allocator") {
++  include_dirs = [ "$skia_vulkan_memory_allocator_dir/include" ]
++}
++
++skia_public_includes = [
++  "client_utils/android",
++  "include/android",
++  "include/codec",
++  "include/config",
++  "include/core",
++  "include/docs",
++  "include/effects",
++  "include/encode",
++  "include/gpu",
++  "include/pathops",
++  "include/ports",
++  "include/svg",
++  "include/utils",
++  "include/utils/mac",
++  "modules/skottie/include",
++  "modules/skparagraph/include",
++  "modules/skshaper/include",
++  "modules/svg/include",
++]
++
++# Used by gn_to_bp.py to list our public include dirs.
++skia_source_set("public") {
++  configs = [ ":skia_public" ]
++  include_dirs = skia_public_includes
++}
++
++config("skia.h_config") {
++  include_dirs = [ "$target_gen_dir" ]
++}
++action("skia.h") {
++  public_configs = [ ":skia.h_config" ]
++  skia_h = "$target_gen_dir/skia.h"
++  script = "gn/find_headers.py"
++
++  args = [ rebase_path("//bin/gn") ] + [ rebase_path("//") ] +
++         [ rebase_path(skia_h, root_build_dir) ] +
++         rebase_path(skia_public_includes)
++  depfile = "$skia_h.deps"
++  outputs = [ skia_h ]
++}
++
++skia_source_set("public_headers_warnings_check") {
++  sources = [ "tools/public_headers_warnings_check.cpp" ]
++  configs = [ ":use_skia_vulkan_headers" ]
++  if (defined(skia_header_target_default_configs)) {
++    configs += skia_header_target_default_configs
++  }
++  deps = [
++    ":skia",
++    ":skia.h",
++    "modules/skottie",
++    "modules/skshaper",
++  ]
++
++  if (skia_use_dawn) {
++    deps += [ "//third_party/dawn" ]
++  }
++}
++
++# TODO: have each optional provide a target with examples and depend on those.
++if (((skia_enable_fontmgr_fontconfig && skia_use_freetype) ||
++     skia_use_fonthost_mac || skia_enable_fontmgr_win ||
++     skia_enable_fontmgr_custom_directory) && skia_enable_ganesh &&
++    skia_use_libjpeg_turbo_encode && skia_use_libjpeg_turbo_decode &&
++    (skia_use_libpng_encode && !skia_use_ndk_images) && skia_use_zlib &&
++    skia_enable_pdf && !skia_use_vulkan) {
++  skia_executable("fiddle_examples") {
++    sources = [
++      "tools/fiddle/all_examples.cpp",
++      "tools/fiddle/examples.cpp",
++      "tools/fiddle/examples.h",
++    ]
++    if (is_win) {
++      cflags = [
++        "/wd4756",  # Overflow in constant arithmetic
++        "/wd4305",  # truncation from 'double' to 'float'
++      ]
++    }
++    deps = [
++      ":skia",
++      ":skia.h",
++    ]
++    if (skia_use_dawn) {
++      deps += [ "//third_party/dawn" ]
++    }
++  }
++}
++
++# Targets guarded by skia_enable_tools may use //third_party freely.
++if (skia_enable_tools) {
++  if (is_linux && target_cpu == "x64" && skia_enable_ganesh) {
++    skia_executable("fiddle") {
++      check_includes = false
++      libs = []
++      sources = [
++        "tools/fiddle/draw.cpp",
++        "tools/fiddle/fiddle_main.cpp",
++      ]
++
++      if (skia_use_egl) {
++        sources += [ "tools/fiddle/egl_context.cpp" ]
++      } else {
++        sources += [ "tools/fiddle/null_context.cpp" ]
++      }
++      testonly = true
++      deps = [
++        ":flags",
++        ":gpu_tool_utils",
++        ":skia",
++        ":skia.h",
++        "modules/skottie",
++        "modules/skparagraph",
++        "modules/skshaper",
++        "modules/svg",
++      ]
++    }
++  }
++
++  template("test_lib") {
++    config(target_name + "_config") {
++      if (defined(invoker.public_defines)) {
++        defines = invoker.public_defines
++      }
++    }
++    skia_source_set(target_name) {
++      forward_variables_from(invoker, "*", [])
++      check_includes = false
++      public_configs = [
++        ":" + target_name + "_config",
++        ":skia_private",
++      ]
++
++      if (!defined(deps)) {
++        deps = []
++      }
++      deps += [ ":skia" ]
++      testonly = true
++    }
++  }
++
++  template("test_app") {
++    if (is_ios) {
++      ios_app_bundle(target_name) {
++        forward_variables_from(invoker,
++                               "*",
++                               [
++                                 "output_name",
++                                 "visibility",
++                                 "is_shared_library",
++                               ])
++        testonly = true
++        extra_configs = [ ":skia_private" ]
++        launchscreen = "platform_tools/ios/app/LaunchScreen.storyboard"
++        data_sources = [ "resources" ]
++        if ("True" == exec_script("//gn/checkdir.py",
++                                  [ rebase_path("skps", root_build_dir) ],
++                                  "trim string")) {
++          data_sources += [ "skps" ]
++        }
++        if ("True" == exec_script("//gn/checkdir.py",
++                                  [ rebase_path("mskps", root_build_dir) ],
++                                  "trim string")) {
++          data_sources += [ "mskps" ]
++        }
++      }
++    } else {
++      # !is_ios
++
++      if (defined(invoker.is_shared_library) && invoker.is_shared_library) {
++        skia_shared_library("lib" + target_name) {
++          output_dir = root_build_dir
++          forward_variables_from(invoker, "*", [ "is_shared_library" ])
++          if (!defined(configs)) {
++            configs = []
++          }
++          configs += [ ":skia_private" ]
++          testonly = true
++        }
++      } else {
++        _executable = target_name
++        skia_executable(_executable) {
++          check_includes = false
++          output_dir = root_build_dir
++          forward_variables_from(invoker, "*", [ "is_shared_library" ])
++          if (!defined(configs)) {
++            configs = []
++          }
++          configs += [ ":skia_private" ]
++          testonly = true
++        }
++      }
++      if (is_android && skia_android_serial != "" && defined(_executable)) {
++        action("push_" + target_name) {
++          output_dir = root_build_dir
++          script = "gn/push_to_android.py"
++          deps = [ ":" + _executable ]
++          _stamp = "$target_gen_dir/$_executable.pushed_$skia_android_serial"
++          outputs = [ _stamp ]
++          args = [
++            rebase_path("$root_build_dir/$_executable"),
++            skia_android_serial,
++            rebase_path(_stamp),
++          ]
++          testonly = true
++        }
++      }
++    }
++  }
++
++  test_lib("load_dynamic_library") {
++    configs = [ ":skia_private" ]
++    deps = [ ":skia" ]
++    sources = [ "tools/library/LoadDynamicLibrary.h" ]
++    if (is_win) {
++      sources += [ "tools/library/LoadDynamicLibrary_win.cpp" ]
++    } else {
++      sources += [ "tools/library/LoadDynamicLibrary_posix.cpp" ]
++    }
++  }
++
++  if (skia_enable_graphite || skia_enable_ganesh) {
++    test_lib("gpu_tool_utils") {
++      public_defines = []
++
++      # Bots and even devs may not have Vulkan headers, so put
++      # include/third_party/vulkan on our path so they're always available.
++      all_dependent_configs = [ ":use_skia_vulkan_headers" ]
++
++      defines = []
++      if (skia_enable_discrete_gpu) {
++        defines += [ "SK_ENABLE_DISCRETE_GPU" ]
++      }
++
++      deps = [ ":load_dynamic_library" ]
++      public_deps = []
++      sources = [
++        "tools/gpu/BackendSurfaceFactory.cpp",
++        "tools/gpu/BackendSurfaceFactory.h",
++        "tools/gpu/BackendTextureImageFactory.cpp",
++        "tools/gpu/BackendTextureImageFactory.h",
++        "tools/gpu/CompressedTexture.cpp",
++        "tools/gpu/CompressedTexture.h",
++        "tools/gpu/ContextType.cpp",
++        "tools/gpu/ContextType.h",
++        "tools/gpu/FlushFinishTracker.cpp",
++        "tools/gpu/FlushFinishTracker.h",
++        "tools/gpu/ManagedBackendTexture.cpp",
++        "tools/gpu/ManagedBackendTexture.h",
++        "tools/gpu/ProtectedUtils.h",
++        "tools/gpu/YUVUtils.cpp",
++        "tools/gpu/YUVUtils.h",
++      ]
++
++      libs = []
++      frameworks = []
++
++      if (skia_use_gl && !is_canvaskit) {
++        if (is_android || skia_use_egl) {
++          sources +=
++              [ "tools/ganesh/gl/egl/CreatePlatformGLTestContext_egl.cpp" ]
++          libs += [ "EGL" ]
++        } else if (is_linux) {
++          sources +=
++              [ "tools/ganesh/gl/glx/CreatePlatformGLTestContext_glx.cpp" ]
++          libs += [
++            "GLU",
++            "GL",
++            "X11",
++          ]
++        } else if (is_win) {
++          sources += [
++            "tools/ganesh/gl/win/CreatePlatformGLTestContext_win.cpp",
++            "tools/ganesh/gl/win/SkWGL.h",
++            "tools/ganesh/gl/win/SkWGL_win.cpp",
++          ]
++          libs += [ "Gdi32.lib" ]
++          if (target_cpu != "arm64") {
++            libs += [ "OpenGL32.lib" ]
++          }
++        } else if (is_wasm) {
++          # TODO: replace with webgl test context
++          sources +=
++              [ "tools/ganesh/gl/none/CreatePlatformGLTestContext_none.cpp" ]
++        }
++      }
++
++      if (skia_use_vulkan) {
++        sources += [ "tools/gpu/vk/VkTestHelper.h" ]
++        sources += [ "tools/gpu/vk/VkTestHelper.cpp" ]
++        sources += [ "tools/gpu/vk/VkTestMemoryAllocator.h" ]
++        sources += [ "tools/gpu/vk/VkTestMemoryAllocator.cpp" ]
++        sources += [ "tools/gpu/vk/VkTestUtils.h" ]
++        sources += [ "tools/gpu/vk/VkTestUtils.cpp" ]
++        sources += [ "tools/gpu/vk/VkYcbcrSamplerHelper.h" ]
++        sources += [ "tools/gpu/vk/VkYcbcrSamplerHelper.cpp" ]
++        all_dependent_configs += [ ":vulkan_memory_allocator" ]
++      }
++
++      if (skia_use_dawn) {
++        public_deps += [ "//third_party/dawn" ]
++        if (is_clang) {
++          cflags_cc = [ "-Wno-microsoft-cast" ]
++        }
++      }
++      if (skia_enable_ganesh) {
++        sources += [
++          "tools/ganesh/AtlasTextOpTools.cpp",
++          "tools/ganesh/AtlasTextOpTools.h",
++          "tools/ganesh/DDLPromiseImageHelper.cpp",
++          "tools/ganesh/DDLPromiseImageHelper.h",
++          "tools/ganesh/DDLTileHelper.cpp",
++          "tools/ganesh/DDLTileHelper.h",
++          "tools/ganesh/GrAtlasTools.cpp",
++          "tools/ganesh/GrAtlasTools.h",
++          "tools/ganesh/GrContextFactory.cpp",
++          "tools/ganesh/GrContextFactory.h",
++          "tools/ganesh/GrTest.cpp",
++          "tools/ganesh/MemoryCache.cpp",
++          "tools/ganesh/MemoryCache.h",
++          "tools/ganesh/ProtectedUtils_Ganesh.cpp",
++          "tools/ganesh/ProxyUtils.cpp",
++          "tools/ganesh/ProxyUtils.h",
++          "tools/ganesh/TestCanvas.cpp",
++          "tools/ganesh/TestCanvas.h",
++          "tools/ganesh/TestContext.cpp",
++          "tools/ganesh/TestOps.cpp",
++          "tools/ganesh/TestOps.h",
++          "tools/ganesh/mock/MockTestContext.cpp",
++          "tools/text/gpu/TextBlobTools.cpp",
++        ]
++        if (skia_use_gl) {
++          sources += [ "tools/ganesh/gl/GLTestContext.cpp" ]
++          if (is_ios) {
++            sources +=
++                [ "tools/ganesh/gl/iOS/CreatePlatformGLTestContext_iOS.mm" ]
++            frameworks += [ "OpenGLES.framework" ]
++          } else if (is_mac) {
++            sources +=
++                [ "tools/ganesh/gl/mac/CreatePlatformGLTestContext_mac.cpp" ]
++          }
++          if (skia_use_angle) {
++            deps += [ "//third_party/angle2" ]
++            sources += [ "tools/ganesh/gl/angle/GLTestContext_angle.cpp" ]
++          }
++        }
++        if (skia_use_vulkan) {
++          sources += [ "tools/ganesh/vk/VkTestContext.h" ]
++          sources += [ "tools/ganesh/vk/VkTestContext.cpp" ]
++        }
++        if (skia_use_metal) {
++          sources += [ "tools/ganesh/mtl/MtlTestContext.mm" ]
++        }
++        if (skia_use_direct3d) {
++          sources += [
++            "tools/ganesh/d3d/D3DTestContext.cpp",
++            "tools/ganesh/d3d/D3DTestUtils.cpp",
++          ]
++        }
++      }
++      if (skia_enable_graphite) {
++        sources += [
++          "tools/graphite/ContextFactory.cpp",
++          "tools/graphite/ContextFactory.h",
++          "tools/graphite/GraphiteMemoryPipelineStorage.cpp",
++          "tools/graphite/GraphiteMemoryPipelineStorage.h",
++          "tools/graphite/GraphiteTestContext.cpp",
++          "tools/graphite/GraphiteTestContext.h",
++          "tools/graphite/GraphiteToolUtils.cpp",
++          "tools/graphite/GraphiteToolUtils.h",
++          "tools/graphite/PipelineCallbackHandler.cpp",
++          "tools/graphite/PipelineCallbackHandler.h",
++          "tools/graphite/ProtectedUtils_Graphite.cpp",
++          "tools/graphite/UniqueKeyUtils.cpp",
++          "tools/graphite/UniqueKeyUtils.h",
++        ]
++        if (skia_use_dawn) {
++          sources += [
++            "tools/graphite/dawn/GraphiteDawnTestContext.cpp",
++            "tools/graphite/dawn/GraphiteDawnTestContext.h",
++            "tools/graphite/dawn/GraphiteDawnToggles.cpp",
++            "tools/graphite/dawn/GraphiteDawnToggles.h",
++          ]
++        }
++        if (skia_use_metal) {
++          sources += [
++            "tools/graphite/mtl/GraphiteMtlTestContext.h",
++            "tools/graphite/mtl/GraphiteMtlTestContext.mm",
++          ]
++        }
++        if (skia_use_vulkan) {
++          sources += [
++            "tools/graphite/vk/GraphiteVulkanTestContext.cpp",
++            "tools/graphite/vk/GraphiteVulkanTestContext.h",
++          ]
++        }
++        if (skia_enable_precompile) {
++          sources += [
++            "tools/graphite/precompile/PrecompileEffectFactories.cpp",
++            "tools/graphite/precompile/PrecompileEffectFactories.h",
++          ]
++        }
++      }
++    }  # test_lib("gpu_tool_utils")
++  }
++
++  test_lib("flags") {
++    sources = [
++      "tools/flags/CommandLineFlags.cpp",
++      "tools/flags/CommandLineFlags.h",
++    ]
++  }
++
++  test_lib("common_flags_config") {
++    sources = [
++      "tools/flags/CommonFlags.h",
++      "tools/flags/CommonFlagsConfig.cpp",
++      "tools/flags/CommonFlagsConfig.h",
++    ]
++    deps = [ ":flags" ]
++  }
++  if (skia_enable_ganesh) {
++    test_lib("common_flags_ganesh") {
++      sources = [ "tools/flags/CommonFlagsGanesh.cpp" ]
++      deps = [ ":flags" ]
++      public_deps = [ ":gpu_tool_utils" ]
++    }
++  }
++  if (skia_enable_graphite) {
++    test_lib("common_flags_graphite") {
++      sources = [ "tools/flags/CommonFlagsGraphite.cpp" ]
++      deps = [ ":flags" ]
++      public_deps = [ ":gpu_tool_utils" ]
++    }
++  }
++  test_lib("common_flags_images") {
++    sources = [ "tools/flags/CommonFlagsImages.cpp" ]
++    deps = [ ":flags" ]
++  }
++
++  test_lib("trace") {
++    deps = [ ":flags" ]
++    sources = [
++      "tools/trace/ChromeTracingTracer.cpp",
++      "tools/trace/ChromeTracingTracer.h",
++      "tools/trace/EventTracingPriv.cpp",
++      "tools/trace/EventTracingPriv.h",
++      "tools/trace/SkDebugfTracer.cpp",
++      "tools/trace/SkDebugfTracer.h",
++    ]
++    if (skia_use_perfetto) {
++      deps += [ "//third_party/perfetto" ]
++      sources += [
++        "tools/trace/SkPerfettoTrace.cpp",
++        "tools/trace/SkPerfettoTrace.h",
++      ]
++      defines = [ "SK_USE_PERFETTO" ]
++    }
++  }
++
++  test_lib("tool_utils") {
++    sources = [
++      "tools/AndroidSkDebugToStdOut.cpp",
++      "tools/AutoreleasePool.h",
++      "tools/DecodeUtils.cpp",
++      "tools/DecodeUtils.h",
++      "tools/DeserialProcsUtils.cpp",
++      "tools/DeserialProcsUtils.h",
++      "tools/EncodeUtils.cpp",
++      "tools/EncodeUtils.h",
++      "tools/GpuToolUtils.h",
++      "tools/LsanSuppressions.cpp",
++      "tools/ProcStats.cpp",
++      "tools/ProcStats.h",
++      "tools/Resources.cpp",
++      "tools/Resources.h",
++      "tools/RuntimeBlendUtils.cpp",
++      "tools/RuntimeBlendUtils.h",
++      "tools/SkMetaData.cpp",
++      "tools/SkMetaData.h",
++      "tools/Stats.h",
++      "tools/TestFontDataProvider.cpp",
++      "tools/TestFontDataProvider.h",
++      "tools/ToolUtils.cpp",
++      "tools/ToolUtils.h",
++      "tools/TsanSuppressions.cpp",
++      "tools/UrlDataManager.cpp",
++      "tools/UrlDataManager.h",
++      "tools/debugger/DebugCanvas.cpp",
++      "tools/debugger/DebugCanvas.h",
++      "tools/debugger/DebugLayerManager.cpp",
++      "tools/debugger/DebugLayerManager.h",
++      "tools/debugger/DrawCommand.cpp",
++      "tools/debugger/DrawCommand.h",
++      "tools/debugger/JsonWriteBuffer.cpp",
++      "tools/debugger/JsonWriteBuffer.h",
++      "tools/fonts/FontToolUtils.cpp",
++      "tools/fonts/FontToolUtils.h",
++      "tools/fonts/RandomScalerContext.cpp",
++      "tools/fonts/RandomScalerContext.h",
++      "tools/fonts/TestEmptyTypeface.h",
++      "tools/fonts/TestFontMgr.cpp",
++      "tools/fonts/TestFontMgr.h",
++      "tools/fonts/TestSVGTypeface.cpp",
++      "tools/fonts/TestSVGTypeface.h",
++      "tools/fonts/TestTypeface.cpp",
++      "tools/fonts/TestTypeface.h",
++      "tools/sksltrace/SkSLTraceUtils.cpp",
++      "tools/sksltrace/SkSLTraceUtils.h",
++      "tools/text/SkTextBlobTrace.cpp",
++      "tools/text/SkTextBlobTrace.h",
++      "tools/timer/TimeUtils.h",
++      "tools/timer/Timer.cpp",
++      "tools/timer/Timer.h",
++    ]
++    if (skia_enable_svg) {
++      sources += [
++        "tools/SvgPathExtractor.cpp",
++        "tools/SvgPathExtractor.h",
++      ]
++    }
++    if (skia_use_libpng_decode) {
++      sources += [
++        "tools/MSKPPlayer.cpp",
++        "tools/MSKPPlayer.h",
++        "tools/SkSharingProc.cpp",
++        "tools/SkSharingProc.h",
++      ]
++    }
++
++    if (!is_canvaskit) {
++      sources += [ "tools/CrashHandler.cpp" ]
++    }
++    libs = []
++    frameworks = []
++    if (is_ios) {
++      sources += [ "tools/ios_utils.m" ]
++      sources += [ "tools/ios_utils.h" ]
++      sources += [ "tools/AutoreleasePool.mm" ]
++      frameworks += [ "Foundation.framework" ]
++    } else if (is_mac) {
++      sources += [ "tools/AutoreleasePool.mm" ]
++      frameworks += [ "Foundation.framework" ]
++    } else if (is_win && !skia_enable_winuwp) {
++      libs += [ "DbgHelp.lib" ]
++    }
++
++    defines = []
++    if (skia_tools_require_resources) {
++      defines += [ "SK_TOOLS_REQUIRE_RESOURCES" ]
++    }
++    deps = [ ":flags" ]
++    if (skia_enable_svg) {
++      deps += [ "modules/svg" ]
++    }
++    public_deps = [ "modules/jsonreader" ]
++    if (skia_enable_ganesh || skia_enable_graphite) {
++      public_deps += [ ":gpu_tool_utils" ]
++    }
++  }
++
++  test_lib("etc1") {
++    sources = [ "third_party/etc1/etc1.cpp" ]
++  }
++
++  import("gn/gm.gni")
++  test_lib("gm") {
++    sources = gm_sources
++    if (skia_use_gl) {
++      sources += gl_gm_sources
++    }
++    if (!skia_enable_ganesh) {
++      sources -= ganesh_gm_sources
++    }
++    if (!skia_enable_graphite) {
++      sources -= graphite_gm_sources
++    }
++    if (!skia_enable_ganesh && !skia_enable_graphite) {
++      sources -= gpu_gm_sources
++    }
++    if (skia_use_fontations) {
++      sources += fontations_gm_sources
++    }
++    deps = [
++      ":etc1",
++      ":flags",
++      ":skia",
++      ":tool_utils",
++      "modules/skottie",
++      "modules/skottie:gm",
++      "modules/skparagraph",
++      "modules/skparagraph:gm",
++      "modules/skresources",
++      "modules/skshaper",
++    ]
++    if (is_skia_dev_build) {
++      sources += [ "gm/fiddle.cpp" ]
++      deps += [ ":skia.h" ]
++    }
++    if (skia_enable_graphite || skia_enable_ganesh) {
++      public_deps = [ ":gpu_tool_utils" ]
++    }
++
++    if (skia_use_ffmpeg) {
++      deps += [ "experimental/ffmpeg:video_decoder" ]
++      sources += [ "gm/video_decoder.cpp" ]
++    }
++  }
++
++  test_lib("test") {
++    sources = [
++      "tests/ComparePixels.cpp",
++      "tests/ComparePixels.h",
++      "tests/CtsEnforcement.cpp",
++      "tests/Test.cpp",
++      "tests/Test.h",
++      "tests/TestHarness.cpp",
++      "tests/TestHarness.h",
++    ]
++    deps = [
++      ":flags",
++      ":skia",
++      ":tool_utils",
++    ]
++    if (skia_enable_graphite || skia_enable_ganesh) {
++      public_deps = [
++        ":gpu_tool_utils",  # Test.h #includes headers from this target.
++      ]
++    }
++    if (skia_enable_ganesh) {
++      sources += [
++        "tests/ganesh/GaneshTestUtils.cpp",
++        "tests/ganesh/GaneshTestUtils.h",
++      ]
++    }
++  }
++
++  if (skia_enable_graphite || skia_enable_ganesh) {
++    import("gn/tests.gni")
++    test_lib("tests") {
++      sources = tests_sources + pathops_tests_sources
++      frameworks = []
++      if (skia_use_metal) {
++        cflags_objcc = [ "-fobjc-arc" ]
++        frameworks += [ "MetalKit.framework" ]
++      }
++      if (skia_use_jpeg_gainmaps) {
++        sources += jpeg_gainmap_tests_sources
++      }
++      if (skia_enable_graphite) {
++        sources += graphite_tests_sources
++        if (skia_enable_sparse_strips) {
++          sources += sparse_strips_test_sources
++        }
++        if (skia_use_dawn) {
++          sources += graphite_dawn_tests_sources
++        }
++        if (skia_use_metal) {
++          sources += graphite_metal_tests_sources
++        }
++        if (skia_use_vulkan) {
++          sources += graphite_vulkan_tests_sources
++        }
++      }
++      if (skia_enable_ganesh) {
++        sources += ganesh_tests_sources
++        if (skia_use_metal) {
++          sources += ganesh_metal_tests_sources
++        }
++        if (skia_use_gl) {
++          sources += ganesh_gl_tests_sources
++        }
++        if (skia_use_vulkan) {
++          sources += skia_gpu_vk_chromium_public
++          sources += skia_gpu_vk_chromium_private
++        }
++      }
++      if (skia_enable_precompile) {
++        sources += precompile_tests_sources
++      }
++      deps = [
++        ":bmp_decode_rust_tests",
++        ":flags",
++        ":fontmgr_FontConfigInterface_tests",
++        ":fontmgr_android_tests",
++        ":fontmgr_fontconfig_tests",
++        ":fontmgr_mac_ct_tests",
++        ":fontscanner_tests",
++        ":png_decode_libpng_tests",
++        ":png_decode_rust_tests",
++        ":png_encode_rust_tests",
++        ":rust_exif_tests",
++        ":rust_icc_tests",
++        ":skia",
++        ":test",
++        ":tool_utils",
++        ":typeface_fontations_tests",
++        "modules/bentleyottmann:tests",
++        "modules/skottie:tests",
++        "modules/skparagraph:tests",
++        "modules/sksg:tests",
++        "modules/skshaper",
++        "modules/skshaper:tests",
++        "modules/skunicode:tests",
++        "modules/svg:tests",
++        "//src/partition_alloc:raw_ptr",
++        "//third_party/libpng",
++        "//third_party/libwebp",
++        "//third_party/zlib",
++      ]
++    }
++  }
++
++  if (skia_enable_ganesh) {
++    import("gn/bench.gni")
++    test_lib("bench") {
++      sources = bench_sources
++      if (skia_enable_graphite) {
++        sources += graphite_bench_sources
++        if (skia_enable_sparse_strips) {
++          sources += sparse_strips_bench_sources
++        }
++      }
++      if (!skia_enable_ganesh) {
++        sources -= ganesh_bench_sources
++      }
++      deps = [
++        ":flags",
++        ":gm",
++        ":gpu_tool_utils",
++        ":skia",
++        ":tool_utils",
++        "modules/skparagraph:bench",
++        "modules/skshaper",
++      ]
++    }
++  }
++
++  if ((is_linux || is_mac || skia_enable_optimize_size) &&
++      skia_enable_tools_that_might_need_ganesh) {
++    if (skia_enable_skottie) {
++      test_app("skottie_tool") {
++        deps = [ "modules/skottie:tool" ]
++      }
++      test_app("skottie_tool_cpu") {
++        deps = [ "modules/skottie:tool_cpu" ]
++      }
++      test_app("skottie_tool_gpu") {
++        deps = [ "modules/skottie:tool_gpu" ]
++      }
++      test_app("skottie_preshape_tool") {
++        deps = [ "modules/skottie:preshape_tool" ]
++      }
++    }
++    if (skia_enable_svg && skia_use_expat && defined(is_skia_standalone)) {
++      test_app("svg_tool") {
++        deps = [ "modules/svg:tool" ]
++      }
++    }
++  }
++
++  test_lib("hash_and_encode") {
++    sources = [
++      "tools/HashAndEncode.cpp",
++      "tools/HashAndEncode.h",
++    ]
++    deps = [
++      ":flags",
++      ":skia",
++      "//third_party/libpng",
++    ]
++  }
++  if (!is_canvaskit) {
++    if (skia_enable_tools_that_might_need_ganesh) {
++      test_app("convert-to-nia") {
++        sources = [ "tools/convert-to-nia.cpp" ]
++        deps = [ ":skia" ]
++      }
++      test_app("imgcvt") {
++        sources = [ "tools/imgcvt.cpp" ]
++        configs = [ ":use_skia_vulkan_headers" ]
++        deps = [
++          ":skia",
++          "modules/skcms",
++        ]
++      }
++    }
++    if (skia_enable_graphite || skia_enable_ganesh) {
++      test_app("dm") {
++        sources = [
++          "dm/DM.cpp",
++          "dm/DMGpuTestProcs.cpp",
++          "dm/DMJsonWriter.cpp",
++          "dm/DMJsonWriter.h",
++          "dm/DMSrcSink.cpp",
++          "dm/DMSrcSink.h",
++        ]
++        deps = [
++          ":common_flags_config",
++          ":common_flags_images",
++          ":compile_all_sksl_tests",
++          ":flags",
++          ":gm",
++          ":gpu_tool_utils",
++          ":hash_and_encode",
++          ":skia",
++          ":tests",
++          ":tool_utils",
++          ":trace",
++          "modules/skottie",
++          "modules/skottie:utils",
++          "modules/skshaper",
++          "modules/skunicode",
++        ]
++        if (skia_use_libpng_decode) {
++          deps += [ "modules/svg" ]
++        }
++        if (skia_enable_graphite) {
++          deps += [ ":common_flags_graphite" ]
++        }
++        if (skia_enable_ganesh) {
++          deps += [ ":common_flags_ganesh" ]
++        }
++        if (skia_use_partition_alloc) {
++          deps += [ "tools/partition_alloc:test_support" ]
++        }
++      }
++    }
++    test_app("filterfuzz") {
++      sources = [ "experimental/filterfuzz/filterfuzz.cpp" ]
++      deps = [
++        ":flags",
++        ":skia",
++        ":tool_utils",
++      ]
++    }
++
++    if (!skia_enable_optimize_size && !skia_use_fontations &&
++        !skia_use_rust_png_decode && !skia_use_rust_png_encode &&
++        !skia_use_rust_bmp_decode && !skia_enable_vello_shaders) {
++      # optional separate library to dlopen when running CanvasStateTests.
++      # currently does not link in the presence of rust
++      skia_shared_library("canvas_state_lib") {
++        sources = [
++          "tests/CanvasStateHelpers.cpp",
++          "tests/CanvasStateHelpers.h",
++        ]
++        deps = [ ":skia" ]
++      }
++    }
++  }
++
++  if (!is_win && skia_enable_tools_that_might_need_ganesh) {
++    test_app("blob_cache_sim") {
++      sources = [ "tools/blob_cache_sim.cpp" ]
++      deps = [
++        ":skia",
++        ":tool_utils",
++      ]
++    }
++  }
++
++  if (skia_use_libpng_decode && skia_enable_tools_that_might_need_ganesh) {
++    test_app("nanobench") {
++      sources = [
++        "bench/nanobench.cpp",
++        "bench/nanobench.h",
++      ]
++      deps = [
++        ":bench",
++        ":common_flags_config",
++        ":common_flags_ganesh",
++        ":common_flags_images",
++        ":flags",
++        ":gm",
++        ":gpu_tool_utils",
++        ":skia",
++        ":tool_utils",
++        ":trace",
++        "modules/skparagraph",
++        "modules/skshaper",
++        "modules/skunicode",
++        "modules/svg",
++      ]
++      if (skia_enable_graphite) {
++        deps += [ ":common_flags_graphite" ]
++      }
++      if (skia_use_pprof) {
++        # https://packages.debian.org/trixie/libgoogle-perftools-dev
++        libs = [
++          "profiler",
++          "tcmalloc",
++        ]
++        defines = [ "SK_USE_PPROF" ]
++      }
++      if (skia_use_partition_alloc) {
++        deps += [ "tools/partition_alloc:test_support" ]
++      }
++    }
++  }
++
++  test_app("skpinfo") {
++    sources = [ "tools/skpinfo.cpp" ]
++    configs = [ ":use_skia_vulkan_headers" ]
++    deps = [
++      ":flags",
++      ":skia",
++    ]
++  }
++
++  if (skia_enable_tools_that_might_need_ganesh) {
++    if (skia_use_ffmpeg) {
++      test_app("skottie2movie") {
++        sources = [ "tools/skottie2movie.cpp" ]
++        deps = [
++          ":flags",
++          ":gpu_tool_utils",
++          ":skia",
++          "experimental/ffmpeg:video_encoder",
++          "modules/skottie",
++          "modules/skottie:utils",
++        ]
++      }
++    }
++
++    if (skia_use_libpng_decode) {
++      test_app("skpbench") {
++        sources = [
++          "bench/BigPath.cpp",
++          "tools/skpbench/skpbench.cpp",
++        ]
++        deps = [
++          ":common_flags_config",
++          ":common_flags_ganesh",
++          ":flags",
++          ":gpu_tool_utils",
++          ":skia",
++          ":tool_utils",
++        ]
++      }
++    }
++
++    if (is_linux && skia_use_icu) {
++      test_app("sktexttopdf") {
++        sources = [ "tools/using_skia_and_harfbuzz.cpp" ]
++        deps = [
++          ":skia",
++          "modules/skshaper",
++        ]
++      }
++    }
++
++    if (is_linux || is_mac) {
++      test_app("create_test_font") {
++        sources = [ "tools/fonts/create_test_font.cpp" ]
++        deps = [ ":skia" ]
++        assert_no_deps = [
++          # tool_utils requires the output of this app.
++          ":tool_utils",
++        ]
++      }
++    }
++
++    if (skia_use_expat) {
++      test_app("create_test_font_color") {
++        sources = [ "tools/fonts/create_test_font_color.cpp" ]
++        deps = [
++          ":flags",
++          ":skia",
++          ":tool_utils",
++          "//modules/svg",
++        ]
++      }
++    }
++
++    test_app("get_images_from_skps") {
++      sources = [ "tools/get_images_from_skps.cpp" ]
++      deps = [
++        ":flags",
++        ":skia",
++      ]
++    }
++
++    test_app("fuzz") {
++      sources = [
++        "fuzz/Fuzz.cpp",
++        "fuzz/Fuzz.h",
++        "fuzz/FuzzCanvas.cpp",
++        "fuzz/FuzzCanvasHelpers.cpp",
++        "fuzz/FuzzCanvasHelpers.h",
++        "fuzz/FuzzCommon.cpp",
++        "fuzz/FuzzCommon.h",
++        "fuzz/FuzzCreateDDL.cpp",
++        "fuzz/FuzzCubicRoots.cpp",
++        "fuzz/FuzzDDLThreading.cpp",
++        "fuzz/FuzzDrawFunctions.cpp",
++        "fuzz/FuzzEncoders.cpp",
++        "fuzz/FuzzGrStyledShape.cpp",
++        "fuzz/FuzzGradients.cpp",
++        "fuzz/FuzzMain.cpp",
++        "fuzz/FuzzParsePath.cpp",
++        "fuzz/FuzzPathMeasure.cpp",
++        "fuzz/FuzzPathop.cpp",
++        "fuzz/FuzzPolyUtils.cpp",
++        "fuzz/FuzzQuadRoots.cpp",
++        "fuzz/FuzzRegionOp.cpp",
++        "fuzz/FuzzSkParagraph.cpp",
++        "fuzz/FuzzTriangulation.cpp",
++        "fuzz/oss_fuzz/FuzzAndroidCodec.cpp",
++        "fuzz/oss_fuzz/FuzzAnimatedImage.cpp",
++        "fuzz/oss_fuzz/FuzzCOLRv1.cpp",
++        "fuzz/oss_fuzz/FuzzColorspace.cpp",
++        "fuzz/oss_fuzz/FuzzHdrAgtm.cpp",
++        "fuzz/oss_fuzz/FuzzImage.cpp",
++        "fuzz/oss_fuzz/FuzzImageFilterDeserialize.cpp",
++        "fuzz/oss_fuzz/FuzzIncrementalImage.cpp",
++        "fuzz/oss_fuzz/FuzzJSON.cpp",
++        "fuzz/oss_fuzz/FuzzParsePath.cpp",
++        "fuzz/oss_fuzz/FuzzPathDeserialize.cpp",
++        "fuzz/oss_fuzz/FuzzRegionDeserialize.cpp",
++        "fuzz/oss_fuzz/FuzzRegionSetPath.cpp",
++        "fuzz/oss_fuzz/FuzzSKP.cpp",
++        "fuzz/oss_fuzz/FuzzSKSL2GLSL.cpp",
++        "fuzz/oss_fuzz/FuzzSKSL2Metal.cpp",
++        "fuzz/oss_fuzz/FuzzSKSL2Pipeline.cpp",
++        "fuzz/oss_fuzz/FuzzSKSL2SPIRV.cpp",
++        "fuzz/oss_fuzz/FuzzSKSL2WGSL.cpp",
++        "fuzz/oss_fuzz/FuzzSVG.cpp",
++        "fuzz/oss_fuzz/FuzzSkDescriptorDeserialize.cpp",
++        "fuzz/oss_fuzz/FuzzSkMeshSpecification.cpp",
++        "fuzz/oss_fuzz/FuzzSkParagraph.cpp",
++        "fuzz/oss_fuzz/FuzzSkRuntimeBlender.cpp",
++        "fuzz/oss_fuzz/FuzzSkRuntimeColorFilter.cpp",
++        "fuzz/oss_fuzz/FuzzSkRuntimeEffect.cpp",
++        "fuzz/oss_fuzz/FuzzTextBlobDeserialize.cpp",
++        "tools/UrlDataManager.cpp",
++        "tools/debugger/DebugCanvas.cpp",
++        "tools/debugger/DebugLayerManager.cpp",
++        "tools/debugger/DrawCommand.cpp",
++        "tools/debugger/JsonWriteBuffer.cpp",
++        "tools/fonts/FontToolUtils.cpp",
++      ]
++
++      if (skia_enable_graphite && skia_enable_precompile) {
++        sources += [ "fuzz/FuzzPrecompile.cpp" ]
++      }
++      if (skia_use_rust_bmp_decode) {
++        sources += [ "fuzz/oss_fuzz/FuzzBMPRustDecoder.cpp" ]
++      }
++      deps = [
++        ":flags",
++        ":gpu_tool_utils",
++        ":skia",
++        "modules/jsonreader",
++        "modules/skottie:fuzz",
++        "modules/skparagraph",
++        "modules/svg",
++      ]
++      if (skia_use_rust_bmp_decode) {
++        deps += [ ":bmp_decode_rust" ]
++      }
++    }
++
++    test_app("dump_record") {
++      sources = [ "tools/dump_record.cpp" ]
++      deps = [
++        ":flags",
++        ":skia",
++      ]
++    }
++
++    if (skia_use_libpng_decode) {
++      test_app("skdiff") {
++        sources = [
++          "tools/skdiff/skdiff.cpp",
++          "tools/skdiff/skdiff_html.cpp",
++          "tools/skdiff/skdiff_main.cpp",
++          "tools/skdiff/skdiff_utils.cpp",
++        ]
++        deps = [ ":skia" ]
++      }
++
++      test_app("skp_parser") {
++        sources = [ "tools/skp_parser.cpp" ]
++        deps = [
++          ":skia",
++          ":tool_utils",
++        ]
++      }
++    }
++
++    if (!is_win) {
++      source_set("skqp_lib") {  # Not a skia_source_set
++        check_includes = false
++        testonly = true
++        public_configs = [ ":skia_private" ]
++        sources = [
++          "tools/skqp/src/skqp.cpp",
++          "tools/skqp/src/skqp.h",
++          "tools/skqp/src/skqp_GpuTestProcs.cpp",
++        ]
++        deps = [
++          ":gm",
++          ":skia",
++          ":tests",
++          ":tool_utils",
++        ]
++      }
++      if (skia_use_libpng_decode) {
++        test_app("skqp") {
++          sources = [ "tools/skqp/src/skqp_main.cpp" ]
++          include_dirs = [ "//" ]
++          lib_dirs = []
++          deps = [ ":skqp_lib" ]
++        }
++      }
++    }
++    if (is_android) {
++      shared_library("libskqp_jni") {  # Not a skia_shared_library
++        configs += [ ":skia_private" ]
++        testonly = true
++        sources = [ "tools/skqp/src/jni_skqp.cpp" ]
++        deps = [
++          ":skia",
++          ":skqp_lib",
++          ":tool_utils",
++        ]
++        libs = [ "android" ]
++      }
++    }
++    if (is_android && skia_use_gl) {
++      test_app("skottie_android") {
++        is_shared_library = true
++
++        sources = [ "platform_tools/android/apps/skottie/skottielib/src/main/cpp/native-lib.cpp" ]
++        libs = []
++
++        deps = [
++          ":skia",
++          "modules/skottie",
++          "modules/skshaper",
++          "modules/skunicode",
++        ]
++      }
++    }
++
++    if (is_ios && skia_enable_skottie) {
++      group("skottie_ios") {
++        deps = [ "tools/skottie_ios_app" ]
++      }
++    }
++  }
++
++  test_lib("sk_app") {
++    public_deps = [ ":skia" ]
++    sources = [
++      "tools/sk_app/Application.h",
++      "tools/sk_app/CommandSet.cpp",
++      "tools/sk_app/CommandSet.h",
++      "tools/sk_app/Window.cpp",
++      "tools/sk_app/Window.h",
++    ]
++    libs = []
++    frameworks = []
++
++    if (skia_enable_graphite || skia_enable_ganesh) {
++      public_deps += [ ":gpu_tool_utils" ]
++    }
++
++    if (is_android) {
++      sources += [
++        "tools/sk_app/android/Window_android.cpp",
++        "tools/sk_app/android/Window_android.h",
++        "tools/sk_app/android/main_android.cpp",
++        "tools/sk_app/android/surface_glue_android.cpp",
++        "tools/sk_app/android/surface_glue_android.h",
++      ]
++      libs += [ "android" ]
++    } else if (is_linux) {
++      sources += [
++        "tools/sk_app/unix/Window_unix.cpp",
++        "tools/sk_app/unix/Window_unix.h",
++        "tools/sk_app/unix/keysym2ucs.c",
++        "tools/sk_app/unix/keysym2ucs.h",
++        "tools/sk_app/unix/main_unix.cpp",
++      ]
++      libs += [
++        "GL",  # Used by raster window context, so cannot be behind skia_use_gl.
++        "X11",
++      ]
++    } else if (is_win) {
++      sources += [
++        "tools/sk_app/win/Window_win.cpp",
++        "tools/sk_app/win/Window_win.h",
++        "tools/sk_app/win/main_win.cpp",
++      ]
++    } else if (is_mac) {
++      sources += [
++        "tools/sk_app/mac/Window_mac.h",
++        "tools/sk_app/mac/Window_mac.mm",
++        "tools/sk_app/mac/main_mac.mm",
++      ]
++      frameworks += [
++        "QuartzCore.framework",
++        "Cocoa.framework",
++        "Foundation.framework",
++      ]
++    } else if (is_ios) {
++      sources += [
++        "tools/sk_app/ios/Window_ios.h",
++        "tools/sk_app/ios/Window_ios.mm",
++        "tools/sk_app/ios/main_ios.mm",
++      ]
++      frameworks += [ "QuartzCore.framework" ]
++    }
++
++    deps = [
++      ":tool_utils",
++      "tools/window",
++    ]
++    if (is_android) {
++      deps += [ "//third_party/native_app_glue" ]
++    }
++    if (skia_use_gl && skia_use_angle) {
++      deps += [ "//third_party/angle2" ]
++    }
++  }
++
++  # viewer requires at least one of Ganesh or Graphite. Raster is presented via Ganesh and
++  # therefore cannot stand alone.
++  if (skia_enable_ganesh || skia_enable_graphite) {
++    test_app("viewer") {
++      is_shared_library = is_android
++      sources = [
++        "tools/viewer/3DSlide.cpp",
++        "tools/viewer/AndroidShadowsSlide.cpp",
++        "tools/viewer/AnimBlurSlide.cpp",
++        "tools/viewer/AnimTimer.h",
++        "tools/viewer/AnimatedImageSlide.cpp",
++        "tools/viewer/AnimatedImageSlide.h",
++        "tools/viewer/AnimatedRectsSlide.cpp",
++        "tools/viewer/AnimatedTextSlide.cpp",
++        "tools/viewer/ArcSlide.cpp",
++        "tools/viewer/AtlasSlide.cpp",
++        "tools/viewer/AudioSlide.cpp",
++        "tools/viewer/BisectSlide.cpp",
++        "tools/viewer/BisectSlide.h",
++        "tools/viewer/CameraSlide.cpp",
++        "tools/viewer/CaptureSlide.cpp",
++        "tools/viewer/CaptureSlide.h",
++        "tools/viewer/ChartSlide.cpp",
++        "tools/viewer/ChineseFlingSlide.cpp",
++        "tools/viewer/ClickHandlerSlide.cpp",
++        "tools/viewer/ClickHandlerSlide.h",
++        "tools/viewer/ClipSlide.cpp",
++        "tools/viewer/ClockSlide.cpp",
++        "tools/viewer/CowboySlide.cpp",
++        "tools/viewer/DegenerateQuadsSlide.cpp",
++        "tools/viewer/DegenerateTwoPtRadialsSlide.cpp",
++        "tools/viewer/EdgeBuilderVizSlide.cpp",
++        "tools/viewer/FatBitsSlide.cpp",
++        "tools/viewer/FilterBoundsSlide.cpp",
++        "tools/viewer/FitCubicToCircleSlide.cpp",
++        "tools/viewer/FlutterAnimateSlide.cpp",
++        "tools/viewer/GMSlide.cpp",
++        "tools/viewer/GMSlide.h",
++        "tools/viewer/GlyphTransformSlide.cpp",
++        "tools/viewer/GradientsSlide.cpp",
++        "tools/viewer/GraphitePrimitivesSlide.cpp",
++        "tools/viewer/ImGuiLayer.cpp",
++        "tools/viewer/ImGuiLayer.h",
++        "tools/viewer/ImageFilterDAGSlide.cpp",
++        "tools/viewer/ImageSlide.cpp",
++        "tools/viewer/ImageSlide.h",
++        "tools/viewer/LayersSlide.cpp",
++        "tools/viewer/ManyRectsSlide.cpp",
++        "tools/viewer/MaterialShadowsSlide.cpp",
++        "tools/viewer/MegaStrokeSlide.cpp",
++        "tools/viewer/MeshGradientSlide.cpp",
++        "tools/viewer/MeshSlide.cpp",
++        "tools/viewer/MixerSlide.cpp",
++        "tools/viewer/MotionMarkSlide.cpp",
++        "tools/viewer/PatchSlide.cpp",
++        "tools/viewer/PathClipSlide.cpp",
++        "tools/viewer/PathEffectsSlide.cpp",
++        "tools/viewer/PathLerpSlide.cpp",
++        "tools/viewer/PathOverstrokeSlide.cpp",
++        "tools/viewer/PathSlide.cpp",
++        "tools/viewer/PathTessellatorsSlide.cpp",
++        "tools/viewer/PathTextSlide.cpp",
++        "tools/viewer/ProtectedSlide.cpp",
++        "tools/viewer/QuadStrokerSlide.cpp",
++        "tools/viewer/RasterPipelineVizSlide.cpp",
++        "tools/viewer/RectanizerSlide.cpp",
++        "tools/viewer/RepeatTileSlide.cpp",
++        "tools/viewer/SBIXSlide.cpp",
++        "tools/viewer/SGSlide.cpp",
++        "tools/viewer/SKPSlide.cpp",
++        "tools/viewer/SKPSlide.h",
++        "tools/viewer/SVGFileSlide.cpp",
++        "tools/viewer/ShadowColorSlide.cpp",
++        "tools/viewer/ShadowReferenceSlide.cpp",
++        "tools/viewer/ShadowUtilsSlide.cpp",
++        "tools/viewer/ShipSlide.cpp",
++        "tools/viewer/SimpleStrokerSlide.cpp",
++        "tools/viewer/SkSLDebuggerSlide.cpp",
++        "tools/viewer/SkSLDebuggerSlide.h",
++        "tools/viewer/SkSLSlide.cpp",
++        "tools/viewer/SkSLSlide.h",
++        "tools/viewer/SkottieSlide.cpp",
++        "tools/viewer/SkottieSlide.h",
++        "tools/viewer/Slide.h",
++        "tools/viewer/SlideDir.cpp",
++        "tools/viewer/SlideDir.h",
++        "tools/viewer/SlidesSlide.cpp",
++        "tools/viewer/StatsLayer.cpp",
++        "tools/viewer/StatsLayer.h",
++        "tools/viewer/StringArtSlide.cpp",
++        "tools/viewer/StrokeVerbSlide.cpp",
++        "tools/viewer/SvgSlide.cpp",
++        "tools/viewer/SvgSlide.h",
++        "tools/viewer/TextBoxSlide.cpp",
++        "tools/viewer/TextureUploadSlide.cpp",
++        "tools/viewer/ThinAASlide.cpp",
++        "tools/viewer/TimingSlide.cpp",
++        "tools/viewer/TouchGesture.cpp",
++        "tools/viewer/TouchGesture.h",
++        "tools/viewer/TypefaceSlide.cpp",
++        "tools/viewer/VariableWidthStrokerSlide.cpp",
++        "tools/viewer/Viewer.cpp",
++        "tools/viewer/Viewer.h",
++        "tools/viewer/XferSlide.cpp",
++        "tools/viewer/ZoomInSlide.cpp",
++        "tools/viewer/ZoomInSlide.h",
++      ]
++      libs = []
++
++      deps = [
++        ":common_flags_config",
++        ":flags",
++        ":gm",
++        ":sk_app",
++        ":skia",
++        ":tool_utils",
++        ":trace",
++        ":xml",
++        "modules/audioplayer",
++        "modules/skottie",
++        "modules/skottie:utils",
++        "modules/skparagraph:slides",
++        "modules/skresources",
++        "modules/sksg:slides",
++        "modules/skshaper",
++        "modules/skunicode",
++        "//third_party/delaunator",
++        "//third_party/imgui",
++      ]
++      if (skia_use_libpng_decode) {
++        deps += [ "modules/svg" ]
++
++        sources += [
++          "tools/viewer/MSKPSlide.cpp",
++          "tools/viewer/MSKPSlide.h",
++        ]
++      }
++      if (skia_use_vulkan) {
++        deps += [
++          "//third_party/externals/spirv-tools:spvtools",
++
++          #spvtools depends on this but doesn't deps it in.
++          "//third_party/externals/spirv-tools:spvtools_val",
++        ]
++      }
++      if (skia_enable_ganesh) {
++        deps += [
++          ":common_flags_ganesh",
++          ":gpu_tool_utils",
++        ]
++      }
++      if (skia_enable_graphite) {
++        deps += [
++          ":common_flags_graphite",
++          ":gpu_tool_utils",
++        ]
++      }
++    }
++  }
++
++  if (skia_enable_tools_that_might_need_ganesh) {
++    if (skia_use_vulkan) {
++      test_app("VulkanBasic") {
++        # Bots and even devs may not have Vulkan headers, so put
++        # include/third_party/vulkan on our path so they're always available.
++        all_dependent_configs = [
++          ":use_skia_vulkan_headers",
++          ":vulkan_memory_allocator",
++        ]
++
++        sources = [ "example/VulkanBasic.cpp" ]
++        sources += [ "tools/gpu/vk/VkTestMemoryAllocator.h" ]
++        sources += [ "tools/gpu/vk/VkTestMemoryAllocator.cpp" ]
++        sources += [ "tools/gpu/vk/VkTestUtils.h" ]
++        sources += [ "tools/gpu/vk/VkTestUtils.cpp" ]
++        deps = [
++          ":load_dynamic_library",
++          ":skia",
++        ]
++      }
++    }
++
++    if (is_ios && skia_use_metal && skia_enable_ganesh) {
++      group("minimal_ios_mtl_skia_app") {
++        deps = [ "experimental/minimal_ios_mtl_skia_app" ]
++      }
++    }
++
++    if (is_linux || is_win || is_mac) {
++      test_app("editor") {
++        is_shared_library = is_android
++        deps = [ "modules/skplaintexteditor:editor_app" ]
++      }
++    }
++
++    skia_executable("image_diff_metric") {
++      sources = [ "tools/image_diff_metric.cpp" ]
++      deps = [ ":skia" ]
++    }
++
++    group("modules_testonly") {
++      testonly = true
++      deps = []
++      if (is_canvaskit) {
++        deps += [ "modules/canvaskit:viewer_wasm" ]
++      }
++    }
++  }
++}
++
++if (skia_build_fuzzers) {
++  assert(is_clang)
++  template("libfuzzer_app") {
++    skia_executable(target_name) {
++      output_dir = root_build_dir
++      check_includes = false
++      forward_variables_from(invoker, "*", [ "is_shared_library" ])
++      if (!defined(configs)) {
++        configs = []
++      }
++      configs += [ ":skia_private" ]
++      sources += [
++        "fuzz/Fuzz.cpp",
++        "fuzz/FuzzCommon.cpp",
++      ]
++      deps += [
++        ":flags",
++        ":skia",
++        ":tool_utils",
++      ]
++      defines = [ "SK_BUILD_FOR_LIBFUZZER" ]
++
++      # oss-fuzz will set this engine itself when building and we don't want a
++      # conflict (e.g. both libfuzzer and centipede)
++      if (skia_provide_default_fuzz_engine) {
++        cflags = [ "-fsanitize=fuzzer" ]
++        ldflags = [ "-fsanitize=fuzzer" ]
++      }
++      testonly = true
++    }
++  }
++
++  libfuzzer_app("region_deserialize") {
++    sources = [ "fuzz/oss_fuzz/FuzzRegionDeserialize.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("image_filter_deserialize") {
++    sources = [ "fuzz/oss_fuzz/FuzzImageFilterDeserialize.cpp" ]
++    deps = [ "modules/svg" ]
++  }
++
++  libfuzzer_app("region_set_path") {
++    sources = [ "fuzz/oss_fuzz/FuzzRegionSetPath.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("textblob_deserialize") {
++    sources = [ "fuzz/oss_fuzz/FuzzTextBlobDeserialize.cpp" ]
++    deps = [ "modules/svg" ]
++  }
++
++  libfuzzer_app("path_deserialize") {
++    sources = [ "fuzz/oss_fuzz/FuzzPathDeserialize.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("image_decode") {
++    sources = [ "fuzz/oss_fuzz/FuzzImage.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("animated_image_decode") {
++    sources = [ "fuzz/oss_fuzz/FuzzAnimatedImage.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("api_create_ddl") {
++    sources = [
++      "fuzz/FuzzCreateDDL.cpp",
++      "fuzz/oss_fuzz/FuzzAPICreateDDL.cpp",
++    ]
++    deps = [
++      "modules/svg",
++      "//third_party/libpng",
++    ]
++  }
++
++  libfuzzer_app("api_draw_functions") {
++    sources = [
++      "fuzz/FuzzDrawFunctions.cpp",
++      "fuzz/oss_fuzz/FuzzDrawFunctions.cpp",
++    ]
++    deps = []
++  }
++
++  libfuzzer_app("api_ddl_threading") {
++    sources = [
++      "fuzz/FuzzDDLThreading.cpp",
++      "fuzz/oss_fuzz/FuzzDDLThreading.cpp",
++    ]
++    deps = []
++  }
++
++  libfuzzer_app("api_gradients") {
++    sources = [
++      "fuzz/FuzzGradients.cpp",
++      "fuzz/oss_fuzz/FuzzGradients.cpp",
++    ]
++    deps = []
++  }
++
++  libfuzzer_app("api_image_filter") {
++    sources = [
++      "fuzz/FuzzCanvas.cpp",
++      "fuzz/FuzzCanvasHelpers.cpp",
++      "fuzz/FuzzCanvasHelpers.h",
++      "fuzz/oss_fuzz/FuzzAPIImageFilter.cpp",
++    ]
++    deps = [ "//third_party/libpng" ]
++  }
++
++  libfuzzer_app("api_path_measure") {
++    sources = [
++      "fuzz/FuzzPathMeasure.cpp",
++      "fuzz/oss_fuzz/FuzzPathMeasure.cpp",
++    ]
++    deps = []
++  }
++
++  libfuzzer_app("api_pathop") {
++    sources = [
++      "fuzz/FuzzPathop.cpp",
++      "fuzz/oss_fuzz/FuzzPathop.cpp",
++    ]
++    deps = []
++  }
++
++  libfuzzer_app("api_triangulation") {
++    sources = [
++      "fuzz/FuzzTriangulation.cpp",
++      "fuzz/oss_fuzz/FuzzTriangulation.cpp",
++    ]
++    deps = []
++  }
++
++  libfuzzer_app("api_raster_n32_canvas") {
++    sources = [
++      "fuzz/FuzzCanvas.cpp",
++      "fuzz/FuzzCanvasHelpers.cpp",
++      "fuzz/FuzzCanvasHelpers.h",
++      "fuzz/oss_fuzz/FuzzRasterN32Canvas.cpp",
++    ]
++    deps = [
++      "modules/svg",
++      "//third_party/libpng",
++    ]
++  }
++
++  libfuzzer_app("api_regionop") {
++    sources = [
++      "fuzz/FuzzRegionOp.cpp",
++      "fuzz/oss_fuzz/FuzzRegionOp.cpp",
++    ]
++    deps = []
++  }
++
++  if (skia_enable_ganesh) {
++    libfuzzer_app("api_mock_gpu_canvas") {
++      sources = [
++        "fuzz/FuzzCanvas.cpp",
++        "fuzz/FuzzCanvasHelpers.cpp",
++        "fuzz/FuzzCanvasHelpers.h",
++        "fuzz/oss_fuzz/FuzzMockGPUCanvas.cpp",
++      ]
++      deps = [
++        ":gpu_tool_utils",
++        "modules/svg",
++        "//third_party/libpng",
++      ]
++    }
++  }
++
++  if (skia_enable_graphite && skia_enable_precompile) {
++    libfuzzer_app("api_precompile") {
++      sources = [
++        "fuzz/FuzzPrecompile.cpp",
++        "fuzz/oss_fuzz/FuzzPrecompile.cpp",
++      ]
++      deps = [ ":gpu_tool_utils" ]
++    }
++  }
++
++  libfuzzer_app("api_null_canvas") {
++    sources = [
++      "fuzz/FuzzCanvas.cpp",
++      "fuzz/FuzzCanvasHelpers.cpp",
++      "fuzz/FuzzCanvasHelpers.h",
++      "fuzz/oss_fuzz/FuzzNullCanvas.cpp",
++    ]
++    deps = [
++      "modules/svg",
++      "//third_party/libpng",
++    ]
++  }
++
++  libfuzzer_app("api_skparagraph") {
++    sources = [
++      "fuzz/FuzzSkParagraph.cpp",
++      "fuzz/oss_fuzz/FuzzSkParagraph.cpp",
++    ]
++    deps = [ "modules/skparagraph" ]
++  }
++
++  libfuzzer_app("api_svg_canvas") {
++    sources = [
++      "fuzz/FuzzCanvas.cpp",
++      "fuzz/FuzzCanvasHelpers.cpp",
++      "fuzz/FuzzCanvasHelpers.h",
++      "fuzz/oss_fuzz/FuzzAPISVGCanvas.cpp",
++    ]
++    deps = [
++      "modules/svg",
++      "//third_party/libpng",
++    ]
++  }
++
++  if (skia_use_libpng_encode) {
++    libfuzzer_app("png_encoder") {
++      sources = [
++        "fuzz/FuzzEncoders.cpp",
++        "fuzz/oss_fuzz/FuzzPNGEncoder.cpp",
++      ]
++      deps = []
++    }
++  }
++
++  if (skia_use_rust_png_encode) {
++    libfuzzer_app("png_rust_encoder") {
++      sources = [
++        "fuzz/FuzzEncoders.cpp",
++        "fuzz/oss_fuzz/FuzzPNGRustEncoder.cpp",
++      ]
++      deps = []
++    }
++  }
++
++  libfuzzer_app("jpeg_encoder") {
++    sources = [
++      "fuzz/FuzzEncoders.cpp",
++      "fuzz/oss_fuzz/FuzzJPEGEncoder.cpp",
++    ]
++    deps = []
++  }
++
++  libfuzzer_app("webp_encoder") {
++    sources = [
++      "fuzz/FuzzEncoders.cpp",
++      "fuzz/oss_fuzz/FuzzWEBPEncoder.cpp",
++    ]
++    deps = []
++  }
++
++  libfuzzer_app("skottie_json") {
++    sources = [ "modules/skottie/fuzz/FuzzSkottieJSON.cpp" ]
++    deps = [
++      "modules/jsonreader",
++      "modules/skottie",
++      "modules/svg",
++    ]
++  }
++
++  libfuzzer_app("skjson") {
++    sources = [ "fuzz/oss_fuzz/FuzzJSON.cpp" ]
++    deps = [ "modules/jsonreader" ]
++  }
++
++  libfuzzer_app("api_polyutils") {
++    sources = [
++      "fuzz/FuzzPolyUtils.cpp",
++      "fuzz/oss_fuzz/FuzzPolyUtils.cpp",
++    ]
++    deps = [ ":skia" ]
++  }
++
++  libfuzzer_app("android_codec") {
++    sources = [ "fuzz/oss_fuzz/FuzzAndroidCodec.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("image_decode_incremental") {
++    sources = [ "fuzz/oss_fuzz/FuzzIncrementalImage.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("api_grshape") {
++    sources = [
++      "fuzz/FuzzCanvasHelpers.cpp",
++      "fuzz/FuzzCanvasHelpers.h",
++      "fuzz/FuzzGrStyledShape.cpp",
++      "fuzz/oss_fuzz/FuzzGrStyledShape.cpp",
++    ]
++    deps = []
++  }
++
++  libfuzzer_app("sksl2glsl") {
++    sources = [ "fuzz/oss_fuzz/FuzzSKSL2GLSL.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("sksl2metal") {
++    sources = [ "fuzz/oss_fuzz/FuzzSKSL2Metal.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("sksl2pipeline") {
++    sources = [ "fuzz/oss_fuzz/FuzzSKSL2Pipeline.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("sksl2spirv") {
++    sources = [ "fuzz/oss_fuzz/FuzzSKSL2SPIRV.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("sksl2wgsl") {
++    sources = [ "fuzz/oss_fuzz/FuzzSKSL2WGSL.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("skdescriptor_deserialize") {
++    sources = [ "fuzz/oss_fuzz/FuzzSkDescriptorDeserialize.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("svg_dom") {
++    sources = [ "fuzz/oss_fuzz/FuzzSVG.cpp" ]
++    deps = [ "modules/svg" ]
++  }
++
++  libfuzzer_app("skruntimeblender") {
++    sources = [ "fuzz/oss_fuzz/FuzzSkRuntimeBlender.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("skruntimecolorfilter") {
++    sources = [ "fuzz/oss_fuzz/FuzzSkRuntimeColorFilter.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("skruntimeeffect") {
++    sources = [ "fuzz/oss_fuzz/FuzzSkRuntimeEffect.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("skmeshspecification") {
++    sources = [ "fuzz/oss_fuzz/FuzzSkMeshSpecification.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("skp") {
++    sources = [ "fuzz/oss_fuzz/FuzzSKP.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("colrv1") {
++    sources = [ "fuzz/oss_fuzz/FuzzCOLRv1.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("quad_roots") {
++    sources = [
++      "fuzz/FuzzQuadRoots.cpp",
++      "fuzz/oss_fuzz/FuzzQuadRoots.cpp",
++    ]
++    deps = []
++  }
++
++  libfuzzer_app("cubic_roots") {
++    sources = [
++      "fuzz/FuzzCubicRoots.cpp",
++      "fuzz/oss_fuzz/FuzzCubicRoots.cpp",
++    ]
++    deps = []
++  }
++
++  libfuzzer_app("skcolorspace") {
++    sources = [ "fuzz/oss_fuzz/FuzzColorspace.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("parse_path") {
++    sources = [ "fuzz/oss_fuzz/FuzzParsePath.cpp" ]
++    deps = []
++  }
++
++  libfuzzer_app("hdr_agtm") {
++    sources = [ "fuzz/oss_fuzz/FuzzHdrAgtm.cpp" ]
++    deps = []
++  }
++}
++
++if (skia_build_rust_targets) {
++  action("rust_hello_world") {
++    script = "gn/bazel_build.py"
++    sources = [ "experimental/rust_cxx/hello-world.rs" ]
++    outputs = [ "$root_out_dir/rust_hello_world" ]
++    args = [
++      "//experimental/rust_cxx:rust_hello_world",
++      "../../bazel-bin/experimental/rust_cxx/rust_hello_world",
++    ]
++  }
++
++  action("cpp_with_rust") {
++    script = "gn/bazel_build.py"
++    sources = [
++      "experimental/rust_cxx/hype-bridge.rs",
++      "experimental/rust_cxx/main.cpp",
++    ]
++    outputs = [ "$root_out_dir/cpp_with_rust" ]
++    args = [
++      "//experimental/rust_cxx:cpp_with_rust",
++      "../../bazel-bin/experimental/rust_cxx/cpp_with_rust",
++    ]
++  }
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/spring_animation/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/spring_animation/BUILD.gn
+new file mode 100644
+index 00000000..32a6a128
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/spring_animation/BUILD.gn
+@@ -0,0 +1,33 @@
++# Copyright 2013 The Flutter Authors. All rights reserved.
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++if (is_ios || is_mac) {
++  import("//flutter/common/config.gni")
++  import("//flutter/testing/testing.gni")
++
++  source_set("spring_animation") {
++    sources = [
++      "spring_animation.h",
++      "spring_animation.mm",
++    ]
++    public_configs = [ "//flutter:config" ]
++  }
++
++  if (enable_unittests) {
++    test_fixtures("spring_animation_fixtures") {
++      fixtures = []
++    }
++
++    executable("spring_animation_unittests") {
++      testonly = true
++      sources = [ "SpringAnimationTest.mm" ]
++      deps = [
++        ":spring_animation",
++        ":spring_animation_fixtures",
++        "//flutter/testing",
++      ]
++      public_configs = [ "//flutter:config" ]
++    }
++  }
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/sqlite/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/sqlite/BUILD.gn
+new file mode 100644
+index 00000000..5975d596
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/sqlite/BUILD.gn
+@@ -0,0 +1,21 @@
++# sqlite — prebuilt from sysroot.
++# Use plain lib names so each toolchain resolves from its own sysroot.
++
++config("sqlite_public") {
++  include_dirs = [ "src" ]
++}
++
++config("sqlite_link") {
++  libs = [ "sqlite3" ]
++}
++
++source_set("sqlite") {
++  sources = []
++  all_dependent_configs = [ ":sqlite_link" ]
++  public_configs = [ ":sqlite_public" ]
++}
++
++source_set("sqlite_dev") {
++  sources = []
++  include_dirs = [ "dev" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/swiftshader/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/swiftshader/BUILD.gn
+new file mode 100644
+index 00000000..dc8fb165
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/swiftshader/BUILD.gn
+@@ -0,0 +1,29 @@
++# Stub for swiftshader (Vulkan/OpenGL software renderer).
++# Removed from DEPS as a CIPD package and unnecessary for release builds.
++# Provide minimal target/config definitions for GN dependency resolution.
++
++# Main swiftshader source_set (referenced by shell/common/BUILD.gn etc.)
++source_set("swiftshader") {
++  sources = []
++  include_dirs = [ "." ]
++}
++
++# swiftshader config (compiler flags) - referenced by testing/BUILD.gn
++config("swiftshader_config") {
++  cflags = []
++}
++
++# Vulkan stub library - referenced by testing/BUILD.gn for Vulkan tests
++source_set("swiftshader_libvulkan_static") {
++  sources = []
++}
++
++# OpenGL stub library - referenced by testing/BUILD.gn for GLES tests
++source_set("swiftshader_libGLESv2_static") {
++  sources = []
++}
++
++# Common stub
++source_set("swiftshader_common") {
++  sources = []
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/tonic/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/tonic/BUILD.gn
+new file mode 100644
+index 00000000..ed2930c7
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/tonic/BUILD.gn
+@@ -0,0 +1,94 @@
++# Copyright 2013 The Flutter Authors. All rights reserved.
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//flutter/build/dart/dart.gni")
++
++config("config") {
++  include_dirs = [
++    "//flutter/third_party",
++    "//flutter",
++  ]
++}
++
++source_set("tonic") {
++  sources = [
++    "common/build_config.h",
++    "common/log.cc",
++    "common/log.h",
++    "common/macros.h",
++    "converter/dart_converter.cc",
++    "converter/dart_converter.h",
++    "dart_args.h",
++    "dart_binding_macros.h",
++    "dart_class_library.cc",
++    "dart_class_library.h",
++    "dart_class_provider.cc",
++    "dart_class_provider.h",
++    "dart_library_natives.cc",
++    "dart_library_natives.h",
++    "dart_list.cc",
++    "dart_list.h",
++    "dart_message_handler.cc",
++    "dart_message_handler.h",
++    "dart_microtask_queue.cc",
++    "dart_microtask_queue.h",
++    "dart_persistent_value.cc",
++    "dart_persistent_value.h",
++    "dart_state.cc",
++    "dart_state.h",
++    "dart_weak_persistent_value.cc",
++    "dart_weak_persistent_value.h",
++    "dart_wrappable.cc",
++    "dart_wrappable.h",
++    "dart_wrapper_info.h",
++    "file_loader/file_loader.cc",
++    "file_loader/file_loader.h",
++    "logging/dart_error.cc",
++    "logging/dart_error.h",
++    "logging/dart_invoke.cc",
++    "logging/dart_invoke.h",
++    "scopes/dart_api_scope.h",
++    "scopes/dart_isolate_scope.cc",
++    "scopes/dart_isolate_scope.h",
++    "typed_data/dart_byte_data.cc",
++    "typed_data/dart_byte_data.h",
++
++    # Deprecated.
++    "filesystem/filesystem/eintr_wrapper.h",
++    "filesystem/filesystem/file.cc",
++    "filesystem/filesystem/file.h",
++    "filesystem/filesystem/path.h",
++    "filesystem/filesystem/portable_unistd.h",
++    "parsers/packages_map.cc",
++    "parsers/packages_map.h",
++    "typed_data/float32_list.h",
++    "typed_data/float64_list.h",
++    "typed_data/int32_list.h",
++    "typed_data/typed_list.cc",
++    "typed_data/typed_list.h",
++    "typed_data/uint16_list.h",
++    "typed_data/uint8_list.h",
++  ]
++
++  if (is_win) {
++    sources += [
++      "file_loader/file_loader_win.cc",
++      "filesystem/filesystem/path_win.cc",
++    ]
++  } else if (is_fuchsia) {
++    sources += [
++      "file_loader/file_loader_fuchsia.cc",
++      "filesystem/filesystem/path_posix.cc",
++    ]
++  } else {
++    sources += [
++      "file_loader/file_loader_posix.cc",
++      "filesystem/filesystem/path_posix.cc",
++    ]
++  }
++
++  public_deps = [ "$dart_src/runtime:dart_api" ]
++
++  public_configs = [ ":config" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/vulkan_memory_allocator/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/vulkan_memory_allocator/BUILD.gn
+new file mode 100644
+index 00000000..a26e8b81
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/vulkan_memory_allocator/BUILD.gn
+@@ -0,0 +1,8 @@
++config("vulkan_memory_allocator_public") {
++  include_dirs = [ "include" ]
++}
++
++source_set("vulkan_memory_allocator") {
++  sources = []
++  public_configs = [ ":vulkan_memory_allocator_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/wuffs/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/wuffs/BUILD.gn
+new file mode 100644
+index 00000000..956d952b
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/wuffs/BUILD.gn
+@@ -0,0 +1,12 @@
++# wuffs — use the single-file amalgamation in release/c/.
++
++config("wuffs_public") {
++  include_dirs = [ "release/c" ]
++}
++
++# wuffs amalgamation: a single .c file that covers the full library.
++# Pick v0.4 (latest); stubs are also provided for v0.2/v0.3.
++source_set("wuffs") {
++  sources = [ "release/c/wuffs-v0.4.c" ]
++  public_configs = [ ":wuffs_public" ]
++}
+diff --git a/engine/src/flutter/loong64/third_party_gn/zlib/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/zlib/BUILD.gn
+new file mode 100644
+index 00000000..58884989
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_gn/zlib/BUILD.gn
+@@ -0,0 +1,31 @@
++# zlib — compile upstream source directly (no sysroot prebuilt used).
++
++config("zlib_public") {
++  include_dirs = [ "." ]
++}
++
++source_set("zlib") {
++  sources = [
++    "adler32.c",
++    "compress.c",
++    "crc32.c",
++    "deflate.c",
++    "gzclose.c",
++    "gzlib.c",
++    "gzread.c",
++    "gzwrite.c",
++    "inflate.c",
++    "infback.c",
++    "inffast.c",
++    "inftrees.c",
++    "trees.c",
++    "uncompr.c",
++    "zutil.c",
++  ]
++  include_dirs = [ "." ]
++  public_configs = [ ":zlib_public" ]
++}
++
++config("zlib_config") {
++  defines = []
++}
+diff --git a/engine/src/flutter/loong64/third_party_stubs/swiftshader/BUILD.gn b/engine/src/flutter/loong64/third_party_stubs/swiftshader/BUILD.gn
+new file mode 100644
+index 00000000..dc8fb165
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_stubs/swiftshader/BUILD.gn
+@@ -0,0 +1,29 @@
++# Stub for swiftshader (Vulkan/OpenGL software renderer).
++# Removed from DEPS as a CIPD package and unnecessary for release builds.
++# Provide minimal target/config definitions for GN dependency resolution.
++
++# Main swiftshader source_set (referenced by shell/common/BUILD.gn etc.)
++source_set("swiftshader") {
++  sources = []
++  include_dirs = [ "." ]
++}
++
++# swiftshader config (compiler flags) - referenced by testing/BUILD.gn
++config("swiftshader_config") {
++  cflags = []
++}
++
++# Vulkan stub library - referenced by testing/BUILD.gn for Vulkan tests
++source_set("swiftshader_libvulkan_static") {
++  sources = []
++}
++
++# OpenGL stub library - referenced by testing/BUILD.gn for GLES tests
++source_set("swiftshader_libGLESv2_static") {
++  sources = []
++}
++
++# Common stub
++source_set("swiftshader_common") {
++  sources = []
++}
+diff --git a/engine/src/flutter/loong64/third_party_stubs/swiftshader/src/BUILD.gn b/engine/src/flutter/loong64/third_party_stubs/swiftshader/src/BUILD.gn
+new file mode 100644
+index 00000000..8cc06339
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_stubs/swiftshader/src/BUILD.gn
+@@ -0,0 +1,2 @@
++# Stub
++group("src") {}
+diff --git a/engine/src/flutter/loong64/third_party_stubs/swiftshader/src/OpenGL/BUILD.gn b/engine/src/flutter/loong64/third_party_stubs/swiftshader/src/OpenGL/BUILD.gn
+new file mode 100644
+index 00000000..445338d9
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_stubs/swiftshader/src/OpenGL/BUILD.gn
+@@ -0,0 +1,4 @@
++# Stub
++source_set("swiftshader_libGLESv2_static") {
++  sources = []
++}
+diff --git a/engine/src/flutter/loong64/third_party_stubs/swiftshader/src/Vulkan/BUILD.gn b/engine/src/flutter/loong64/third_party_stubs/swiftshader/src/Vulkan/BUILD.gn
+new file mode 100644
+index 00000000..a8d4c9ea
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_stubs/swiftshader/src/Vulkan/BUILD.gn
+@@ -0,0 +1,4 @@
++# Stub: swiftshader_libvulkan_static
++source_set("swiftshader_libvulkan_static") {
++  sources = []
++}
+diff --git a/engine/src/flutter/loong64/third_party_stubs/swiftshader/src/common/BUILD.gn b/engine/src/flutter/loong64/third_party_stubs/swiftshader/src/common/BUILD.gn
+new file mode 100644
+index 00000000..afce4f35
+--- /dev/null
++++ b/engine/src/flutter/loong64/third_party_stubs/swiftshader/src/common/BUILD.gn
+@@ -0,0 +1,4 @@
++# Stub
++source_set("swiftshader_common") {
++  sources = []
++}
 diff --git a/engine/src/flutter/shell/platform/android/BUILD.gn b/engine/src/flutter/shell/platform/android/BUILD.gn
 index 40c209ca..7aec5160 100644
 --- a/engine/src/flutter/shell/platform/android/BUILD.gn

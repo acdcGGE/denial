@@ -74,7 +74,10 @@ EOF
     pkg-config --exists "$p" || die "sysroot 缺少 pkg-config 依赖: $p"
   done
 
-  if ! rustup target list --installed | grep -qx "$TARGET_TRIPLE"; then
+  # rustup 默认源在部分网络下不可达，默认走国内镜像（可用环境变量覆盖）
+  export RUSTUP_DIST_SERVER=${RUSTUP_DIST_SERVER:-https://rsproxy.cn}
+  export RUSTUP_UPDATE_ROOT=${RUSTUP_UPDATE_ROOT:-https://rsproxy.cn/rustup}
+  if [ ! -d "$(rustc --print sysroot)/lib/rustlib/$TARGET_TRIPLE" ]; then
     rustup target add "$TARGET_TRIPLE"
   fi
 
@@ -86,6 +89,49 @@ EOF
       die "需要 depot_tools 的 gclient 同步引擎依赖（见 README）"
     fi
   fi
+
+  # dart 的 BUILD.gn 需要 gclient 生成的参数文件（不随仓库提交）
+  local dart_args=$FLUTTER/engine/src/flutter/third_party/dart/build/config/gclient_args.gni
+  if [ ! -f "$dart_args" ]; then
+    printf '# Auto-generated minimal gclient args for manual sync\ncheckout_llvm = false\nbuild_devtools_from_sources = false\n' > "$dart_args"
+  fi
+
+  # flutter 源码按 third_party/icu/source 布局引用，上游仓库实际是 icu4c/source
+  ln -sfn icu4c/source "$FLUTTER/engine/src/flutter/third_party/icu/source"
+
+  # Flutter 的内部镜像仓库才带 third_party 构建脚本，GitHub 上游仓库没有，统一补齐
+  local tp=$FLUTTER/engine/src/flutter/third_party
+  local gn_src=$FLUTTER/engine/src/flutter/loong64/third_party_gn
+  if [ -d "$gn_src" ]; then
+    while IFS= read -r f; do
+      mkdir -p "$tp/$(dirname "$f")"
+      cp -f "$gn_src/$f" "$tp/$f"
+    done < <(cd "$gn_src" && find . -name BUILD.gn)
+    [ -f "$gn_src/flatbuffers/copy_flatc.py" ] && cp -f "$gn_src/flatbuffers/copy_flatc.py" "$tp/flatbuffers/"
+  fi
+
+  # swiftshader 的真实仓库在 loong64 上会触发内置 LLVM 断言，仅测试需要，用 stub 顶替
+  local stub=$FLUTTER/engine/src/flutter/loong64/third_party_stubs/swiftshader
+  if [ -d "$stub" ]; then
+    rm -rf "$tp/swiftshader"
+    cp -a "$stub" "$tp/swiftshader"
+  fi
+
+  # icudtl.dat 由 Flutter 的 icu 镜像提供（体积小，随 loom64 目录一起分发）
+  mkdir -p "$tp/icu/flutter"
+  [ -f "$tp/icu/flutter/icudtl.dat" ] || cp -f "$FLUTTER/engine/src/flutter/loong64/icu/flutter/icudtl.dat" "$tp/icu/flutter/icudtl.dat"
+
+  # 宿主工具链需要该 sysroot 目录存在（实际使用宿主机库）
+  local host_sysroot=$FLUTTER/engine/src/build/linux/debian_bullseye_amd64-sysroot
+  if [ ! -d "$host_sysroot" ]; then
+    mkdir -p "$host_sysroot"
+    ln -sfn /lib "$host_sysroot/lib"
+    ln -sfn /lib64 "$host_sysroot/lib64"
+  fi
+
+  # 宿主 flatc 产物在输出根目录，impeller 规则期望 clang_x64/flatc
+  mkdir -p "$TARGET_OUT/clang_x64"
+  ln -sfn ../flatc "$TARGET_OUT/clang_x64/flatc"
 
   # CIPD 的 devtools 源（dart/third_party/flutter/devtools）不可达，
   # 而 dart 根 pubspec 以 path 依赖 third_party/devtools/devtools_shared，
