@@ -193,7 +193,8 @@ stage_engine() {
   mkdir -p "$TARGET_OUT" "$HOST_OUT"
   sed "s|@SYSROOT@|$SYSROOT|g" \
       "$DENIAL_ROOT/contrib/loong64/args/denial_linux_loong64_release.args.gn" > "$TARGET_OUT/args.gn"
-  cp "$DENIAL_ROOT/contrib/loong64/args/denial_host_release.args.gn" > "$HOST_OUT/args.gn"
+  sed "s|@SYSROOT@|$SYSROOT|g" \
+      "$DENIAL_ROOT/contrib/loong64/args/denial_host_release.args.gn" > "$HOST_OUT/args.gn"
 
   ( cd "$ENGINE_SRC"
     "$GN" gen "$TARGET_OUT" --root=. --script-executable="$(command -v python3)"
