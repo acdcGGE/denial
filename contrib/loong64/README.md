@@ -68,6 +68,7 @@ cd "$WORK/flutter" && gclient sync -D    # 需要 depot_tools
 - 引擎 host 构建需要 Vulkan / ICU 头文件；脚本通过 `CPATH` 指向 sysroot 与引擎 ICU 源码。
 - 引擎自建 `dartvm` 已具备 JIT，但缺少 `dartdev`（`pub`），因此提供一层 `dart` 包装脚本：`pub` 交给官方 Dart 3.13.4，其余交给 `dartvm`。
 - `dds` / `dartdev` 的 AOT snapshot 与 SDK API 不匹配属于已知无害失败，脚本以 `-k 0` 继续。
+- `third_party/dart/third_party/devtools` 在上游来自 CIPD（不可达），而 dart 根 `pubspec.yaml` 以 path 依赖 `devtools_shared`；脚本会生成最小 stub（见 `DEPS` 顶部说明，上游源：https://github.com/flutter/devtools ）。
 
 ## 运行
 

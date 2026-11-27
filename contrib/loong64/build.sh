@@ -86,6 +86,21 @@ EOF
       die "需要 depot_tools 的 gclient 同步引擎依赖（见 README）"
     fi
   fi
+
+  # CIPD 的 devtools 源（dart/third_party/flutter/devtools）不可达，
+  # 而 dart 根 pubspec 以 path 依赖 third_party/devtools/devtools_shared，
+  # 生成最小 stub 以保证 dart pub get 可执行。
+  local dev=$FLUTTER/engine/src/flutter/third_party/dart/third_party/devtools/devtools_shared
+  if [ ! -f "$dev/pubspec.yaml" ]; then
+    mkdir -p "$dev/lib"
+    cat > "$dev/pubspec.yaml" <<'YAML'
+name: devtools_shared
+version: 1.0.0
+environment:
+  sdk: '>=3.13.0 <4.0.0'
+YAML
+    printf '// Stub for devtools_shared\nlibrary devtools_shared;\n' > "$dev/lib/devtools_shared.dart"
+  fi
 }
 
 stage_engine() {
