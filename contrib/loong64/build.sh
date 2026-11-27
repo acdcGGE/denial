@@ -170,6 +170,14 @@ stage_engine() {
     *depot_tools*)
       die "PATH 中 depot_tools 排在系统路径之前，python3 会被解析为未初始化的包装脚本；请把 depot_tools 放到 PATH 末尾" ;;
   esac
+
+  # 引擎构建需要 bootstrap Dart SDK；gclient 的 download_dart_sdk 钩子在 --nohooks 下不会执行
+  ensure_tool_dart
+  local boot_sdk=$FLUTTER/engine/src/third_party/dart/tools/sdks/dart-sdk
+  if [ ! -x "$boot_sdk/bin/dart" ]; then
+    mkdir -p "$(dirname "$boot_sdk")"
+    ln -sfn "$WORK/tool-dart-sdk/dart-sdk" "$boot_sdk"
+  fi
   if ! git -C "$FLUTTER" apply --reverse --check \
       "$DENIAL_ROOT/contrib/loong64/flutter-denial-3.47.5-loongarch64.patch" >/dev/null 2>&1; then
     git -C "$FLUTTER" apply "$DENIAL_ROOT/contrib/loong64/flutter-denial-3.47.5-loongarch64.patch"
@@ -236,20 +244,25 @@ stage_engine() {
     cp -f "$TARGET_OUT/libflutter_linux_gtk.so" "$HOST_OUT/libflutter_linux_gtk.so"
 }
 
-stage_tool() {
-  log "准备 flutter 工具链（Dart 3.13.4 + 引擎自建 dartvm）"
+ensure_tool_dart() {
   local dartsdk=$WORK/tool-dart-sdk/dart-sdk
   if [ ! -x "$dartsdk/bin/dart" ]; then
     mkdir -p "$WORK/tool-dart-sdk"
     local zip=$WORK/tool-dart.zip
     local url=https://storage.flutter-io.cn/dart-archive/channels/stable/release/3.13.4/sdk/dartsdk-linux-x64-release.zip
     if command -v aria2c >/dev/null; then
-      aria2c -x8 -s8 -o tool-dart.zip -d "$WORK" "$url"
+      aria2c -x4 -s4 -o tool-dart.zip -d "$WORK" "$url"
     else
       curl -L --retry 3 -o "$zip" "$url"
     fi
     unzip -q -o "$zip" -d "$WORK/tool-dart-sdk"
   fi
+}
+
+stage_tool() {
+  log "准备 flutter 工具链（Dart 3.13.4 + 引擎自建 dartvm）"
+  ensure_tool_dart
+  local dartsdk=$WORK/tool-dart-sdk/dart-sdk
 
   # 引擎自建 dart-sdk 缺少 dartdev（pub），用官方 dart 处理 pub，其余交给 dartvm
   mkdir -p "$HOST_OUT/dart-sdk/bin/resources"
