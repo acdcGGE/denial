@@ -84,7 +84,21 @@ EOF
   if [ ! -d "$FLUTTER/engine/src" ]; then
     git clone --depth 1 -b loong64-cross-build "$FLUTTER_URL" "$FLUTTER"
     if command -v gclient >/dev/null; then
-      ( cd "$FLUTTER" && gclient sync -D )
+      # 生成 .gclient（仓库本身不含）：solution 为仓库根，依赖路径才与上游一致
+      local rev
+      rev=$(git -C "$FLUTTER" rev-parse HEAD)
+      cat > "$FLUTTER/.gclient" <<EOF
+solutions = [
+  {
+    "custom_deps": {},
+    "deps_file": "DEPS",
+    "managed": True,
+    "name": ".",
+    "url": "https://github.com/acdcGGE/flutter.git@$rev",
+  },
+]
+EOF
+      ( cd "$FLUTTER" && gclient sync -D --no-history -j4 --nohooks )
     else
       die "需要 depot_tools 的 gclient 同步引擎依赖（见 README）"
     fi
