@@ -178,6 +178,10 @@ stage_engine() {
     mkdir -p "$(dirname "$boot_sdk")"
     ln -sfn "$WORK/tool-dart-sdk/dart-sdk" "$boot_sdk"
   fi
+
+  # dart 源码需要 package_config.json（gclient 钩子同样被跳过）
+  ( cd "$FLUTTER/engine/src/flutter/third_party/dart" && \
+    "$WORK/tool-dart-sdk/dart-sdk/bin/dart" pub get >/dev/null )
   if ! git -C "$FLUTTER" apply --reverse --check \
       "$DENIAL_ROOT/contrib/loong64/flutter-denial-3.47.5-loongarch64.patch" >/dev/null 2>&1; then
     git -C "$FLUTTER" apply "$DENIAL_ROOT/contrib/loong64/flutter-denial-3.47.5-loongarch64.patch"
