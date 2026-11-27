@@ -125,6 +125,7 @@ EOF
   local host_sysroot=$FLUTTER/engine/src/build/linux/debian_bullseye_amd64-sysroot
   if [ ! -d "$host_sysroot" ]; then
     mkdir -p "$host_sysroot"
+    ln -sfn /usr "$host_sysroot/usr"
     ln -sfn /lib "$host_sysroot/lib"
     ln -sfn /lib64 "$host_sysroot/lib64"
   fi
