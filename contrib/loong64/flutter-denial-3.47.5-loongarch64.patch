@@ -13553,7 +13553,7 @@ index 00000000..1aa2263f
 +}
 diff --git a/engine/src/flutter/loong64/third_party_gn/boringssl/BUILD.gn b/engine/src/flutter/loong64/third_party_gn/boringssl/BUILD.gn
 new file mode 100644
-index 00000000..acf5cacf
+index 00000000..2103e807
 --- /dev/null
 +++ b/engine/src/flutter/loong64/third_party_gn/boringssl/BUILD.gn
 @@ -0,0 +1,93 @@
@@ -13609,7 +13609,7 @@ index 00000000..acf5cacf
 +              crypto_sources + ssl_internal_headers + ssl_sources + pki_sources
 +all_headers = crypto_headers + ssl_headers + pki_headers + pki_internal_headers
 +
-+if (is_msan) {
++if (is_msan || current_cpu == "loong64") {
 +  # MSan instrumentation is incompatible with assembly optimizations.
 +  # BoringSSL's GAS-compatible assembly knows how to detect MSan, but the NASM
 +  # assembly does not, so we check for MSan explicitly.
