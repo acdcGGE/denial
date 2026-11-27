@@ -79,7 +79,7 @@ EOF
   fi
 
   if [ ! -d "$FLUTTER/engine/src" ]; then
-    git clone --depth 1 -b loong64-native-build "$FLUTTER_URL" "$FLUTTER"
+    git clone --depth 1 -b loong64-cross-build "$FLUTTER_URL" "$FLUTTER"
     if command -v gclient >/dev/null; then
       ( cd "$FLUTTER" && gclient sync -D )
     else
@@ -104,6 +104,15 @@ stage_engine() {
   ln -sfn "$SYSROOT/usr/include/vk_video" "$WORK/host-deps/include/vk_video"
   ln -sfn "$ENGINE_SRC/flutter/third_party/icu/source/common/unicode" \
           "$WORK/host-deps/include/unicode"
+
+  # 引擎默认从 CIPD 下载 clang；离线/受限网络下回退到系统仓库的 clang
+  local bt=$ENGINE_SRC/flutter/buildtools/linux-x64/clang/bin
+  if [ ! -x "$bt/clang" ]; then
+    mkdir -p "$bt"
+    for t in clang clang++ llvm-ar llvm-nm llvm-objcopy llvm-readelf; do
+      ln -sfn "$(command -v "$t")" "$bt/$t"
+    done
+  fi
 
   mkdir -p "$TARGET_OUT" "$HOST_OUT"
   sed "s|@SYSROOT@|$SYSROOT|g" \

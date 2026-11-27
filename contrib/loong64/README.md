@@ -1,4 +1,4 @@
-# denial loongarch64 
+# denial loongarch64 交叉编译
 
 在 x86-64 主机上为 **loongarch64** 交叉编译 denial v0.6.10，包含：
 
@@ -37,7 +37,7 @@ SYSROOT_URL=https://<mirror>/archlinux-loongarch64-rootfs.tar.zst ./contrib/loon
 ### 3. Flutter 引擎源码（网络）
 
 ```bash
-git clone -b loong64-native-build https://github.com/acdcGGE/flutter.git "$WORK/flutter"
+git clone -b loong64-cross-build https://github.com/acdcGGE/flutter.git "$WORK/flutter"
 cd "$WORK/flutter" && gclient sync -D    # 需要 depot_tools
 ```
 
