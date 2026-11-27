@@ -172,6 +172,7 @@ pub(super) fn validate_bundle(bundle: &Path, official: &Path) -> Result<PathBuf,
     let platform = match std::env::consts::ARCH {
         "x86_64" => "linux-x64",
         "aarch64" => "linux-arm64",
+        "loongarch64" => "linux-loong64",
         _ => "unsupported",
     };
     if manifest.schema != 1 || manifest.mode != "release" || manifest.platform != platform {
@@ -453,7 +454,7 @@ pub(crate) mod fixtures {
             fs::write(bundle.join("data/flutter_assets/nested/asset"), b"asset").unwrap();
             seal(&bundle.join("data/flutter_assets"));
             let manifest = serde_json::json!({
-                "schema": 1, "mode": "release", "platform": if cfg!(target_arch = "aarch64") { "linux-arm64" } else { "linux-x64" },
+                "schema": 1, "mode": "release", "platform": if cfg!(target_arch = "aarch64") { "linux-arm64" } else if cfg!(target_arch = "loongarch64") { "linux-loong64" } else { "linux-x64" },
                 "flutter_generation": denial_core::FLUTTER_ENGINE_ABI,
                 "engine_sha256": hash_file(&official.join("lib/libflutter_engine.so")).unwrap(),
                 "app_sha256": hash_file(&bundle.join("lib/libapp.so")).unwrap(),

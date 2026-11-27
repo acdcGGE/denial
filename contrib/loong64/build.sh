@@ -1,0 +1,219 @@
+#!/usr/bin/env bash
+# denial v0.6.10 loongarch64 交叉编译脚本（在 x86-64 主机上编译出 loong64 产物）
+#
+# 用法:
+#   ./contrib/loong64/build.sh <stage> [stage...]
+#   stage: env | engine | tool | shell | rust | payload | all
+#
+# 可覆盖的环境变量:
+#   WORK           构建根目录            (默认 $HOME/loong64-build/denial-main-build)
+#   SYSROOT        loongarch64 sysroot   (默认 $HOME/loong64-build/sysroot)
+#   FLUTTER        denialwm/flutter 检出  (默认 $WORK/checkout，需为 denial/3.47.5)
+#   GN             gn 可执行文件         (默认 PATH 中的 gn)
+#   JOBS           并行度                (默认 16)
+set -euo pipefail
+
+DENIAL_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+WORK=${WORK:-$HOME/loong64-build/denial-main-build}
+SYSROOT=${SYSROOT:-$HOME/loong64-build/sysroot}
+FLUTTER=${FLUTTER:-$WORK/checkout}
+GN=${GN:-gn}
+JOBS=${JOBS:-16}
+
+ENGINE_SRC=$FLUTTER/engine/src
+TARGET_OUT=$WORK/checkout/engine/src/flutter/out/denial_linux_loong64_release
+HOST_OUT=$WORK/host-build/out/denial_host_release
+VIEW=$WORK/engine-view
+SHELL_OUT=$WORK/shell-assembly
+PAYLOAD=$WORK/payload
+RUST_TARGET_DIR=$WORK/rust
+TARGET_TRIPLE=loongarch64-unknown-linux-gnu
+
+log() { printf '\n=== %s ===\n' "$*"; }
+die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+
+stage_env() {
+  log "检查构建环境"
+  for t in clang clang++ llvm-ar ninja pkg-config curl unzip; do
+    command -v "$t" >/dev/null || die "缺少 $t"
+  done
+  [ -d "$SYSROOT/usr/lib" ] || die "sysroot 不存在: $SYSROOT"
+  [ -d "$FLUTTER/engine/src" ] || die "flutter 源码不存在: $FLUTTER"
+  [ -d "$DENIAL_ROOT/dart_shell" ] || die "不是 denial 仓库根目录: $DENIAL_ROOT"
+  export PKG_CONFIG_ALLOW_CROSS=1
+  export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
+  export PKG_CONFIG_LIBDIR=$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/lib/loongarch64-linux-gnu/pkgconfig:$SYSROOT/usr/share/pkgconfig
+  for p in libdrm gbm egl libinput libseat libudev xkbcommon gtk+-3.0 fontconfig; do
+    pkg-config --exists "$p" || die "sysroot 缺少 pkg-config 依赖: $p"
+  done
+  rustup target list --installed | grep -qx "$TARGET_TRIPLE" || rustup target add "$TARGET_TRIPLE"
+}
+
+stage_engine() {
+  log "编译 loongarch64 引擎与 host 引擎"
+  if ! git -C "$FLUTTER" apply --reverse --check \
+      "$DENIAL_ROOT/contrib/loong64/flutter-denial-3.47.5-loongarch64.patch" >/dev/null 2>&1; then
+    git -C "$FLUTTER" apply "$DENIAL_ROOT/contrib/loong64/flutter-denial-3.47.5-loongarch64.patch"
+  fi
+  mkdir -p "$FLUTTER/packages/flutter_tools"
+  cp "$DENIAL_ROOT/contrib/loong64/flutter_tools-pubspec_overrides.yaml" \
+     "$FLUTTER/packages/flutter_tools/pubspec_overrides.yaml"
+
+  # host 编译所需的第三方头文件（Vulkan / ICU）来自 sysroot 与引擎源码
+  mkdir -p "$WORK/host-deps/include"
+  ln -sfn "$SYSROOT/usr/include/vulkan"   "$WORK/host-deps/include/vulkan"
+  ln -sfn "$SYSROOT/usr/include/vk_video" "$WORK/host-deps/include/vk_video"
+  ln -sfn "$ENGINE_SRC/flutter/third_party/icu/source/common/unicode" \
+          "$WORK/host-deps/include/unicode"
+
+  mkdir -p "$TARGET_OUT" "$HOST_OUT"
+  sed "s|@SYSROOT@|$SYSROOT|g" \
+      "$DENIAL_ROOT/contrib/loong64/args/denial_linux_loong64_release.args.gn" > "$TARGET_OUT/args.gn"
+  cp "$DENIAL_ROOT/contrib/loong64/args/denial_host_release.args.gn" > "$HOST_OUT/args.gn"
+
+  ( cd "$ENGINE_SRC"
+    "$GN" gen "$TARGET_OUT" --root=. --script-executable=/usr/bin/python3
+    "$GN" gen "$HOST_OUT"   --root=. --script-executable=/usr/bin/python3 )
+
+  export PATH=$HOME/bin:$PATH
+  ( cd "$ENGINE_SRC" && ninja -C "$TARGET_OUT" -j"$JOBS" \
+      libflutter_engine.so libflutter_linux_gtk.so impellerc flatc \
+      gen_snapshot flutter_patched_sdk \
+      flutter/shell/platform/linux:publish_headers_linux )
+
+  # dds/dartdev 的 AOT snapshot 与 SDK API 不匹配，属于已知无害失败
+  CPATH=$WORK/host-deps/include \
+  ( cd "$ENGINE_SRC" && ninja -C "$HOST_OUT" -k 0 -j"$JOBS" \
+      dart_sdk flutter/sky/packages/sky_engine:sky_engine \
+      flutter_patched_sdk/platform_strong.dill gen_snapshot impellerc \
+      flutter/shell/platform/linux:publish_headers_linux ) || true
+  [ -x "$HOST_OUT/dartvm" ] || die "host 引擎构建失败"
+
+  # 生成 flutter 交叉构建视图
+  rm -rf "$VIEW"; mkdir -p "$VIEW/out/denial_linux_loong64_release"
+  ln -sfn "$ENGINE_SRC/flutter" "$VIEW/flutter"
+  ln -sfn "$HOST_OUT" "$VIEW/out/denial_host_release"
+  for p in "$TARGET_OUT"/*; do
+    n=${p##*/}; [ "$n" = gen_snapshot ] && continue
+    ln -sfn "$p" "$VIEW/out/denial_linux_loong64_release/$n"
+  done
+  ln -sfn "$TARGET_OUT/clang_x64/gen_snapshot" "$VIEW/out/denial_linux_loong64_release/gen_snapshot"
+  ln -sfn "$TARGET_OUT/clang_x64/gen_snapshot" "$VIEW/out/denial_linux_loong64_release/gen_snapshot_loong64"
+
+  # assemble 需要 icudtl.dat 与 host 版 libflutter_linux_gtk.so（后者仅被复制，不参与运行）
+  ICU_DATA=$ENGINE_SRC/flutter/third_party/icu/flutter/icudtl.dat
+  cp -f "$ICU_DATA" "$TARGET_OUT/icudtl.dat"
+  ln -sfn "$TARGET_OUT/icudtl.dat" "$VIEW/out/denial_linux_loong64_release/icudtl.dat"
+  cp -f "$ICU_DATA" "$HOST_OUT/icudtl.dat"
+  [ -e "$HOST_OUT/libflutter_linux_gtk.so" ] || \
+    cp -f "$TARGET_OUT/libflutter_linux_gtk.so" "$HOST_OUT/libflutter_linux_gtk.so"
+}
+
+stage_tool() {
+  log "准备 flutter 工具链（Dart 3.13.4 + 引擎自建 dartvm）"
+  local dartsdk=$WORK/tool-dart-sdk/dart-sdk
+  if [ ! -x "$dartsdk/bin/dart" ]; then
+    mkdir -p "$WORK/tool-dart-sdk"
+    local zip=$WORK/tool-dart.zip
+    local url=https://storage.flutter-io.cn/dart-archive/channels/stable/release/3.13.4/sdk/dartsdk-linux-x64-release.zip
+    if command -v aria2c >/dev/null; then
+      aria2c -x8 -s8 -o tool-dart.zip -d "$WORK" "$url"
+    else
+      curl -L --retry 3 -o "$zip" "$url"
+    fi
+    unzip -q -o "$zip" -d "$WORK/tool-dart-sdk"
+  fi
+
+  # 引擎自建 dart-sdk 缺少 dartdev（pub），用官方 dart 处理 pub，其余交给 dartvm
+  mkdir -p "$HOST_OUT/dart-sdk/bin/resources"
+  cp -a "$dartsdk/bin/resources/devtools" "$HOST_OUT/dart-sdk/bin/resources/" 2>/dev/null || true
+  cat > "$HOST_OUT/dart-sdk/bin/dart" <<EOF
+#!/bin/bash
+case "\$1" in
+  pub) exec $dartsdk/bin/dart "\$@";;
+esac
+exec $HOST_OUT/dartvm "\$@"
+EOF
+  chmod +x "$HOST_OUT/dart-sdk/bin/dart"
+
+  cd "$FLUTTER"
+  git tag -f 3.47.5 >/dev/null 2>&1 || true
+  echo 3.47.5 > version
+  rm -f bin/cache/flutter.version.json
+  rm -rf bin/cache/dart-sdk
+  ln -sfn "$HOST_OUT/dart-sdk" bin/cache/dart-sdk
+  cp bin/internal/engine.version bin/cache/engine-dart-sdk.stamp
+  rm -f bin/cache/flutter_tools.snapshot bin/cache/flutter_tools.stamp
+
+  ( cd packages/flutter_tools && "$dartsdk/bin/dart" pub get )
+  bin/cache/dart-sdk/bin/dart --verbosity=error \
+    --snapshot=bin/cache/flutter_tools.snapshot --snapshot-kind=app-jit \
+    --packages=packages/flutter_tools/.dart_tool/package_config.json \
+    --no-enable-mirrors packages/flutter_tools/bin/flutter_tools.dart || true
+  echo "$(git rev-parse HEAD):" > bin/cache/flutter_tools.stamp
+  ./bin/flutter --version >/dev/null
+}
+
+stage_shell() {
+  log "编译 Dart shell (libapp.so)"
+  cd "$DENIAL_ROOT/dart_shell"
+  "$FLUTTER/bin/flutter" pub get
+  "$FLUTTER/bin/flutter" assemble \
+    --local-engine-src-path="$VIEW" \
+    --local-engine=denial_linux_loong64_release \
+    --local-engine-host=denial_host_release \
+    --suppress-analytics --resource-pool-size=10 \
+    --output="$SHELL_OUT" \
+    -dTargetFile=lib/main.dart -dBuildMode=release \
+    -dTargetPlatform=linux-loong64 -dDartObfuscation=false \
+    -dTrackWidgetCreation=true -dTreeShakeIcons=false \
+    release_bundle_linux-loong64_assets
+}
+
+stage_rust() {
+  log "交叉编译 Rust compositor"
+  export CC_loongarch64_unknown_linux_gnu="clang --target=loongarch64-linux-gnu --sysroot=$SYSROOT"
+  export CXX_loongarch64_unknown_linux_gnu="clang++ --target=loongarch64-linux-gnu --sysroot=$SYSROOT"
+  export AR_loongarch64_unknown_linux_gnu=llvm-ar
+  export CFLAGS_loongarch64_unknown_linux_gnu="--target=loongarch64-linux-gnu --sysroot=$SYSROOT"
+  export CXXFLAGS_loongarch64_unknown_linux_gnu="--target=loongarch64-linux-gnu --sysroot=$SYSROOT"
+  export CARGO_TARGET_LOONGARCH64_UNKNOWN_LINUX_GNU_LINKER=clang++
+  # __tls_get_addr 仅由 ld-linux 提供，必须忽略目标文件中的未定义符号
+  export CARGO_TARGET_LOONGARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS="-C link-arg=--target=loongarch64-linux-gnu -C link-arg=--sysroot=$SYSROOT -C link-arg=-fuse-ld=lld -C link-arg=-L$SYSROOT/usr/lib -C link-arg=-L$SYSROOT/lib -C link-arg=-Wl,-rpath-link,$SYSROOT/usr/lib -C link-arg=-Wl,--unresolved-symbols=ignore-in-object-files"
+  export CARGO_TARGET_DIR=$RUST_TARGET_DIR
+  cd "$DENIAL_ROOT/compositor"
+  cargo build --release --target "$TARGET_TRIPLE" --features flutter \
+    --bin deniald --bin denialctl
+  cargo build --release --target "$TARGET_TRIPLE" -p denial-portal
+}
+
+stage_payload() {
+  log "组装 payload"
+  local rel=$RUST_TARGET_DIR/$TARGET_TRIPLE/release
+  rm -rf "$PAYLOAD"
+  mkdir -p "$PAYLOAD/bin" "$PAYLOAD/bundle/lib" "$PAYLOAD/bundle/data/flutter_assets"
+  install -m755 "$rel/deniald" "$rel/denialctl" "$rel/denial-portal" "$PAYLOAD/bin/"
+  install -m755 "$TARGET_OUT/libflutter_engine.so" "$PAYLOAD/bundle/lib/"
+  [ -f "$SHELL_OUT/lib/libapp.so" ] && install -m755 "$SHELL_OUT/lib/libapp.so" "$PAYLOAD/bundle/lib/"
+  install -m644 "$ENGINE_SRC/flutter/third_party/icu/flutter/icudtl.dat" "$PAYLOAD/bundle/data/"
+  cp -a "$SHELL_OUT/flutter_assets/." "$PAYLOAD/bundle/data/flutter_assets/"
+  install -m644 "$DENIAL_ROOT/packaging/arch/outputs.conf" "$PAYLOAD/outputs.conf"
+  ( cd "$PAYLOAD" && find bin bundle -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS )
+  tar -C "$WORK" -czf "$WORK/denial-linux-loong64.tar.gz" payload
+  file "$PAYLOAD"/bin/* "$PAYLOAD"/bundle/lib/*
+  echo "归档: $WORK/denial-linux-loong64.tar.gz"
+}
+
+for s in "$@"; do
+  case "$s" in
+    env) stage_env ;;
+    engine) stage_engine ;;
+    tool) stage_tool ;;
+    shell) stage_shell ;;
+    rust) stage_rust ;;
+    payload) stage_payload ;;
+    all)
+      stage_env; stage_engine; stage_tool; stage_shell; stage_rust; stage_payload ;;
+    *) die "未知 stage: $s" ;;
+  esac
+done

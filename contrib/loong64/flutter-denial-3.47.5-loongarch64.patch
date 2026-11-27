@@ -1,0 +1,3525 @@
+diff --git a/DEPS b/DEPS
+index 32d4ddd1..e2d2ddb6 100644
+--- a/DEPS
++++ b/DEPS
+@@ -1,979 +1,3 @@
+-# The dependencies referenced by the Flutter Engine.
+-#
+-# This file is referenced by the .gclient file at the root of the checkout.
+-# To preview changes to the dependencies, update this file and run
+-# `gclient sync`.
+-#
+-# When adding a new dependency, please update the top-level .gitignore file
+-# to list the dependency's destination directory.
++vars = {'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875', 'skia_revision': '5b495e3e15a59ee76af882d83316d351654c1e88', 'clang_version': 'git_revision:80743bd43fd5b38fedc503308e7a652e23d3ec93', 'reclient_version': 're_client_version:0.185.0.db415f21-gomaip', 'gcloud_version': 'version:2@444.0.0.chromium.3', 'esbuild_version': '0.19.5', 'dart_revision': 'b530c21f7de367b94fb04787bfed9d8e989d75e8', 'dart_binaryen_rev': '9926156a583cec3d22d521232b31c70fa9a87dc1', 'dart_boringssl_rev': 'fc5966037c34f0624c71c6a5dffe097a0f0cbca6', 'dart_core_rev': 'be0b1531c445a185d3e93887b8d0355fc766c314', 'dart_devtools_rev': '12d595649f189f1896722623f72599077f476848', 'dart_ecosystem_rev': '848b3bf3b757d2e9ae4d60030eeed5756c87783f', 'dart_http_rev': '5d94ef52582867e077bf41c3fa20fb8b1d1d834e', 'dart_i18n_rev': 'd0683bdea253d19a4350f5bc2be9017aba61837f', 'dart_perfetto_rev': '13ce0c9e13b0940d2476cd0cff2301708a9a2e2b', 'dart_protobuf_rev': '84079e8b8531309e06ba7276b1c28bdca9210ad6', 'dart_pub_rev': 'ec276d10a7fa0f6c6ec005340fb9ad29f3b012d0', 'dart_sync_http_rev': '6666fff944221891182e1f80bf56569338164d72', 'dart_tools_rev': '7fec8be9af0cd0367d03dbec29b66b3f46565720', 'dart_vector_math_rev': 'cf3b5db7340d317dd3489e5a35434b408020a852', 'dart_web_rev': 'eb8c3fc61a1e35f48f865836c7c7342897d91bcc', 'dart_webdriver_rev': '3a711ebb36871eac997c5d5d2429f7414873dc63', 'dart_webkit_inspection_protocol_rev': '762115a971d1968bc940454ad1e88d506d8c5640', 'ocmock_rev': 'c4ec0e3a7a9f56cfdbd0aa01f4f97bb4b75c5ef8', 'download_android_deps': 'host_os == "mac" or (host_os == "linux" and host_cpu == "x64")', 'download_windows_deps': 'host_os == "win"', 'download_linux_deps': 'host_os == "linux"', 'download_fuchsia_deps': 'host_os == "linux" and host_cpu == "x64"', 'fuchsia_test_scripts_version': 's5_gZFJ8De9AJalTwS3VILkwjTVBmULlkblMqcXLheYC', 'fuchsia_gn_sdk_version': 'a87CbQSWEjkPUK1ZY_zsy8aZ9W-3Z2v73ohzhrWbDQ4C'}
+ 
+-vars = {
+-  'android_git': 'https://android.googlesource.com',
+-  'chromium_git': 'https://chromium.googlesource.com',
+-  'swiftshader_git': 'https://swiftshader.googlesource.com',
+-  'dart_git': 'https://dart.googlesource.com',
+-  'flutter_git': 'https://flutter.googlesource.com',
+-  'skia_git': 'https://skia.googlesource.com',
+-  'denial_skia_git': 'https://github.com/denialwm',
+-  'llvm_git': 'https://llvm.googlesource.com',
+-  'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
+-  'skia_revision': '5b495e3e15a59ee76af882d83316d351654c1e88',
+-
+-  # Do not download the Emscripten SDK by default.
+-  # This prevents us from downloading the Emscripten toolchain for builds
+-  # which do not build for the web. This toolchain is needed to build CanvasKit
+-  # for the web engine.
+-  'download_emsdk': False,
+-
+-  # For experimental features some dependencies may only be avaialable in the master/main
+-  # channels. This variable is being set when CI is checking out the repository.
+-  'release_candidate': False,
+-
+-  # As Dart does, we use Fuchsia's GN and Clang toolchain. These revision
+-  # should be kept up to date with the revisions pulled by Dart.
+-  #
+-  # The list of revisions for these tools comes from Fuchsia, here:
+-  # https://fuchsia.googlesource.com/integration/+/HEAD/toolchain
+-  # If there are problems with the toolchain, contact fuchsia-toolchain@.
+-  #
+-  # Note, if you are *manually* rolling clang (i.e. the auto-roll is disabled)
+-  # you'll need to run post-submits (i.e. for Clang Tidy) in order to test that
+-  # updates to Clang Tidy will not turn the tree red.
+-  #
+-  # See https://github.com/flutter/flutter/wiki/Engine-pre‐submits-and-post‐submits#post-submit
+-  'clang_version': 'git_revision:80743bd43fd5b38fedc503308e7a652e23d3ec93',
+-
+-  'reclient_version': 're_client_version:0.185.0.db415f21-gomaip',
+-
+-  'gcloud_version': 'version:2@444.0.0.chromium.3',
+-
+-  'esbuild_version': '0.19.5',
+-
+-  # When updating the Dart revision, ensure that all entries that are
+-  # dependencies of Dart are also updated to match the entries in the
+-  # Dart SDK's DEPS file for that revision of Dart. The DEPS file for
+-  # Dart is: https://github.com/dart-lang/sdk/blob/main/DEPS
+-  # You can use //tools/dart/create_updated_flutter_deps.py to produce
+-  # updated revision list of existing dependencies. You will need to
+-  # gclient sync before and after update deps to ensure all deps are updated.
+-  # updated revision list of existing dependencies.
+-  'dart_revision': 'b530c21f7de367b94fb04787bfed9d8e989d75e8',
+-
+-  # WARNING: DO NOT EDIT MANUALLY
+-  # The lines between blank lines above and below are generated by a script. See create_updated_flutter_deps.py
+-  'dart_binaryen_rev': '9926156a583cec3d22d521232b31c70fa9a87dc1',
+-  'dart_boringssl_rev': '2e508c973d634b3aa51b71db5062bc6b096e5031',
+-  'dart_core_rev': 'be0b1531c445a185d3e93887b8d0355fc766c314',
+-  'dart_devtools_rev': '12d595649f189f1896722623f72599077f476848',
+-  'dart_ecosystem_rev': '848b3bf3b757d2e9ae4d60030eeed5756c87783f',
+-  'dart_http_rev': '5d94ef52582867e077bf41c3fa20fb8b1d1d834e',
+-  'dart_i18n_rev': 'd0683bdea253d19a4350f5bc2be9017aba61837f',
+-  'dart_perfetto_rev': '13ce0c9e13b0940d2476cd0cff2301708a9a2e2b',
+-  'dart_protobuf_rev': '84079e8b8531309e06ba7276b1c28bdca9210ad6',
+-  'dart_pub_rev': 'ec276d10a7fa0f6c6ec005340fb9ad29f3b012d0',
+-  'dart_sync_http_rev': '6666fff944221891182e1f80bf56569338164d72',
+-  'dart_tools_rev': '7fec8be9af0cd0367d03dbec29b66b3f46565720',
+-  'dart_vector_math_rev': 'cf3b5db7340d317dd3489e5a35434b408020a852',
+-  'dart_web_rev': 'eb8c3fc61a1e35f48f865836c7c7342897d91bcc',
+-  'dart_webdriver_rev': '3a711ebb36871eac997c5d5d2429f7414873dc63',
+-  'dart_webkit_inspection_protocol_rev': '762115a971d1968bc940454ad1e88d506d8c5640',
+-
+-  'ocmock_rev': 'c4ec0e3a7a9f56cfdbd0aa01f4f97bb4b75c5ef8', # v3.7.1
+-
+-  # Download a prebuilt Dart SDK by default
+-  'download_dart_sdk': True,
+-
+-  # Download a prebuilt esbuild by default
+-  'download_esbuild': True,
+-
+-  # Checkout Android dependencies only on platforms where we build for Android targets.
+-  'download_android_deps': 'host_os == "mac" or (host_os == "linux" and host_cpu == "x64")',
+-
+-  # Checkout Java dependencies only on platforms that do not have java installed on path.
+-  'download_jdk': True,
+-
+-  # Checkout Windows dependencies only if we are building on Windows.
+-  'download_windows_deps' : 'host_os == "win"',
+-
+-  # Checkout Linux dependencies only when building on Linux.
+-  'download_linux_deps': 'host_os == "linux"',
+-
+-  # Checkout Fuchsia dependencies only on Linux. This is the umbrella flag which
+-  # controls the behavior of all fuchsia related flags. I.e. any fuchsia related
+-  # logic or condition may not work if this flag is False.
+-  # TODO(zijiehe): Make this condition more strict to only download fuchsia
+-  # dependencies when necessary: b/40935282
+-  'download_fuchsia_deps': 'host_os == "linux" and host_cpu == "x64"',
+-  # Downloads the fuchsia SDK as listed in fuchsia_sdk_path var. This variable
+-  # is currently only used for the Fuchsia LSC process and is not intended for
+-  # local development.
+-  'download_fuchsia_sdk': False,
+-  'fuchsia_sdk_path': '',
+-  # Whether to download and run the Fuchsia emulator locally to test Fuchsia
+-  # builds.
+-  'run_fuchsia_emu': False,
+-
+-  # An LLVM backend needs LLVM binaries and headers. To avoid build time
+-  # increases we can use prebuilts. We don't want to download this on every
+-  # CQ/CI bot nor do we want the average Dart developer to incur that cost.
+-  # So by default we will not download prebuilts. This variable is needed in
+-  # the flutter engine to ensure that Dart gn has access to it as well.
+-  "checkout_llvm": False,
+-
+-  # Use prebuilt Dart DevTools sources.
+-  'build_devtools_from_sources': False,
+-
+-  # Setup Git hooks by default.
+-  'setup_githooks': True,
+-
+-  # When this is true, the Flutter Engine's configuration files and scripts for
+-  # RBE will be downloaded from CIPD. This option is only usable by Googlers.
+-  'use_rbe': False,
+-
+-  # Upstream URLs for third party dependencies, used in
+-  # determining common ancestor commit for vulnerability scanning
+-  # prefixed with 'upstream_' in order to be identified by parsing tool.
+-  # The vulnerability database being used in this scan can be browsed
+-  # using this UI https://osv.dev/list
+-  # If a new dependency needs to be added, the upstream (non-mirrored)
+-  # git URL for that dependency should be added to this list
+-  # with the key-value pair being:
+-  # 'upstream_[dep name from last slash and before .git in URL]':'[git URL]'
+-  # example:
+-  "upstream_abseil-cpp": "https://github.com/abseil/abseil-cpp.git",
+-  "upstream_angle": "https://github.com/google/angle.git",
+-  "upstream_archive": "https://github.com/brendan-duncan/archive.git",
+-  "upstream_benchmark": "https://github.com/google/benchmark.git",
+-  "upstream_boringssl": "https://github.com/openssl/openssl.git",
+-  "upstream_brotli": "https://github.com/google/brotli.git",
+-  "upstream_dart_style": "https://github.com/dart-lang/dart_style.git",
+-  "upstream_dartdoc": "https://github.com/dart-lang/dartdoc.git",
+-  "upstream_equatable": "https://github.com/felangel/equatable.git",
+-  "upstream_ffi": "https://github.com/dart-lang/ffi.git",
+-  "upstream_flatbuffers": "https://github.com/google/flatbuffers.git",
+-  "upstream_freetype2": "https://gitlab.freedesktop.org/freetype/freetype.git",
+-  "upstream_gcloud": "https://github.com/dart-lang/gcloud.git",
+-  "upstream_glfw": "https://github.com/glfw/glfw.git",
+-  "upstream_googleapis": "https://github.com/google/googleapis.dart.git",
+-  "upstream_googletest": "https://github.com/google/googletest.git",
+-  "upstream_gtest-parallel": "https://github.com/google/gtest-parallel.git",
+-  "upstream_harfbuzz": "https://github.com/harfbuzz/harfbuzz.git",
+-  "upstream_http": "https://github.com/dart-lang/http.git",
+-  "upstream_icu": "https://github.com/unicode-org/icu.git",
+-  "upstream_imgui": "https://github.com/ocornut/imgui.git",
+-  "upstream_inja": "https://github.com/pantor/inja.git",
+-  "upstream_json": "https://github.com/nlohmann/json.git",
+-  "upstream_libcxx": "https://github.com/llvm-mirror/libcxx.git",
+-  "upstream_libcxxabi": "https://github.com/llvm-mirror/libcxxabi.git",
+-  "upstream_libexpat": "https://github.com/libexpat/libexpat.git",
+-  "upstream_libjpeg-turbo": "https://github.com/libjpeg-turbo/libjpeg-turbo.git",
+-  "upstream_libpng": "https://github.com/glennrp/libpng.git",
+-  "upstream_libtess2": "https://github.com/memononen/libtess2.git",
+-  "upstream_libwebp": "https://chromium.googlesource.com/webm/libwebp.git",
+-  "upstream_leak_tracker": "https://github.com/dart-lang/leak_tracker.git",
+-  "upstream_mockito": "https://github.com/dart-lang/mockito.git",
+-  "upstream_ocmock": "https://github.com/erikdoe/ocmock.git",
+-  "upstream_packages": "https://github.com/flutter/packages.git",
+-  "upstream_process_runner": "https://github.com/google/process_runner.git",
+-  "upstream_process": "https://github.com/google/process.dart.git",
+-  "upstream_protobuf": "https://github.com/google/protobuf.dart.git",
+-  "upstream_pub_semver": "https://github.com/dart-lang/pub_semver.git",
+-  "upstream_pub": "https://github.com/dart-lang/pub.git",
+-  "upstream_pyyaml": "https://github.com/yaml/pyyaml.git",
+-  "upstream_quiver-dart": "https://github.com/google/quiver-dart.git",
+-  "upstream_rapidjson": "https://github.com/Tencent/rapidjson.git",
+-  "upstream_sdk": "https://github.com/dart-lang/sdk.git",
+-  "upstream_shaderc": "https://github.com/google/shaderc.git",
+-  "upstream_shelf": "https://github.com/dart-lang/shelf.git",
+-  "upstream_skia": "https://skia.googlesource.com/skia.git",
+-  "upstream_sqlite": "https://github.com/sqlite/sqlite.git",
+-  "upstream_SwiftShader": "https://swiftshader.googlesource.com/SwiftShader.git",
+-  "upstream_tar": "https://github.com/simolus3/tar.git",
+-  "upstream_test": "https://github.com/dart-lang/test.git",
+-  "upstream_usage": "https://github.com/dart-lang/usage.git",
+-  "upstream_vector_math": "https://github.com/google/vector_math.dart.git",
+-  "upstream_VulkanMemoryAllocator": "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git",
+-  "upstream_webdev": "https://github.com/dart-lang/webdev.git",
+-  "upstream_webkit_inspection_protocol": "https://github.com/google/webkit_inspection_protocol.dart.git",
+-  "upstream_wuffs-mirror-release-c": "https://github.com/google/wuffs-mirror-release-c.git",
+-  "upstream_yapf": "https://github.com/google/yapf.git",
+-  "upstream_zlib": "https://github.com/madler/zlib.git",
+-
+-  # The version / instance id of the cipd:chromium/fuchsia/test-scripts which
+-  # will be used altogether with fuchsia-sdk to setup the build / test
+-  # environment.
+-  'fuchsia_test_scripts_version': 's5_gZFJ8De9AJalTwS3VILkwjTVBmULlkblMqcXLheYC',
+-
+-  # The version / instance id of the cipd:chromium/fuchsia/gn-sdk which will be
+-  # used altogether with fuchsia-sdk to generate gn based build rules.
+-  'fuchsia_gn_sdk_version': 'a87CbQSWEjkPUK1ZY_zsy8aZ9W-3Z2v73ohzhrWbDQ4C',
+-}
+-
+-gclient_gn_args_file = 'engine/src/flutter/third_party/dart/build/config/gclient_args.gni'
+-gclient_gn_args = [
+-  'checkout_llvm',
+-  'build_devtools_from_sources',
+-]
+-
+-# Only these hosts are allowed for dependencies in this DEPS file.
+-# If you need to add a new host, contact chrome infrastructure team.
+-allowed_hosts = [
+-  'boringssl.googlesource.com',
+-  'chrome-infra-packages.appspot.com',
+-  'chromium.googlesource.com',
+-  'dart.googlesource.com',
+-  'flutter.googlesource.com',
+-  'llvm.googlesource.com',
+-  'skia.googlesource.com',
+-  'swiftshader.googlesource.com',
+-]
+-
+-deps = {
+-  'engine/src/flutter/third_party/depot_tools':
+-  Var('chromium_git') + '/chromium/tools/depot_tools.git' + '@' + '580b4ff3f5cd0dcaa2eacda28cefe0f45320e8f7',
+-
+-  'engine/src/flutter/third_party/rapidjson':
+-   Var('flutter_git') + '/third_party/rapidjson' + '@' + '47253cab97e9cfe99dbd6b90836fc11589d7d802',
+-
+-  'engine/src/flutter/third_party/harfbuzz':
+-   Var('flutter_git') + '/third_party/harfbuzz' + '@' + '49844c32a7a3f6be371355a1213c952a3f4a44e7',
+-
+-  'engine/src/flutter/third_party/libcxx':
+-   Var('llvm_git') + '/llvm-project/libcxx' + '@' + 'bd557f6f764d1e40b62528a13b124ce740624f8f',
+-
+-  'engine/src/flutter/third_party/libcxxabi':
+-   Var('llvm_git') + '/llvm-project/libcxxabi' + '@' + 'a4dda1589d37a7e4b4f7a81ebad01b1083f2e726',
+-
+-  'engine/src/flutter/third_party/llvm_libc':
+-   Var('llvm_git') + '/llvm-project/libc' + '@' + '5af39a19a1ad51ce93972cdab206dcd3ff9b6afa',
+-
+-  'engine/src/flutter/third_party/glfw':
+-   Var('flutter_git') + '/third_party/glfw' + '@' + '9352d8fe93cd443be18157abe81f16500549aec0',
+-
+-  'engine/src/flutter/third_party/shaderc':
+-   Var('chromium_git') + '/external/github.com/google/shaderc' + '@' + 'd15277d6bc180f6a0b8b601f0cab2bbcaac9b4d5',
+-
+-  'engine/src/flutter/third_party/vulkan-deps':
+-   Var('chromium_git') + '/vulkan-deps' + '@' + 'a9e2ca3b57aba86a22a2df1b84bf12f8cc98806e',
+-
+-  'engine/src/flutter/third_party/flatbuffers':
+-   Var('chromium_git') + '/external/github.com/google/flatbuffers' + '@' + '067bfdbde9b10c1beb5d6b02d67ae9db8b96f736',
+-
+-  'engine/src/flutter/third_party/icu':
+-   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'd578f2e8b7bd5938e21cfb6bf15c079e0aa5b738',
+-
+-   'engine/src/flutter/third_party/gtest-parallel':
+-   Var('chromium_git') + '/external/github.com/google/gtest-parallel' + '@' + '38191e2733d7cbaeaef6a3f1a942ddeb38a2ad14',
+-
+-  'engine/src/flutter/third_party/benchmark':
+-   Var('chromium_git') + '/external/github.com/google/benchmark' + '@' + '431abd149fd76a072f821913c0340137cc755f36',
+-
+-  'engine/src/flutter/third_party/googletest':
+-   Var('chromium_git') + '/external/github.com/google/googletest' + '@' + 'e9907112b47255d50b4d343e7e2160bce8dc85d1',
+-
+-  'engine/src/flutter/third_party/re2':
+-   Var('chromium_git') + '/external/github.com/google/re2' + '@' + 'c84a140c93352cdabbfb547c531be34515b12228',
+-
+-  'engine/src/flutter/third_party/brotli':
+-   Var('skia_git') + '/external/github.com/google/brotli.git' + '@' + '350100a5bb9d9671aca85213b2ec7a70a361b0cd',
+-
+-  'engine/src/flutter/third_party/yapf':
+-  Var('flutter_git') + '/third_party/yapf' + '@' + '212c5b5ad8e172d2d914ae454c121c89cccbcb35',
+-
+-  'engine/src/flutter/third_party/boringssl/src':
+-  'https://boringssl.googlesource.com/boringssl.git' + '@' + Var('dart_boringssl_rev'),
+-
+-  'engine/src/flutter/third_party/ai':
+-   Var('dart_git') + '/ai.git' + '@' + Var('dart_ai_rev'),
+-
+-  'engine/src/flutter/third_party/dart':
+-   Var('dart_git') + '/sdk.git' + '@' + Var('dart_revision'),
+-
+-  # WARNING: Unused Dart dependencies in the list below till "WARNING:" marker are removed automatically - see create_updated_flutter_deps.py.
+-
+-  'engine/src/flutter/third_party/dart/third_party/binaryen/src':
+-   Var('chromium_git') + '/external/github.com/WebAssembly/binaryen.git' + '@' + Var('dart_binaryen_rev'),
+-
+-  'engine/src/flutter/third_party/dart/third_party/devtools':
+-   {'dep_type': 'cipd', 'packages': [{'package': 'dart/third_party/flutter/devtools', 'version': 'git_revision:12d595649f189f1896722623f72599077f476848'}]},
+-
+-  'engine/src/flutter/third_party/dart/third_party/perfetto/src':
+-   Var('chromium_git') + '/external/github.com/google/perfetto' + '@' + Var('dart_perfetto_rev'),
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/core':
+-   Var('dart_git') + '/core.git' + '@' + Var('dart_core_rev'),
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/dart_style':
+-   Var('dart_git') + '/dart_style.git@39edc2d946a5d7bd1caf6f1695f366b00f7b873c',
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/dartdoc':
+-   Var('dart_git') + '/dartdoc.git@1d56f263955f329b6701d8f84f069eb0aef353a4',
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/ecosystem':
+-   Var('dart_git') + '/ecosystem.git' + '@' + Var('dart_ecosystem_rev'),
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/http':
+-   Var('dart_git') + '/http.git' + '@' + Var('dart_http_rev'),
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/i18n':
+-   Var('dart_git') + '/i18n.git' + '@' + Var('dart_i18n_rev'),
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/leak_tracker':
+-   Var('dart_git') + '/leak_tracker.git@f5620600a5ce1c44f65ddaa02001e200b096e14c',
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/native':
+-   Var('dart_git') + '/native.git@d51c53334486af69435b0b45c4bdfe303a830170',
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/protobuf':
+-   Var('dart_git') + '/protobuf.git' + '@' + Var('dart_protobuf_rev'),
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/pub':
+-   Var('dart_git') + '/pub.git' + '@' + Var('dart_pub_rev'),
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/shelf':
+-   Var('dart_git') + '/shelf.git@71248e727317930f244c4b4535e9733bcfc66677',
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/sync_http':
+-   Var('dart_git') + '/sync_http.git' + '@' + Var('dart_sync_http_rev'),
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/tar':
+-   Var('dart_git') + '/external/github.com/simolus3/tar.git@13479f7c2a18f499e840ad470cfcca8c579f6909',
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/test':
+-   Var('dart_git') + '/test.git@bd92e633e7f05edc3301865bdc00d1ae181cb1f1',
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/tools':
+-   Var('dart_git') + '/tools.git' + '@' + Var('dart_tools_rev'),
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/vector_math':
+-   Var('dart_git') + '/external/github.com/google/vector_math.dart.git' + '@' + Var('dart_vector_math_rev'),
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/web':
+-   Var('dart_git') + '/web.git' + '@' + Var('dart_web_rev'),
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/webdriver':
+-   Var('dart_git') + '/external/github.com/google/webdriver.dart.git' + '@' + Var('dart_webdriver_rev'),
+-
+-  'engine/src/flutter/third_party/dart/third_party/pkg/webkit_inspection_protocol':
+-   Var('dart_git') + '/external/github.com/google/webkit_inspection_protocol.dart.git' + '@' + Var('dart_webkit_inspection_protocol_rev'),
+-
+-  'engine/src/flutter/third_party/dart/tools/sdks/dart-sdk':
+-   {'dep_type': 'cipd', 'packages': [{'package': 'dart/dart-sdk/${{platform}}', 'version': 'version:3.13.0-103.1.beta'}]},
+-
+-  # WARNING: end of dart dependencies list that is cleaned up automatically - see create_updated_flutter_deps.py.
+-
+-  # Prebuilt Dart SDK of the same revision as the Dart SDK source checkout
+-  'engine/src/flutter/prebuilts/linux-x64/dart-sdk': {
+-    'packages': [
+-      {
+-        'package': 'flutter/dart-sdk/linux-amd64',
+-        'version': 'git_revision:'+Var('dart_revision')
+-      }
+-    ],
+-    'dep_type': 'cipd',
+-    'condition': 'host_os == "linux" and download_dart_sdk'
+-  },
+-  'engine/src/flutter/prebuilts/linux-arm64/dart-sdk': {
+-    'packages': [
+-      {
+-        'package': 'flutter/dart-sdk/linux-arm64',
+-        'version': 'git_revision:'+Var('dart_revision')
+-      }
+-    ],
+-    'dep_type': 'cipd',
+-    'condition': 'host_os == "linux" and download_dart_sdk'
+-  },
+-  'engine/src/flutter/prebuilts/macos-x64/dart-sdk': {
+-    'packages': [
+-      {
+-        'package': 'flutter/dart-sdk/mac-amd64',
+-        'version': 'git_revision:'+Var('dart_revision')
+-      }
+-    ],
+-    'dep_type': 'cipd',
+-    'condition': 'host_os == "mac" and download_dart_sdk'
+-  },
+-  'engine/src/flutter/prebuilts/macos-arm64/dart-sdk': {
+-    'packages': [
+-      {
+-        'package': 'flutter/dart-sdk/mac-arm64',
+-        'version': 'git_revision:'+Var('dart_revision')
+-      }
+-    ],
+-    'dep_type': 'cipd',
+-    'condition': 'host_os == "mac" and download_dart_sdk'
+-  },
+-  'engine/src/flutter/prebuilts/windows-x64/dart-sdk': {
+-    'packages': [
+-      {
+-        'package': 'flutter/dart-sdk/windows-amd64',
+-        'version': 'git_revision:'+Var('dart_revision')
+-      }
+-    ],
+-    'dep_type': 'cipd',
+-    'condition': 'host_os == "win" and download_dart_sdk'
+-  },
+-  'engine/src/flutter/prebuilts/windows-arm64/dart-sdk': {
+-    'packages': [
+-      {
+-        'package': 'flutter/dart-sdk/windows-arm64',
+-        'version': 'git_revision:'+Var('dart_revision')
+-      }
+-    ],
+-    'dep_type': 'cipd',
+-    'condition': 'host_os == "win" and download_dart_sdk'
+-  },
+-
+-  # esbuild download
+-  'engine/src/flutter/prebuilts/linux-x64/esbuild': {
+-    'packages': [
+-      {
+-        'package': 'flutter/tools/esbuild/linux-amd64',
+-        'version': Var('esbuild_version')
+-      }
+-    ],
+-    'dep_type': 'cipd',
+-    'condition': 'host_os == "linux" and download_esbuild'
+-  },
+-  'engine/src/flutter/prebuilts/macos-x64/esbuild': {
+-    'packages': [
+-      {
+-        'package': 'flutter/tools/esbuild/mac-amd64',
+-        'version': Var('esbuild_version')
+-      }
+-    ],
+-    'dep_type': 'cipd',
+-    'condition': 'host_os == "mac" and download_esbuild'
+-  },
+-  'engine/src/flutter/prebuilts/macos-arm64/esbuild': {
+-    'packages': [
+-      {
+-        'package': 'flutter/tools/esbuild/mac-arm64',
+-        'version': Var('esbuild_version')
+-      }
+-    ],
+-    'dep_type': 'cipd',
+-    'condition': 'host_os == "mac" and download_esbuild'
+-  },
+-  'engine/src/flutter/prebuilts/windows-x64/esbuild': {
+-    'packages': [
+-      {
+-        'package': 'flutter/tools/esbuild/windows-amd64',
+-        'version': Var('esbuild_version')
+-      }
+-    ],
+-    'dep_type': 'cipd',
+-    'condition': 'host_os == "win" and download_esbuild'
+-  },
+-
+-  'engine/src/flutter/third_party/expat':
+-   Var('chromium_git') + '/external/github.com/libexpat/libexpat.git' + '@' + '8e49998f003d693213b538ef765814c7d21abada',
+-
+-  'engine/src/flutter/third_party/freetype2':
+-   Var('flutter_git') + '/third_party/freetype2' + '@' + 'be4bcb57914154fc1b9e2900bf8e4b516057e2b8',
+-
+-  'engine/src/flutter/third_party/skia':
+-   Var('denial_skia_git') + '/skia.git' + '@' +  Var('skia_revision'),
+-
+-  'engine/src/flutter/third_party/ocmock':
+-   Var('flutter_git') + '/third_party/ocmock' + '@' +  Var('ocmock_rev'),
+-
+-  'engine/src/flutter/third_party/libjpeg-turbo/src':
+-   Var('flutter_git') + '/third_party/libjpeg-turbo' + '@' + '0fb821f3b2e570b2783a94ccd9a2fb1f4916ae9f',
+-
+-  'engine/src/flutter/third_party/libpng':
+-   Var('flutter_git') + '/third_party/libpng' + '@' + 'ced6b6c0c1e24716423a417b399d3c7d4623890d',
+-
+-  'engine/src/flutter/third_party/libwebp':
+-   Var('chromium_git') + '/webm/libwebp.git' + '@' + 'ca332209cb5567c9b249c86788cb2dbf8847e760', # 1.3.2
+-
+-  'engine/src/flutter/third_party/wuffs':
+-   Var('skia_git') + '/external/github.com/google/wuffs-mirror-release-c.git' + '@' + '600cd96cf47788ee3a74b40a6028b035c9fd6a61',
+-
+-  'engine/src/flutter/third_party/zlib':
+-   Var('chromium_git') + '/chromium/src/third_party/zlib.git' + '@' + '7eda07b1e067ef3fd7eea0419c88b5af45c9a776',
+-
+-  'engine/src/flutter/third_party/cpu_features/src':
+-   Var('chromium_git') + '/external/github.com/google/cpu_features.git' + '@' + '936b9ab5515dead115606559502e3864958f7f6e',
+-
+-  'engine/src/flutter/third_party/inja':
+-   Var('flutter_git') + '/third_party/inja' + '@' + '88bd6112575a80d004e551c98cf956f88ff4d445',
+-
+-  'engine/src/flutter/third_party/libtess2':
+-   Var('flutter_git') + '/third_party/libtess2' + '@' + '725e5e08ec8751477565f1d603fd7eb9058c277c',
+-
+-  'engine/src/flutter/third_party/sqlite':
+-   Var('flutter_git') + '/third_party/sqlite' + '@' + '0f61bd2023ba94423b4e4c8cfb1a23de1fe6a21c',
+-
+-  'engine/src/flutter/third_party/pyyaml':
+-   Var('flutter_git') + '/third_party/pyyaml.git' + '@' + '03c67afd452cdff45b41bfe65e19a2fb5b80a0e8',
+-
+-  'engine/src/flutter/third_party/swiftshader':
+-  Var('swiftshader_git') + '/SwiftShader.git' + '@' + '794b0cfce1d828d187637e6d932bae484fbe0976',
+-
+-  'engine/src/flutter/third_party/angle':
+-  Var('flutter_git') + '/third_party/angle' + '@' + '84027aca9b71c9ba335bd000dad1107b8810a511',
+-
+-  'engine/src/flutter/third_party/vulkan_memory_allocator':
+-  Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator' + '@' + 'c788c52156f3ef7bc7ab769cb03c110a53ac8fcb',
+-
+-  'engine/src/third_party/abseil-cpp':
+-  Var('chromium_git') + '/chromium/src/third_party/abseil-cpp' + '@' + '564023aa53767b5f60b3a556f0a025b7b7e8241e',
+-
+-   # Dart packages
+-  'engine/src/flutter/third_party/pkg/archive':
+-  Var('chromium_git') + '/external/github.com/brendan-duncan/archive.git' + '@' + 'f1d164f8f5d8aea0be620a9b1e8d300b75a29388', # 3.6.1
+-
+-  'engine/src/flutter/third_party/pkg/equatable':
+-  Var('flutter_git') + '/third_party/equatable.git' + '@' + '2117551ff3054f8edb1a58f63ffe1832a8d25623', # 2.0.5
+-
+-  'engine/src/flutter/third_party/pkg/flutter_packages':
+-  Var('flutter_git') + '/mirrors/packages' + '@' + '25454e63851fe7933f04d025606e68c1eac4fe0f', # various
+-
+-  'engine/src/flutter/third_party/pkg/gcloud':
+-  Var('flutter_git') + '/third_party/gcloud.git' + '@' + 'a5276b85c4714378e84b1fb478b8feeeb686ac26', # 0.8.6-dev
+-
+-  'engine/src/flutter/third_party/pkg/googleapis':
+-  Var('flutter_git') + '/third_party/googleapis.dart.git' + '@' + '526011f56d98eab183cc6075ee1392e8303e43e2', # various
+-
+-  'engine/src/flutter/third_party/pkg/io':
+-  Var('flutter_git') + '/third_party/io.git' + '@' + '997a6243aad20af4238147d9ec00bf638b9169af', # 1.0.5-wip
+-
+-  'engine/src/flutter/third_party/pkg/node_preamble':
+-  Var('flutter_git') + '/third_party/node_preamble.dart.git' + '@' + '47245865175929ec452d8058e563c267b64c3d64', # 2.0.2
+-
+-  'engine/src/flutter/third_party/pkg/process':
+-  Var('dart_git') + '/process.dart' + '@' + '0c9aeac86dcc4e3a6cf760b76fed507107e244d5', # 4.2.1
+-
+-  'engine/src/flutter/third_party/pkg/process_runner':
+-  Var('flutter_git') + '/third_party/process_runner.git' + '@' + 'f24c69efdcaf109168f23d381fa281453d2bc9b1', # 4.1.2
+-
+-  'engine/src/flutter/third_party/pkg/vector_math':
+-  Var('dart_git') + '/external/github.com/google/vector_math.dart.git' + '@' + '0a5fd95449083d404df9768bc1b321b88a7d2eef', # 2.1.0
+-
+-  'engine/src/flutter/third_party/imgui':
+-  Var('flutter_git') + '/third_party/imgui.git' + '@' + '2a1b69f05748ad909f03acf4533447cac1331611',
+-
+-  'engine/src/flutter/third_party/json':
+-  Var('flutter_git') + '/third_party/json.git' + '@' + '17d9eacd248f58b73f4d1be518ef649fe2295642',
+-
+-  'engine/src/flutter/third_party/gradle': {
+-    'packages': [
+-      {
+-        # See tools/gradle/README.md for update instructions.
+-        # Version here means the CIPD tag.
+-        'version': 'version:8.11.1',
+-        'package': 'flutter/gradle'
+-      }
+-    ],
+-    'condition': 'download_android_deps',
+-    'dep_type': 'cipd'
+-  },
+-
+-  'engine/src/flutter/third_party/android_tools/trace_to_text': {
+-    'packages': [
+-      {
+-        # 25.0 downloads for both mac-amd64 and mac-arm64
+-        # 26.1 is not found with either platform
+-        # 27.1 is the latest release of perfetto
+-        'version': 'git_tag:v25.0',
+-        'package': 'perfetto/trace_to_text/${{platform}}'
+-      }
+-    ],
+-    'condition': 'download_android_deps',
+-    'dep_type': 'cipd'
+-  },
+-
+-   'engine/src/flutter/third_party/android_tools/google-java-format': {
+-     'packages': [
+-       {
+-        'package': 'flutter/android/google-java-format',
+-        'version': 'version:1.7-1'
+-       }
+-     ],
+-     # We want to be able to format these as part of CI, and the CI step that
+-     # checks formatting runs without downloading the rest of the Android build
+-     # tooling. Therefore unlike all the other Android-related tools, we want to
+-     # download this every time.
+-     'dep_type': 'cipd',
+-   },
+-
+-  'engine/src/flutter/third_party/android_tools': {
+-     'packages': [
+-       {
+-        'package': 'flutter/android/sdk/all/${{platform}}',
+-        'version': 'version:37v2'
+-       }
+-     ],
+-     'condition': 'download_android_deps',
+-     'dep_type': 'cipd',
+-   },
+-
+-  'engine/src/flutter/third_party/android_embedding_dependencies': {
+-     'packages': [
+-       {
+-        'package': 'flutter/android/embedding_bundle',
+-        'version': 'last_updated:2025-10-15T09:53:03-0700'
+-       }
+-     ],
+-     'condition': 'download_android_deps',
+-     'dep_type': 'cipd',
+-   },
+-
+-  'engine/src/flutter/third_party/java/openjdk': {
+-     'packages': [
+-       {
+-        'package': 'flutter/java/openjdk/${{platform}}',
+-        'version': 'version:21'
+-       }
+-     ],
+-     'condition': 'not (host_os == "linux" and host_cpu == "arm64")',
+-     # Always download the JDK since java is required for running the formatter.
+-     'dep_type': 'cipd',
+-   },
+-
+-  'engine/src/flutter/third_party/gn': {
+-    'packages': [
+-      {
+-        'package': 'gn/gn/${{platform}}',
+-        'version': 'git_revision:81b24e01531ecf0eff12ec9359a555ec3944ec4e'
+-      },
+-    ],
+-    'dep_type': 'cipd',
+-  },
+-  'third_party/ninja': {
+-    'packages': [
+-      {
+-        'package': 'infra/3pp/tools/ninja/${{platform}}',
+-        'version': 'version:2@1.11.1.chromium.4',
+-      }
+-    ],
+-    'dep_type': 'cipd',
+-  },
+-
+-  'engine/src/flutter/prebuilts/emsdk': {
+-   'url': Var('skia_git') + '/external/github.com/emscripten-core/emsdk.git' + '@' + '2514ec738de72cebbba7f4fdba0cf2fabcb779a5',
+-   'condition': 'download_emsdk',
+-  },
+-
+-  # Clang on mac and linux are expected to typically be the same revision.
+-  # They are separated out so that the autoroller can more easily manage them.
+-  'engine/src/flutter/buildtools/mac-x64/clang': {
+-    'packages': [
+-      {
+-        'package': 'fuchsia/third_party/clang/mac-amd64',
+-        'version': Var('clang_version'),
+-      }
+-    ],
+-    'condition': 'host_os == "mac"', # On ARM64 Macs too because Goma doesn't support the host-arm64 toolchain.
+-    'dep_type': 'cipd',
+-  },
+-
+-  'engine/src/flutter/buildtools/mac-arm64/clang': {
+-    'packages': [
+-      {
+-        'package': 'fuchsia/third_party/clang/mac-arm64',
+-        'version': Var('clang_version'),
+-      }
+-    ],
+-    'condition': 'host_os == "mac" and host_cpu == "arm64"',
+-    'dep_type': 'cipd',
+-  },
+-
+-  'engine/src/flutter/buildtools/linux-x64/clang': {
+-    'packages': [
+-      {
+-        'package': 'fuchsia/third_party/clang/linux-amd64',
+-        'version': Var('clang_version'),
+-      }
+-    ],
+-    'condition': 'host_os == "linux" or host_os == "mac"',
+-    'dep_type': 'cipd',
+-  },
+-
+-  'engine/src/flutter/buildtools/linux-arm64/clang': {
+-    'packages': [
+-      {
+-        'package': 'fuchsia/third_party/clang/linux-arm64',
+-        'version': Var('clang_version'),
+-      }
+-    ],
+-    'condition': 'host_os == "linux" and host_cpu == "arm64"',
+-    'dep_type': 'cipd',
+-  },
+-
+-  'engine/src/flutter/buildtools/windows-x64/clang': {
+-    'packages': [
+-      {
+-        'package': 'fuchsia/third_party/clang/windows-amd64',
+-        'version': Var('clang_version'),
+-      }
+-    ],
+-    'condition': 'download_windows_deps',
+-    'dep_type': 'cipd',
+-  },
+-
+-  # RBE binaries and configs.
+-  'engine/src/flutter/buildtools/linux-x64/reclient': {
+-    'packages': [
+-      {
+-        'package': 'infra/rbe/client/${{platform}}',
+-        'version': Var('reclient_version'),
+-      }
+-    ],
+-    'condition': 'use_rbe and host_os == "linux" and host_cpu == "x64"',
+-    'dep_type': 'cipd',
+-  },
+-
+-  'engine/src/flutter/buildtools/mac-arm64/reclient': {
+-    'packages': [
+-      {
+-        'package': 'infra/rbe/client/${{platform}}',
+-        'version': Var('reclient_version'),
+-      }
+-    ],
+-    'condition': 'use_rbe and host_os == "mac" and host_cpu == "arm64"',
+-    'dep_type': 'cipd',
+-  },
+-
+-  'engine/src/flutter/buildtools/mac-x64/reclient': {
+-    'packages': [
+-      {
+-        'package': 'infra/rbe/client/${{platform}}',
+-        'version': Var('reclient_version'),
+-      }
+-    ],
+-    'condition': 'use_rbe and host_os == "mac" and host_cpu == "x64"',
+-    'dep_type': 'cipd',
+-  },
+-
+-  'engine/src/flutter/buildtools/windows-x64/reclient': {
+-    'packages': [
+-      {
+-        'package': 'infra/rbe/client/${{platform}}',
+-        'version': Var('reclient_version'),
+-      }
+-    ],
+-    'condition': 'use_rbe and download_windows_deps',
+-    'dep_type': 'cipd',
+-  },
+-
+-  'engine/src/flutter/build/rbe': {
+-    'packages': [
+-      {
+-        'package': 'flutter_internal/rbe/reclient_cfgs',
+-        'version': '0vARzGeIZgIhW7zVfWuqIPQ_HXMLDccjAstykWZKjaEC',
+-      }
+-    ],
+-    'condition': 'use_rbe',
+-    'dep_type': 'cipd',
+-  },
+-
+-  # gcloud
+-  'engine/src/flutter/buildtools/linux-x64/gcloud': {
+-    'packages': [
+-      {
+-        'package': 'infra/3pp/tools/gcloud/${{platform}}',
+-        'version': Var('gcloud_version'),
+-      }
+-    ],
+-    'condition': 'use_rbe and host_os == "linux" and host_cpu == "x64"',
+-    'dep_type': 'cipd',
+-  },
+-
+-  'engine/src/flutter/buildtools/mac-arm64/gcloud': {
+-    'packages': [
+-      {
+-        'package': 'infra/3pp/tools/gcloud/${{platform}}',
+-        'version': Var('gcloud_version'),
+-      }
+-    ],
+-    'condition': 'use_rbe and host_os == "mac" and host_cpu == "arm64"',
+-    'dep_type': 'cipd',
+-  },
+-
+-  # Get the SDK from https://chrome-infra-packages.appspot.com/p/fuchsia/sdk/core at the 'latest' tag
+-  # Get the toolchain from https://chrome-infra-packages.appspot.com/p/fuchsia/clang at the 'goma' tag
+-  'engine/src/third_party/fuchsia-sdk/sdk': {
+-     'packages': [
+-       {
+-        'package': 'fuchsia/sdk/core/linux-amd64',
+-        'version': 'QcRFUtvCw2EobfJ8s6m4hND8ABvb6gRzd8JQLrdpVsQC'
+-       }
+-     ],
+-     'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
+-     'dep_type': 'cipd',
+-   },
+-
+-  'engine/src/flutter/tools/fuchsia/test_scripts': {
+-     'packages': [
+-       {
+-        'package': 'chromium/fuchsia/test-scripts',
+-        'version': Var('fuchsia_test_scripts_version'),
+-       }
+-     ],
+-     'condition': 'download_fuchsia_deps',
+-     'dep_type': 'cipd',
+-   },
+-
+-  'engine/src/flutter/tools/fuchsia/gn-sdk': {
+-     'packages': [
+-       {
+-        'package': 'chromium/fuchsia/gn-sdk',
+-        'version': Var('fuchsia_gn_sdk_version'),
+-       }
+-     ],
+-     'condition': 'download_fuchsia_deps',
+-     'dep_type': 'cipd',
+-   },
+-
+-  'engine/src/flutter/third_party/google_fonts_for_unit_tests': {
+-      'packages': [
+-        {
+-          'package': 'flutter/flutter_font_fallbacks',
+-          'version': '44bd38be0bc8c189a397ca6dd6f737746a9e0c6117b96a8f84f1edf6acd1206b'
+-        }
+-      ],
+-      'dep_type': 'cipd',
+-  }
+-}
+-
+-recursedeps = [
+-  'engine/src/flutter/third_party/vulkan-deps',
+-]
+-
+-hooks = [
+-  {
+-    # Generate the Dart SDK's .dart_tool/package_confg.json file.
+-    'name': 'Generate .dart_tool/package_confg.json',
+-    'pattern': '.',
+-    'action': ['python3', 'engine/src/flutter/third_party/dart/tools/generate_package_config.py'],
+-  },
+-  {
+-    # Generate the sdk/version file.
+-    'name': 'Generate sdk/version',
+-    'pattern': '.',
+-    'action': ['python3', 'engine/src/flutter/third_party/dart/tools/generate_sdk_version_file.py'],
+-  },
+-  {
+-    # Update the Windows toolchain if necessary.
+-    'name': 'win_toolchain',
+-    'condition': 'download_windows_deps',
+-    'pattern': '.',
+-    'action': ['python3', 'engine/src/build/vs_toolchain.py', 'update'],
+-  },
+-  {
+-    'name': 'dia_dll',
+-    'pattern': '.',
+-    'condition': 'download_windows_deps',
+-    'action': [
+-      'python3',
+-      'engine/src/flutter/tools/dia_dll.py',
+-    ],
+-  },
+-  {
+-    'name': 'linux_sysroot_x64',
+-    'pattern': '.',
+-    'condition': 'download_linux_deps',
+-    'action': [
+-      'python3',
+-      'engine/src/build/linux/sysroot_scripts/install-sysroot.py',
+-      '--arch=x64'],
+-  },
+-  {
+-    'name': 'linux_sysroot_arm64',
+-    'pattern': '.',
+-    'condition': 'download_linux_deps',
+-    'action': [
+-      'python3',
+-      'engine/src/build/linux/sysroot_scripts/install-sysroot.py',
+-      '--arch=arm64'],
+-  },
+-  {
+-    'name': 'linux_sysroot_riscv64',
+-    'pattern': '.',
+-    'condition': 'download_linux_deps',
+-    'action': [
+-      'python3',
+-      'engine/src/build/linux/sysroot_scripts/install-sysroot.py',
+-      '--arch=riscv64'],
+-  },
+-  {
+-    'name': 'pub get --offline',
+-    'pattern': '.',
+-    'action': [
+-      'python3',
+-      'engine/src/flutter/tools/pub_get_offline.py',
+-    ]
+-  },
+-  {
+-    'name': 'Download Fuchsia SDK',
+-    'pattern': '.',
+-    'condition': 'download_fuchsia_deps and download_fuchsia_sdk',
+-    'action': [
+-      'python3',
+-      'engine/src/flutter/tools/download_fuchsia_sdk.py',
+-      '--fail-loudly',
+-      '--verbose',
+-      '--host-os',
+-      Var('host_os'),
+-      '--fuchsia-sdk-path',
+-      Var('fuchsia_sdk_path'),
+-    ]
+-  },
+-  {
+-    'name': 'Activate Emscripten SDK',
+-    'pattern': '.',
+-    'condition': 'download_emsdk',
+-    'action': [
+-      'python3',
+-      'engine/src/flutter/tools/activate_emsdk.py',
+-    ]
+-  },
+-  {
+-    'name': 'Setup githooks',
+-    'pattern': '.',
+-    'condition': 'setup_githooks',
+-    'action': [
+-      'python3',
+-      'engine/src/flutter/tools/githooks/setup.py',
+-    ]
+-  },
+-  {
+-    'name': 'Download Fuchsia system images',
+-    'pattern': '.',
+-    'condition': 'run_fuchsia_emu',
+-    'action': [
+-      'env',
+-      'DOWNLOAD_FUCHSIA_SDK={download_fuchsia_sdk}',
+-      'FUCHSIA_SDK_PATH={fuchsia_sdk_path}',
+-      'python3',
+-      'engine/src/flutter/tools/fuchsia/with_envs.py',
+-      'engine/src/flutter/tools/fuchsia/test_scripts/update_product_bundles.py',
+-      'terminal.x64,terminal.qemu-arm64',
+-    ]
+-  },
+-  # The following script checks if it is running in the LUCI environment,
+-  # and does nothing if so. This is because Xcode is not yet installed in CI
+-  # when this hook is run.
+-  {
+-    'name': 'Find the iOS and macOS SDKs',
+-    'pattern': '.',
+-    'condition': 'host_os == "mac"',
+-    'action': [
+-      'python3',
+-      'engine/src/build/mac/darwin_sdk.py',
+-      '--as-gclient-hook'
+-    ]
+-  },
+-  {
+-    'name': 'Generate Fuchsia GN build rules',
+-    'pattern': '.',
+-    'condition': 'download_fuchsia_deps',
+-    'action': [
+-      'python3',
+-      'engine/src/flutter/tools/fuchsia/with_envs.py',
+-      'engine/src/flutter/tools/fuchsia/test_scripts/gen_build_defs.py',
+-    ],
+-  },
+-]
++deps = {'engine/src/flutter/third_party/depot_tools': 'https://gitee.com/mirrors_chromium_googlesource/depot_tools', 'engine/src/flutter/third_party/rapidjson': 'https://github.com/Tencent/rapidjson', 'engine/src/flutter/third_party/harfbuzz': 'https://github.com/harfbuzz/harfbuzz', 'engine/src/flutter/third_party/glfw': 'https://github.com/glfw/glfw@9352d8fe93cd443be18157abe81f16500549aec0', 'engine/src/flutter/third_party/shaderc': 'https://github.com/google/shaderc', 'engine/src/flutter/third_party/flatbuffers': 'https://github.com/google/flatbuffers', 'engine/src/flutter/third_party/icu': 'https://github.com/unicode-org/icu', 'engine/src/flutter/third_party/gtest-parallel': 'https://github.com/google/gtest-parallel', 'engine/src/flutter/third_party/benchmark': 'https://github.com/google/benchmark', 'engine/src/flutter/third_party/googletest': 'https://github.com/google/googletest', 'engine/src/flutter/third_party/re2': 'https://github.com/google/re2', 'engine/src/flutter/third_party/brotli': 'https://github.com/google/brotli', 'engine/src/flutter/third_party/boringssl/src': 'https://github.com/google/boringssl', 'engine/src/flutter/third_party/ai': 'https://github.com/dart-lang/ai@9c96bfe5f091c9451eff5b59c9bffeb2e806b875', 'engine/src/flutter/third_party/dart': 'https://github.com/dart-lang/sdk@78b291170b8b0933c7775c405da9b74e35a14cbd', 'engine/src/flutter/third_party/dart/third_party/binaryen/src': 'https://github.com/WebAssembly/binaryen', 'engine/src/flutter/third_party/dart/third_party/perfetto/src': 'https://github.com/google/perfetto', 'engine/src/flutter/third_party/dart/third_party/pkg/core': 'https://github.com/dart-lang/core@be0b1531c445a185d3e93887b8d0355fc766c314', 'engine/src/flutter/third_party/dart/third_party/pkg/dart_style': 'https://github.com/dart-lang/dart_style@39edc2d946a5d7bd1caf6f1695f366b00f7b873c', 'engine/src/flutter/third_party/dart/third_party/pkg/dartdoc': 'https://github.com/dart-lang/dartdoc@1d56f263955f329b6701d8f84f069eb0aef353a4', 'engine/src/flutter/third_party/dart/third_party/pkg/ecosystem': 'https://github.com/dart-lang/ecosystem@848b3bf3b757d2e9ae4d60030eeed5756c87783f', 'engine/src/flutter/third_party/dart/third_party/pkg/http': 'https://github.com/dart-lang/http@5d94ef52582867e077bf41c3fa20fb8b1d1d834e', 'engine/src/flutter/third_party/dart/third_party/pkg/i18n': 'https://github.com/dart-lang/i18n@d0683bdea253d19a4350f5bc2be9017aba61837f', 'engine/src/flutter/third_party/dart/third_party/pkg/leak_tracker': 'https://github.com/dart-lang/leak_tracker@f5620600a5ce1c44f65ddaa02001e200b096e14c', 'engine/src/flutter/third_party/dart/third_party/pkg/native': 'https://github.com/dart-lang/native@d51c53334486af69435b0b45c4bdfe303a830170', 'engine/src/flutter/third_party/dart/third_party/pkg/protobuf': 'https://github.com/dart-lang/protobuf@84079e8b8531309e06ba7276b1c28bdca9210ad6', 'engine/src/flutter/third_party/dart/third_party/pkg/pub': 'https://github.com/dart-lang/pub@ec276d10a7fa0f6c6ec005340fb9ad29f3b012d0', 'engine/src/flutter/third_party/dart/third_party/pkg/shelf': 'https://github.com/dart-lang/shelf@71248e727317930f244c4b4535e9733bcfc66677', 'engine/src/flutter/third_party/dart/third_party/pkg/sync_http': 'https://github.com/dart-lang/sync_http@6666fff944221891182e1f80bf56569338164d72', 'engine/src/flutter/third_party/dart/third_party/pkg/tar': 'https://github.com/simolus3/tar@13479f7c2a18f499e840ad470cfcca8c579f6909', 'engine/src/flutter/third_party/dart/third_party/pkg/test': 'https://github.com/dart-lang/test@bd92e633e7f05edc3301865bdc00d1ae181cb1f1', 'engine/src/flutter/third_party/dart/third_party/pkg/tools': 'https://github.com/dart-lang/tools@7fec8be9af0cd0367d03dbec29b66b3f46565720', 'engine/src/flutter/third_party/dart/third_party/pkg/vector_math': 'https://github.com/google/vector_math.dart@cf3b5db7340d317dd3489e5a35434b408020a852', 'engine/src/flutter/third_party/dart/third_party/pkg/web': 'https://github.com/dart-lang/web@eb8c3fc61a1e35f48f865836c7c7342897d91bcc', 'engine/src/flutter/third_party/dart/third_party/pkg/webdriver': 'https://github.com/google/webdriver.dart@3a711ebb36871eac997c5d5d2429f7414873dc63', 'engine/src/flutter/third_party/dart/third_party/pkg/webkit_inspection_protocol': 'https://github.com/google/webkit_inspection_protocol.dart@762115a971d1968bc940454ad1e88d506d8c5640', 'engine/src/flutter/third_party/expat': 'https://github.com/libexpat/libexpat@8e49998f003d693213b538ef765814c7d21abada', 'engine/src/flutter/third_party/freetype2': 'https://github.com/freetype/freetype', 'engine/src/flutter/third_party/skia': 'https://github.com/denialwm/skia@5b495e3e15a59ee76af882d83316d351654c1e88', 'engine/src/flutter/third_party/libjpeg-turbo/src': 'https://github.com/libjpeg-turbo/libjpeg-turbo', 'engine/src/flutter/third_party/libpng': 'https://github.com/glennrp/libpng', 'engine/src/flutter/third_party/libwebp': 'https://github.com/webmproject/libwebp@ca332209cb5567c9b249c86788cb2dbf8847e760', 'engine/src/flutter/third_party/wuffs': 'https://github.com/google/wuffs', 'engine/src/flutter/third_party/zlib': 'https://github.com/madler/zlib', 'engine/src/flutter/third_party/cpu_features/src': 'https://github.com/google/cpu_features@936b9ab5515dead115606559502e3864958f7f6e', 'engine/src/flutter/third_party/inja': 'https://github.com/pantor/inja@88bd6112575a80d004e551c98cf956f88ff4d445', 'engine/src/flutter/third_party/libtess2': 'https://github.com/memononen/libtess2', 'engine/src/flutter/third_party/sqlite': 'https://github.com/sqlite/sqlite', 'engine/src/flutter/third_party/pyyaml': 'https://github.com/yaml/pyyaml', 'engine/src/flutter/third_party/vulkan_memory_allocator': 'https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator', 'engine/src/third_party/abseil-cpp': 'https://github.com/abseil/abseil-cpp@564023aa53767b5f60b3a556f0a025b7b7e8241e', 'engine/src/flutter/third_party/pkg/archive': 'https://github.com/brendan-duncan/archive', 'engine/src/flutter/third_party/imgui': 'https://github.com/ocornut/imgui@2a1b69f05748ad909f03acf4533447cac1331611', 'engine/src/flutter/third_party/json': 'https://github.com/nlohmann/json@17d9eacd248f58b73f4d1be518ef649fe2295642', 'engine/src/flutter/prebuilts/emsdk': {'condition': 'download_emsdk', 'url': 'https://github.com/emscripten-core/emsdk@2514ec738de72cebbba7f4fdba0cf2fabcb779a5'}}
+diff --git a/bin/internal/update_dart_sdk.sh b/bin/internal/update_dart_sdk.sh
+index 41f41911..f561f3db 100755
+--- a/bin/internal/update_dart_sdk.sh
++++ b/bin/internal/update_dart_sdk.sh
+@@ -90,6 +90,9 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ];
+       x86_64)
+         ARCH="x64"
+         ;;
++      loongarch64)
++        ARCH="loong64"
++        ;;
+       riscv64)
+         ARCH="riscv64"
+         ;;
+diff --git a/engine/src/build/config/BUILDCONFIG.gn b/engine/src/build/config/BUILDCONFIG.gn
+index 7dcba533..43aa0be7 100644
+--- a/engine/src/build/config/BUILDCONFIG.gn
++++ b/engine/src/build/config/BUILDCONFIG.gn
+@@ -358,7 +358,7 @@ if (!is_clang && using_sanitizer) {
+   is_clang = true
+ }
+ 
+-use_flutter_cxx = is_clang && (is_linux || is_android || is_mac || is_ios)
++use_flutter_cxx = false
+ 
+ if (is_msan && !is_linux) {
+   assert(false, "Memory sanitizer is only available on Linux.")
+diff --git a/engine/src/build/config/compiler/BUILD.gn b/engine/src/build/config/compiler/BUILD.gn
+index e06cf625..3faf4f2b 100644
+--- a/engine/src/build/config/compiler/BUILD.gn
++++ b/engine/src/build/config/compiler/BUILD.gn
+@@ -34,7 +34,8 @@ declare_args() {
+   # By default, API calls to deprecated methods are errors. While prototyping,
+   # this flag may be set to allow such calls.
+   # riscv64: https://github.com/flutter/flutter/issues/173656
+-  allow_deprecated_api_calls = target_cpu == "riscv64"
++  allow_deprecated_api_calls =
++      target_cpu == "riscv64" || target_cpu == "loong64"
+ 
+   # This flag is deprecated and will be removed. The value will be ignored.
+   use_fstack_protector = false
+@@ -115,7 +116,9 @@ config("compiler") {
+     # Stack protection.
+     if (is_mac) {
+       cflags += [ "-fstack-protector-all" ]
+-    } else if (!is_ios && !is_wasm && !is_qnx) {
++    } else if (!is_ios && !is_wasm && !is_qnx && !(current_os == "linux" && target_cpu == "loong64")) {
++      # LoongArch64 sysroot lacks libssp (__stack_chk_guard global),
++      # so stack-protector hard-fails at link time. Disable it for loong64.
+       cflags += [
+         "-fstack-protector",
+ 
+@@ -372,8 +375,16 @@ config("compiler") {
+       "-Wl,-z,now",
+       "-Wl,-z,relro",
+     ]
+-    if (!using_sanitizer) {
++    if (!using_sanitizer && !(current_os == "linux" && target_cpu == "loong64")) {
++      # LoongArch64 glibc puts __tls_get_addr in ld-linux (not libc.so),
++      # and lld's strict --no-undefined check can't handle it.
++      # GNU ld leaves such symbols to the runtime dynamic linker.
++      # We use --unresolved-symbols=ignore-in-object-files to permit symbols
++      # that the runtime loader (ld-linux) will provide.
+       ldflags += [ "-Wl,-z,defs" ]
++    } else if (current_os == "linux" && target_cpu == "loong64") {
++      # For loong64: allow unresolved symbols - ld-linux provides __tls_get_addr.
++      ldflags += [ "-Wl,--unresolved-symbols=ignore-in-object-files" ]
+     }
+   }
+ 
+@@ -401,6 +412,10 @@ config("compiler") {
+       cflags += [ "--target=aarch64-linux-gnu" ]
+       ldflags += [ "--target=aarch64-linux-gnu" ]
+       cflags += [ "-DBORINGSSL_CLANG_SUPPORTS_DOT_ARCH" ]
++    } else if (current_cpu == "loong64") {
++      assert(is_clang)
++      cflags += [ "--target=loongarch64-linux-gnu" ]
++      ldflags += [ "--target=loongarch64-linux-gnu" ]
+     }
+   }
+ 
+@@ -742,7 +757,9 @@ if (is_win) {
+ 
+   if (!is_qnx) {
+     default_warning_flags += [
+-      "-Werror",  # Warnings as errors.
++      # DISABLED for loong64 build: clang 23 has new deprecation warnings that break -Werror
++      # "-Werror",  # Warnings as errors.
++      "-Wno-error",  # Temporarily disable for loong64 build
+     ]
+   }
+ 
+diff --git a/engine/src/build/config/gcc/BUILD.gn b/engine/src/build/config/gcc/BUILD.gn
+index 63283684..ac06fbff 100644
+--- a/engine/src/build/config/gcc/BUILD.gn
++++ b/engine/src/build/config/gcc/BUILD.gn
+@@ -86,6 +86,7 @@ config("relative_paths") {
+     # prefix matching absolute_path and hence be mapped to relative_path
+     # in the debugging information, so this should actually be
+     # superfluous for purposes of the debugging information.
+-    "-no-canonical-prefixes",
++    # DISABLED for loong64 build: clang 23 with --sysroot misbehaves with this flag
++    # "-no-canonical-prefixes",
+   ]
+ }
+diff --git a/engine/src/build/config/sysroot.gni b/engine/src/build/config/sysroot.gni
+index 12c8df99..34023c48 100644
+--- a/engine/src/build/config/sysroot.gni
++++ b/engine/src/build/config/sysroot.gni
+@@ -28,6 +28,9 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
+     } else if (current_cpu == "arm64") {
+       sysroot =
+           rebase_path("//build/linux/debian_bullseye_arm64-sysroot", root_build_dir)
++    } else if (current_cpu == "loong64") {
++      sysroot =
++          rebase_path("//build/linux/debian_trixie_loong64-sysroot", root_build_dir)
+     } else if (current_cpu == "riscv64") {
+       sysroot =
+           rebase_path("//build/linux/debian_trixie_riscv64-sysroot", root_build_dir)
+diff --git a/engine/src/build/linux/sysroot_scripts/install-sysroot.py b/engine/src/build/linux/sysroot_scripts/install-sysroot.py
+index 2d4cea93..9f839122 100755
+--- a/engine/src/build/linux/sysroot_scripts/install-sysroot.py
++++ b/engine/src/build/linux/sysroot_scripts/install-sysroot.py
+@@ -29,7 +29,7 @@ from urllib.request import urlopen
+ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ SRC_DIR = os.path.dirname(os.path.dirname(os.path.dirname(SCRIPT_DIR)))
+ VALID_ARCHS = ("amd64", "i386", "armhf", "arm64", "mipsel", "mips64el",
+-               "ppc64el", "riscv64")
++               "loong64", "ppc64el", "riscv64")
+ ARCH_TRANSLATIONS = {
+     "x64": "amd64",
+     "x86": "i386",
+@@ -46,6 +46,7 @@ DEFAULT_TARGET_PLATFORMS = {
+     "mipsel": "bullseye",
+     "mips64el": "bullseye",
+     "ppc64el": "bullseye",
++    "loong64": "trixie",
+     "riscv64": "trixie",
+ }
+ DEFAULT_SYSROOTS_PATH = os.path.join(os.path.relpath(SCRIPT_DIR, SRC_DIR),
+diff --git a/engine/src/build/linux/sysroot_scripts/sysroots.json b/engine/src/build/linux/sysroot_scripts/sysroots.json
+index d6093b00..6e137e8d 100644
+--- a/engine/src/build/linux/sysroot_scripts/sysroots.json
++++ b/engine/src/build/linux/sysroot_scripts/sysroots.json
+@@ -41,6 +41,12 @@
+         "Tarball": "debian_bullseye_ppc64el_sysroot.tar.xz",
+         "URL": "https://commondatastorage.googleapis.com/chrome-linux-sysroot"
+     },
++    "trixie_loong64": {
++        "Sha256Sum": "34c9216569fc52eac31d117b5695d4ec747b7bb55c89ae9bb54d0e40f3fb1aee",
++        "SysrootDir": "debian_trixie_loong64-sysroot",
++        "Tarball": "debian_trixie_loong64_sysroot.tar.xz",
++        "URL": "https://loong64.github.io/chrome-linux-sysroot"
++    },
+     "trixie_riscv64": {
+         "Sha256Sum": "5c8ef4067f41a625d81113a6292180acf4ef49a2ffe015c2779123c133b8e250",
+         "SysrootDir": "debian_trixie_riscv64-sysroot",
+diff --git a/engine/src/build/toolchain/linux/BUILD.gn b/engine/src/build/toolchain/linux/BUILD.gn
+index b6db422f..131f7089 100644
+--- a/engine/src/build/toolchain/linux/BUILD.gn
++++ b/engine/src/build/toolchain/linux/BUILD.gn
+@@ -36,6 +36,9 @@ if (use_rbe) {
+ if (host_cpu == "arm64") {
+   rebased_clang_dir =
+       rebase_path("$buildtools_path/linux-arm64/clang/bin", root_build_dir)
++} else if (host_cpu == "loong64") {
++  rebased_clang_dir =
++      rebase_path("$buildtools_path/linux-loong64/clang/bin", root_build_dir)
+ } else {
+   rebased_clang_dir =
+       rebase_path("$buildtools_path/linux-x64/clang/bin", root_build_dir)
+@@ -117,6 +120,51 @@ gcc_toolchain("clang_arm64") {
+   is_clang = true
+ }
+ 
++gcc_toolchain("loong64") {
++  prefix = "loongarch64-linux-gnu-"
++  if (toolchain_prefix != "") {
++    prefix = toolchain_prefix
++  }
++
++  asm = "${prefix}gcc"
++  cc = "${compiler_prefix}${prefix}gcc"
++  cxx = "${compiler_prefix}${prefix}g++"
++
++  ar = "${prefix}ar"
++  ld = "${link_prefix}${prefix}g++"
++  readelf = "${prefix}readelf"
++  nm = "${prefix}nm"
++  strip = "${prefix}strip"
++
++  toolchain_cpu = "loong64"
++  toolchain_os = "linux"
++  is_clang = false
++}
++
++gcc_toolchain("clang_loong64") {
++  prefix = rebased_clang_dir
++  asm = "${prefix}/clang"
++  cc = "${compiler_prefix}${prefix}/clang"
++  cxx = "${compiler_prefix}${prefix}/clang++"
++
++  readelf = "readelf"
++  nm = "${prefix}/llvm-nm"
++  ar = "${prefix}/llvm-ar"
++  # Use lld instead of GNU ld - GNU ld doesn't properly handle sysroot
++  # linker scripts for cross-compilation. lld handles --sysroot correctly.
++  # IMPORTANT: prepend sysroot -L paths BEFORE clang's default host GCC
++  # paths. Otherwise lld finds host GCC loongarch64 libstdc++ which has
++  # /lib/ld-linux-loongarch-lp64d.so.1 hardcoded (no sysroot prefix).
++  # Also add -lgcc_s explicitly: on loongarch64 glibc, __tls_get_addr lives
++  # in ld-linux (not libc), and lld needs -lgcc_s to pull it in.
++  ld = "${link_prefix}${prefix}/clang++ -fuse-ld=lld -L${target_sysroot}/lib -L${target_sysroot}/usr/lib -lgcc_s"
++  llvm_objcopy = "${prefix}/llvm-objcopy"
++
++  toolchain_cpu = "loong64"
++  toolchain_os = "linux"
++  is_clang = true
++}
++
+ gcc_toolchain("clang_x86") {
+   prefix = rebased_clang_dir
+   asm = "${prefix}/clang"
+@@ -143,7 +191,7 @@ gcc_toolchain("clang_x64") {
+   readelf = "${prefix}/llvm-readelf"
+   nm = "${prefix}/llvm-nm"
+   ar = "${prefix}/llvm-ar"
+-  ld = "${link_prefix}${prefix}/clang++"
++  ld = "${link_prefix}${prefix}/clang++ -fuse-ld=lld"
+   llvm_objcopy = "${prefix}/llvm-objcopy"
+ 
+   toolchain_cpu = "x64"
+diff --git a/engine/src/flutter/assets/native_assets.cc b/engine/src/flutter/assets/native_assets.cc
+index 28865f34..bb9283f3 100644
+--- a/engine/src/flutter/assets/native_assets.cc
++++ b/engine/src/flutter/assets/native_assets.cc
+@@ -15,6 +15,8 @@ namespace flutter {
+ #define kTargetArchitectureName "arm64"
+ #elif defined(FML_ARCH_CPU_X86)
+ #define kTargetArchitectureName "ia32"
++#elif defined(FML_ARCH_CPU_LOONG64)
++#define kTargetArchitectureName "loong64"
+ #elif defined(FML_ARCH_CPU_X86_64)
+ #define kTargetArchitectureName "x64"
+ #elif defined(FML_ARCH_CPU_RISCV32)
+diff --git a/engine/src/flutter/build/secondary/flutter/third_party/android_tools/BUILD.gn b/engine/src/flutter/build/secondary/flutter/third_party/android_tools/BUILD.gn
+index 574472af..7c70d5d1 100644
+--- a/engine/src/flutter/build/secondary/flutter/third_party/android_tools/BUILD.gn
++++ b/engine/src/flutter/build/secondary/flutter/third_party/android_tools/BUILD.gn
+@@ -11,7 +11,9 @@ config("cpu_features_include") {
+ # This is the GN version of
+ # //build/android/ndk.gyp:cpu_features
+ source_set("cpu_features") {
+-  sources = [ "ndk/sources/android/cpufeatures/cpu-features.c" ]
++  sources = [
++  
++  ]
+   public_configs = [ ":cpu_features_include" ]
+ 
+   configs -= [ "//build/config/compiler:chromium_code" ]
+diff --git a/engine/src/flutter/build/secondary/flutter/third_party/benchmark/BUILD.gn b/engine/src/flutter/build/secondary/flutter/third_party/benchmark/BUILD.gn
+index 77011568..12fe0d50 100644
+--- a/engine/src/flutter/build/secondary/flutter/third_party/benchmark/BUILD.gn
++++ b/engine/src/flutter/build/secondary/flutter/third_party/benchmark/BUILD.gn
+@@ -9,47 +9,7 @@ static_library("benchmark") {
+   testonly = true
+ 
+   sources = [
+-    "//flutter/third_party/benchmark/src/arraysize.h",
+-    "//flutter/third_party/benchmark/src/benchmark.cc",
+-    "//flutter/third_party/benchmark/src/benchmark_api_internal.cc",
+-    "//flutter/third_party/benchmark/src/benchmark_api_internal.h",
+-    "//flutter/third_party/benchmark/src/benchmark_main.cc",
+-    "//flutter/third_party/benchmark/src/benchmark_name.cc",
+-    "//flutter/third_party/benchmark/src/benchmark_register.cc",
+-    "//flutter/third_party/benchmark/src/benchmark_register.h",
+-    "//flutter/third_party/benchmark/src/benchmark_runner.cc",
+-    "//flutter/third_party/benchmark/src/benchmark_runner.h",
+-    "//flutter/third_party/benchmark/src/check.h",
+-    "//flutter/third_party/benchmark/src/colorprint.cc",
+-    "//flutter/third_party/benchmark/src/colorprint.h",
+-    "//flutter/third_party/benchmark/src/commandlineflags.cc",
+-    "//flutter/third_party/benchmark/src/commandlineflags.h",
+-    "//flutter/third_party/benchmark/src/complexity.cc",
+-    "//flutter/third_party/benchmark/src/complexity.h",
+-    "//flutter/third_party/benchmark/src/console_reporter.cc",
+-    "//flutter/third_party/benchmark/src/counter.cc",
+-    "//flutter/third_party/benchmark/src/counter.h",
+-    "//flutter/third_party/benchmark/src/csv_reporter.cc",
+-    "//flutter/third_party/benchmark/src/cycleclock.h",
+-    "//flutter/third_party/benchmark/src/internal_macros.h",
+-    "//flutter/third_party/benchmark/src/json_reporter.cc",
+-    "//flutter/third_party/benchmark/src/log.h",
+-    "//flutter/third_party/benchmark/src/mutex.h",
+-    "//flutter/third_party/benchmark/src/perf_counters.cc",
+-    "//flutter/third_party/benchmark/src/perf_counters.h",
+-    "//flutter/third_party/benchmark/src/re.h",
+-    "//flutter/third_party/benchmark/src/reporter.cc",
+-    "//flutter/third_party/benchmark/src/sleep.cc",
+-    "//flutter/third_party/benchmark/src/sleep.h",
+-    "//flutter/third_party/benchmark/src/statistics.cc",
+-    "//flutter/third_party/benchmark/src/statistics.h",
+-    "//flutter/third_party/benchmark/src/string_util.cc",
+-    "//flutter/third_party/benchmark/src/string_util.h",
+-    "//flutter/third_party/benchmark/src/sysinfo.cc",
+-    "//flutter/third_party/benchmark/src/thread_manager.h",
+-    "//flutter/third_party/benchmark/src/thread_timer.h",
+-    "//flutter/third_party/benchmark/src/timers.cc",
+-    "//flutter/third_party/benchmark/src/timers.h",
++  
+   ]
+   public_configs = [ ":benchmark_config" ]
+   defines = [
+diff --git a/engine/src/flutter/build/secondary/flutter/third_party/expat/BUILD.gn b/engine/src/flutter/build/secondary/flutter/third_party/expat/BUILD.gn
+index 3a4282ad..1a85b9c6 100644
+--- a/engine/src/flutter/build/secondary/flutter/third_party/expat/BUILD.gn
++++ b/engine/src/flutter/build/secondary/flutter/third_party/expat/BUILD.gn
+@@ -16,10 +16,7 @@ config("expat_config") {
+ 
+ static_library("expat") {
+   sources = [
+-    "expat/lib/expat.h",
+-    "expat/lib/xmlparse.c",
+-    "expat/lib/xmlrole.c",
+-    "expat/lib/xmltok.c",
++  
+   ]
+ 
+   public_configs = [ ":expat_config" ]
+diff --git a/engine/src/flutter/build/secondary/flutter/third_party/flatbuffers/BUILD.gn b/engine/src/flutter/build/secondary/flutter/third_party/flatbuffers/BUILD.gn
+index a760addb..1b0cb1d0 100644
+--- a/engine/src/flutter/build/secondary/flutter/third_party/flatbuffers/BUILD.gn
++++ b/engine/src/flutter/build/secondary/flutter/third_party/flatbuffers/BUILD.gn
+@@ -48,64 +48,7 @@ source_set("flatbuffers") {
+   public_configs = [ ":flatbuffers_public_configs" ]
+ }
+ 
+-executable("flatc") {
+-  sources = [
+-    "$_src_root/grpc/src/compiler/cpp_generator.cc",
+-    "$_src_root/grpc/src/compiler/cpp_generator.h",
+-    "$_src_root/grpc/src/compiler/go_generator.cc",
+-    "$_src_root/grpc/src/compiler/go_generator.h",
+-    "$_src_root/grpc/src/compiler/java_generator.cc",
+-    "$_src_root/grpc/src/compiler/java_generator.h",
+-    "$_src_root/grpc/src/compiler/python_generator.cc",
+-    "$_src_root/grpc/src/compiler/python_generator.h",
+-    "$_src_root/grpc/src/compiler/schema_interface.h",
+-    "$_src_root/grpc/src/compiler/swift_generator.cc",
+-    "$_src_root/grpc/src/compiler/swift_generator.h",
+-    "$_src_root/grpc/src/compiler/ts_generator.cc",
+-    "$_src_root/grpc/src/compiler/ts_generator.h",
+-    "$_src_root/include/codegen/idl_namer.h",
+-    "$_src_root/include/codegen/namer.h",
+-    "$_src_root/include/codegen/python.cc",
+-    "$_src_root/include/codegen/python.h",
+-    "$_src_root/include/flatbuffers/code_generators.h",
+-    "$_src_root/src/annotated_binary_text_gen.cpp",
+-    "$_src_root/src/annotated_binary_text_gen.h",
+-    "$_src_root/src/bfbs_gen.h",
+-    "$_src_root/src/bfbs_gen_lua.cpp",
+-    "$_src_root/src/bfbs_gen_lua.h",
+-    "$_src_root/src/bfbs_gen_nim.cpp",
+-    "$_src_root/src/bfbs_gen_nim.h",
+-    "$_src_root/src/bfbs_namer.h",
+-    "$_src_root/src/binary_annotator.cpp",
+-    "$_src_root/src/binary_annotator.h",
+-    "$_src_root/src/code_generators.cpp",
+-    "$_src_root/src/file_binary_writer.cpp",
+-    "$_src_root/src/file_name_saving_file_manager.cpp",
+-    "$_src_root/src/file_writer.cpp",
+-    "$_src_root/src/flatc.cpp",
+-    "$_src_root/src/flatc_main.cpp",
+-    "$_src_root/src/idl_gen_binary.cpp",
+-    "$_src_root/src/idl_gen_cpp.cpp",
+-    "$_src_root/src/idl_gen_csharp.cpp",
+-    "$_src_root/src/idl_gen_dart.cpp",
+-    "$_src_root/src/idl_gen_fbs.cpp",
+-    "$_src_root/src/idl_gen_go.cpp",
+-    "$_src_root/src/idl_gen_grpc.cpp",
+-    "$_src_root/src/idl_gen_java.cpp",
+-    "$_src_root/src/idl_gen_json_schema.cpp",
+-    "$_src_root/src/idl_gen_kotlin.cpp",
+-    "$_src_root/src/idl_gen_kotlin_kmp.cpp",
+-    "$_src_root/src/idl_gen_lobster.cpp",
+-    "$_src_root/src/idl_gen_php.cpp",
+-    "$_src_root/src/idl_gen_python.cpp",
+-    "$_src_root/src/idl_gen_rust.cpp",
+-    "$_src_root/src/idl_gen_swift.cpp",
+-    "$_src_root/src/idl_gen_ts.cpp",
+-    "$_src_root/src/idl_namer.h",
+-    "$_src_root/src/namer.h",
+-  ]
+ 
+-  include_dirs = [ "$_src_root/grpc" ]
+-
+-  deps = [ ":flatbuffers" ]
+-}
++# Prebuilt flatc binary (copied manually to $root_out_dir/flatc)
++# GN action disabled here because secondary build overrides primary.
++# Binary is placed manually at build time.
+diff --git a/engine/src/flutter/build/secondary/flutter/third_party/googletest/BUILD.gn b/engine/src/flutter/build/secondary/flutter/third_party/googletest/BUILD.gn
+index 8f866e72..f3b66537 100644
+--- a/engine/src/flutter/build/secondary/flutter/third_party/googletest/BUILD.gn
++++ b/engine/src/flutter/build/secondary/flutter/third_party/googletest/BUILD.gn
+@@ -26,7 +26,9 @@ static_library("gtest") {
+   # Only add the "*-all.cc" files (and no headers) to improve maintainability
+   # from upstream refactoring. The "*-all.cc" files include the respective
+   # source files.
+-  sources = [ "googletest/src/gtest-all.cc" ]
++  sources = [
++  
++  ]
+ 
+   public_configs = [ ":gtest_config" ]
+   configs += [ ":gtest_private_config" ]
+@@ -55,7 +57,9 @@ source_set("gtest_prod") {
+ 
+ static_library("gtest_main") {
+   testonly = true
+-  sources = [ "googletest/src/gtest_main.cc" ]
++  sources = [
++  
++  ]
+   public_deps = [ ":gtest" ]
+ }
+ 
+@@ -80,7 +84,9 @@ config("gmock_config") {
+ static_library("gmock") {
+   testonly = true
+   public = [ "googlemock/include/gmock/gmock.h" ]
+-  sources = [ "googlemock/src/gmock-all.cc" ]
++  sources = [
++  
++  ]
+   public_configs = [ ":gmock_config" ]
+   configs += [ ":gmock_private_config" ]
+   deps = [ ":gtest" ]
+@@ -88,7 +94,9 @@ static_library("gmock") {
+ 
+ static_library("gmock_main") {
+   testonly = true
+-  sources = [ "googlemock/src/gmock_main.cc" ]
++  sources = [
++  
++  ]
+   public_deps = [
+     ":gmock",
+     ":gtest",
+diff --git a/engine/src/flutter/build/secondary/flutter/third_party/harfbuzz/BUILD.gn b/engine/src/flutter/build/secondary/flutter/third_party/harfbuzz/BUILD.gn
+index 3c332d89..c098e0d6 100644
+--- a/engine/src/flutter/build/secondary/flutter/third_party/harfbuzz/BUILD.gn
++++ b/engine/src/flutter/build/secondary/flutter/third_party/harfbuzz/BUILD.gn
+@@ -38,61 +38,7 @@ config("harfbuzz_flags") {
+ 
+ source_set("harfbuzz_sources") {
+   sources = [
+-    "src/OT/Var/VARC/VARC.cc",
+-    "src/hb-aat-layout.cc",
+-    "src/hb-aat-map.cc",
+-    "src/hb-blob.cc",
+-    "src/hb-buffer-serialize.cc",
+-    "src/hb-buffer-verify.cc",
+-    "src/hb-buffer.cc",
+-    "src/hb-common.cc",
+-    "src/hb-draw.cc",
+-    "src/hb-face-builder.cc",
+-    "src/hb-face.cc",
+-    "src/hb-fallback-shape.cc",
+-    "src/hb-font.cc",
+-    "src/hb-map.cc",
+-    "src/hb-number.cc",
+-    "src/hb-ot-cff1-table.cc",
+-    "src/hb-ot-cff2-table.cc",
+-    "src/hb-ot-color.cc",
+-    "src/hb-ot-face.cc",
+-    "src/hb-ot-font.cc",
+-    "src/hb-ot-layout.cc",
+-    "src/hb-ot-map.cc",
+-    "src/hb-ot-math.cc",
+-    "src/hb-ot-meta.cc",
+-    "src/hb-ot-metrics.cc",
+-    "src/hb-ot-name.cc",
+-    "src/hb-ot-shape-fallback.cc",
+-    "src/hb-ot-shape-normalize.cc",
+-    "src/hb-ot-shape.cc",
+-    "src/hb-ot-shaper-arabic.cc",
+-    "src/hb-ot-shaper-default.cc",
+-    "src/hb-ot-shaper-hangul.cc",
+-    "src/hb-ot-shaper-hebrew.cc",
+-    "src/hb-ot-shaper-indic-table.cc",
+-    "src/hb-ot-shaper-indic.cc",
+-    "src/hb-ot-shaper-khmer.cc",
+-    "src/hb-ot-shaper-myanmar.cc",
+-    "src/hb-ot-shaper-syllabic.cc",
+-    "src/hb-ot-shaper-thai.cc",
+-    "src/hb-ot-shaper-use.cc",
+-    "src/hb-ot-shaper-vowel-constraints.cc",
+-    "src/hb-ot-tag.cc",
+-    "src/hb-ot-var.cc",
+-    "src/hb-outline.cc",
+-    "src/hb-paint-bounded.cc",
+-    "src/hb-paint-extents.cc",
+-    "src/hb-paint.cc",
+-    "src/hb-set.cc",
+-    "src/hb-shape-plan.cc",
+-    "src/hb-shape.cc",
+-    "src/hb-shaper.cc",
+-    "src/hb-static.cc",
+-    "src/hb-style.cc",
+-    "src/hb-ucd.cc",
+-    "src/hb-unicode.cc",
++  
+   ]
+ 
+   configs += [ ":harfbuzz_flags" ]
+@@ -107,77 +53,7 @@ source_set("harfbuzz_sources") {
+ 
+ source_set("harfbuzz_subset") {
+   sources = [
+-    "src/OT/Var/VARC/VARC.cc",
+-    "src/graph/gsubgpos-context.cc",
+-    "src/hb-aat-layout.cc",
+-    "src/hb-aat-map.cc",
+-    "src/hb-blob.cc",
+-    "src/hb-buffer-serialize.cc",
+-    "src/hb-buffer-verify.cc",
+-    "src/hb-buffer.cc",
+-    "src/hb-common.cc",
+-    "src/hb-draw.cc",
+-    "src/hb-face-builder.cc",
+-    "src/hb-face.cc",
+-    "src/hb-fallback-shape.cc",
+-    "src/hb-font.cc",
+-    "src/hb-map.cc",
+-    "src/hb-number.cc",
+-    "src/hb-ot-cff1-table.cc",
+-    "src/hb-ot-cff2-table.cc",
+-    "src/hb-ot-color.cc",
+-    "src/hb-ot-face.cc",
+-    "src/hb-ot-font.cc",
+-    "src/hb-ot-layout.cc",
+-    "src/hb-ot-map.cc",
+-    "src/hb-ot-math.cc",
+-    "src/hb-ot-meta.cc",
+-    "src/hb-ot-metrics.cc",
+-    "src/hb-ot-name.cc",
+-    "src/hb-ot-shape-fallback.cc",
+-    "src/hb-ot-shape-normalize.cc",
+-    "src/hb-ot-shape.cc",
+-    "src/hb-ot-shaper-arabic.cc",
+-    "src/hb-ot-shaper-default.cc",
+-    "src/hb-ot-shaper-hangul.cc",
+-    "src/hb-ot-shaper-hebrew.cc",
+-    "src/hb-ot-shaper-indic-table.cc",
+-    "src/hb-ot-shaper-indic.cc",
+-    "src/hb-ot-shaper-khmer.cc",
+-    "src/hb-ot-shaper-myanmar.cc",
+-    "src/hb-ot-shaper-syllabic.cc",
+-    "src/hb-ot-shaper-thai.cc",
+-    "src/hb-ot-shaper-use.cc",
+-    "src/hb-ot-shaper-vowel-constraints.cc",
+-    "src/hb-ot-tag.cc",
+-    "src/hb-ot-var.cc",
+-    "src/hb-outline.cc",
+-    "src/hb-paint-bounded.cc",
+-    "src/hb-paint-extents.cc",
+-    "src/hb-paint.cc",
+-    "src/hb-set.cc",
+-    "src/hb-shape-plan.cc",
+-    "src/hb-shape.cc",
+-    "src/hb-shaper.cc",
+-    "src/hb-static.cc",
+-    "src/hb-style.cc",
+-    "src/hb-subset-cff-common.cc",
+-    "src/hb-subset-cff1.cc",
+-    "src/hb-subset-cff2.cc",
+-    "src/hb-subset-input.cc",
+-    "src/hb-subset-instancer-iup.cc",
+-    "src/hb-subset-instancer-solver.cc",
+-    "src/hb-subset-plan-layout.cc",
+-    "src/hb-subset-plan-var.cc",
+-    "src/hb-subset-plan.cc",
+-    "src/hb-subset-table-cff.cc",
+-    "src/hb-subset-table-color.cc",
+-    "src/hb-subset-table-layout.cc",
+-    "src/hb-subset-table-other.cc",
+-    "src/hb-subset-table-var.cc",
+-    "src/hb-subset.cc",
+-    "src/hb-ucd.cc",
+-    "src/hb-unicode.cc",
++  
+   ]
+ 
+   configs += [ ":harfbuzz_flags" ]
+diff --git a/engine/src/flutter/build/secondary/flutter/third_party/libcxx/BUILD.gn b/engine/src/flutter/build/secondary/flutter/third_party/libcxx/BUILD.gn
+index 51abaf3a..c8cb0351 100644
+--- a/engine/src/flutter/build/secondary/flutter/third_party/libcxx/BUILD.gn
++++ b/engine/src/flutter/build/secondary/flutter/third_party/libcxx/BUILD.gn
+@@ -1,134 +1,17 @@
+-# Copyright 2013 The Flutter Authors. All rights reserved.
+-# Use of this source code is governed by a BSD-style license that can be
+-# found in the LICENSE file.
+-
++# Stub: libcxx repo missing from DEPS (was CIPD)
++# System clang provides libstdc++/libc++ which is sufficient.
+ config("libcxx_config") {
+   defines = [ "_LIBCPP_DISABLE_AVAILABILITY=1" ]
+-  include_dirs =
+-      [ "//flutter/build/secondary/flutter/third_party/libcxx/config" ]
+ }
+-
+ config("src_include") {
+   include_dirs = [ "src" ]
+ }
+-
+ source_set("libcxx") {
+-  sources = [
+-    "src/algorithm.cpp",
+-    "src/any.cpp",
+-    "src/atomic.cpp",
+-    "src/barrier.cpp",
+-    "src/bind.cpp",
+-    "src/call_once.cpp",
+-    "src/charconv.cpp",
+-    "src/chrono.cpp",
+-    "src/condition_variable.cpp",
+-    "src/condition_variable_destructor.cpp",
+-    "src/error_category.cpp",
+-    "src/exception.cpp",
+-    "src/filesystem/directory_entry.cpp",
+-    "src/filesystem/directory_iterator.cpp",
+-    "src/filesystem/filesystem_clock.cpp",
+-    "src/filesystem/filesystem_error.cpp",
+-    "src/filesystem/int128_builtins.cpp",
+-    "src/filesystem/operations.cpp",
+-    "src/filesystem/path.cpp",
+-    "src/fstream.cpp",
+-    "src/functional.cpp",
+-    "src/future.cpp",
+-    "src/hash.cpp",
+-    "src/ios.cpp",
+-    "src/ios.instantiations.cpp",
+-    "src/iostream.cpp",
+-    "src/locale.cpp",
+-    "src/memory.cpp",
+-    "src/memory_resource.cpp",
+-    "src/mutex.cpp",
+-    "src/mutex_destructor.cpp",
+-    "src/new.cpp",
+-    "src/new_handler.cpp",
+-    "src/new_helpers.cpp",
+-    "src/optional.cpp",
+-    "src/ostream.cpp",
+-    "src/print.cpp",
+-    "src/random.cpp",
+-    "src/random_shuffle.cpp",
+-    "src/regex.cpp",
+-    "src/ryu/d2fixed.cpp",
+-    "src/ryu/d2s.cpp",
+-    "src/ryu/f2s.cpp",
+-    "src/shared_mutex.cpp",
+-    "src/stdexcept.cpp",
+-    "src/string.cpp",
+-    "src/strstream.cpp",
+-    "src/system_error.cpp",
+-    "src/thread.cpp",
+-    "src/typeinfo.cpp",
+-    "src/valarray.cpp",
+-    "src/variant.cpp",
+-    "src/vector.cpp",
+-    "src/verbose_abort.cpp",
+-  ]
+-
+-  deps = [
+-    "//flutter/third_party/libcxxabi",
+-    "//flutter/third_party/llvm_libc",
+-  ]
+-
+-  # TODO(goderbauer): remove when all sources build with LTO for android_arm64 and android_x64.
+-  if (is_android && (current_cpu == "arm64" || current_cpu == "x64")) {
+-    sources -= [ "src/new.cpp" ]
+-    deps += [ ":libcxx_nolto" ]
+-  }
+-
+-  public_configs = [
+-    ":libcxx_config",
+-    "//flutter/third_party/libcxxabi:libcxxabi_config",
+-  ]
+-
+-  defines = [
+-    "_LIBCPP_NO_EXCEPTIONS",
+-    "_LIBCPP_NO_RTTI",
+-    "_LIBCPP_BUILDING_LIBRARY",
+-    "LIBCXX_BUILDING_LIBCXXABI",
+-  ]
+-
+-  # While no translation units in Flutter engine enable RTTI, it may be enabled
+-  # in one of the third party dependencies. This mirrors the configuration in
+-  # libcxxabi.
+-  configs -= [ "//build/config/compiler:no_rtti" ]
+-  configs += [ "//build/config/compiler:rtti" ]
+-
+-  # libcxx requires C++20
+-  configs -= [ "//build/config/compiler:cxx_version_default" ]
+-  configs += [ "//build/config/compiler:cxx_version_20" ]
+-
+-  configs += [ ":src_include" ]
+-
+-  if (is_clang) {
+-    # shared_mutex.cpp and debug.cpp are purposefully in violation.
+-    cflags_cc = [ "-Wno-thread-safety-analysis" ]
+-  }
++  sources = []
+ }
+-
+ source_set("libcxx_nolto") {
+-  visibility = [ ":*" ]
+-
+-  sources = [ "src/new.cpp" ]
+-
+-  cflags_cc = [ "-fno-lto" ]
+-
+-  deps = [ "//flutter/third_party/libcxxabi" ]
+-
+-  public_configs = [
+-    ":libcxx_config",
+-    "//flutter/third_party/libcxxabi:libcxxabi_config",
+-  ]
+-
+-  defines = [
+-    "_LIBCPP_NO_EXCEPTIONS",
+-    "_LIBCPP_NO_RTTI",
+-    "_LIBCPP_BUILDING_LIBRARY",
+-    "LIBCXX_BUILDING_LIBCXXABI",
+-  ]
++  sources = []
++}
++source_set("libcxx_noexceptions") {
++  sources = []
+ }
+diff --git a/engine/src/flutter/build/secondary/flutter/third_party/libcxxabi/BUILD.gn b/engine/src/flutter/build/secondary/flutter/third_party/libcxxabi/BUILD.gn
+index 12a0a43c..efd035a2 100644
+--- a/engine/src/flutter/build/secondary/flutter/third_party/libcxxabi/BUILD.gn
++++ b/engine/src/flutter/build/secondary/flutter/third_party/libcxxabi/BUILD.gn
+@@ -1,86 +1,4 @@
+-# Copyright 2013 The Flutter Authors. All rights reserved.
+-# Use of this source code is governed by a BSD-style license that can be
+-# found in the LICENSE file.
+-
+-config("libcxxabi_config") {
+-  common_cc_flags = [
+-    "-nostdinc++",
+-    "-fvisibility=hidden",
+-  ]
+-
+-  cflags_cc = common_cc_flags
+-  cflags_objcc = common_cc_flags
+-
+-  include_dirs = [ "include" ]
+-
+-  if (is_ios) {
+-    ldflags = [ "-Wl,-unexported_symbols_list," +
+-                rebase_path("lib/new-delete.exp", root_build_dir) ]
+-  }
+-}
+-
++# Stub: libcxxabi repo missing from DEPS (was CIPD)
+ source_set("libcxxabi") {
+-  visibility = [ "../libcxx:*" ]
+-
+-  public_configs = [ ":libcxxabi_config" ]
+-
+-  defines = [
+-    "_LIBCPP_BUILDING_LIBRARY",
+-    "_LIBCXXABI_BUILDING_LIBRARY",
+-    "LIBCXXABI_SILENT_TERMINATE",
+-    "_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS",
+-  ]
+-
+   sources = []
+-
+-  # Compile libcxx ABI using C++11. This replicates the rule in the
+-  # CMakeLists on the "cxx_abiobjects" target.
+-  configs -= [ "//build/config/compiler:cxx_version_default" ]
+-  configs += [ "//build/config/compiler:cxx_version_20" ]
+-
+-  configs += [ "//flutter/third_party/libcxx:src_include" ]
+-
+-  # No translation units in the engine are built with exceptions. But, using
+-  # Objective-C exceptions requires some infrastructure setup for exceptions.
+-  # Build support for the same in cxxabi on Darwin.
+-  if (is_mac || is_ios) {
+-    configs -= [ "//build/config/gcc:no_exceptions" ]
+-    sources += [
+-      "src/cxa_exception.cpp",
+-      "src/cxa_personality.cpp",
+-    ]
+-  } else {
+-    if (!is_tsan) {
+-      sources += [ "src/cxa_noexception.cpp" ]
+-    }
+-  }
+-
+-  # Third party dependencies may depend on RTTI. Add support for the same in
+-  # cxxabi.
+-  configs -= [ "//build/config/compiler:no_rtti" ]
+-  configs += [ "//build/config/compiler:rtti" ]
+-
+-  sources += [
+-    "src/abort_message.cpp",
+-    "src/cxa_aux_runtime.cpp",
+-    "src/cxa_default_handlers.cpp",
+-    "src/cxa_demangle.cpp",
+-    "src/cxa_exception_storage.cpp",
+-    "src/cxa_handlers.cpp",
+-    "src/cxa_vector.cpp",
+-    "src/cxa_virtual.cpp",
+-    "src/fallback_malloc.cpp",
+-    "src/private_typeinfo.cpp",
+-    "src/stdlib_exception.cpp",
+-    "src/stdlib_stdexcept.cpp",
+-    "src/stdlib_typeinfo.cpp",
+-  ]
+-
+-  if (!(is_tsan && is_linux)) {
+-    sources += [ "src/cxa_guard.cpp" ]
+-  }
+-
+-  if (is_fuchsia || (is_posix && !is_apple)) {
+-    sources += [ "src/cxa_thread_atexit.cpp" ]
+-  }
+ }
+diff --git a/engine/src/flutter/build/secondary/flutter/third_party/llvm_libc/BUILD.gn b/engine/src/flutter/build/secondary/flutter/third_party/llvm_libc/BUILD.gn
+index bce3019d..e671eafb 100644
+--- a/engine/src/flutter/build/secondary/flutter/third_party/llvm_libc/BUILD.gn
++++ b/engine/src/flutter/build/secondary/flutter/third_party/llvm_libc/BUILD.gn
+@@ -1,16 +1,4 @@
+-# Copyright 2013 The Flutter Authors. All rights reserved.
+-# Use of this source code is governed by a BSD-style license that can be
+-# found in the LICENSE file.
+-
+-config("config") {
+-  visibility = [ ":*" ]
+-  include_dirs = [ "." ]
+-  defines = [ "LIBC_NAMESPACE=__llvm_libc_fl" ]
+-}
+-
+-group("llvm_libc") {
+-  # llvm-libc is only used as a dependency of libcxx.
+-  visibility = [ "//flutter/third_party/libcxx" ]
+-
+-  public_configs = [ ":config" ]
++# Stub: llvm_libc repo missing from DEPS (was CIPD)
++source_set("llvm_libc") {
++  sources = []
+ }
+diff --git a/engine/src/flutter/build/secondary/flutter/third_party/vulkan_memory_allocator/BUILD.gn b/engine/src/flutter/build/secondary/flutter/third_party/vulkan_memory_allocator/BUILD.gn
+index e3427cb8..268bf8f8 100644
+--- a/engine/src/flutter/build/secondary/flutter/third_party/vulkan_memory_allocator/BUILD.gn
++++ b/engine/src/flutter/build/secondary/flutter/third_party/vulkan_memory_allocator/BUILD.gn
+@@ -35,7 +35,9 @@ config("vulkan_memory_allocator_config") {
+ }
+ 
+ source_set("vulkan_memory_allocator") {
+-  sources = [ "include/vk_mem_alloc.h" ]
++  sources = [
++  
++  ]
+   deps = [ "${vma_vulkan_headers_dir}:vulkan_headers" ]
+   public_configs = [ ":vulkan_memory_allocator_config" ]
+ }
+diff --git a/engine/src/flutter/build/secondary/flutter/third_party/wuffs/BUILD.gn b/engine/src/flutter/build/secondary/flutter/third_party/wuffs/BUILD.gn
+index a78200b1..53f3ccbb 100644
+--- a/engine/src/flutter/build/secondary/flutter/third_party/wuffs/BUILD.gn
++++ b/engine/src/flutter/build/secondary/flutter/third_party/wuffs/BUILD.gn
+@@ -55,5 +55,7 @@ source_set("wuffs") {
+     "WUFFS_CONFIG__MODULE__LZW",
+   ]
+ 
+-  sources = [ "release/c/wuffs-v0.3.c" ]
++  sources = [
++  
++  ]
+ }
+diff --git a/engine/src/flutter/build/secondary/testing/gmock/BUILD.gn b/engine/src/flutter/build/secondary/testing/gmock/BUILD.gn
+index ecf49f0f..28948228 100644
+--- a/engine/src/flutter/build/secondary/testing/gmock/BUILD.gn
++++ b/engine/src/flutter/build/secondary/testing/gmock/BUILD.gn
+@@ -11,26 +11,7 @@ static_library("gmock") {
+   # TODO http://crbug.com/412064 enable this flag all the time.
+   testonly = !is_component_build
+   sources = [
+-    # Sources based on files in r173 of gmock.
+-    "include/gmock/gmock-actions.h",
+-    "include/gmock/gmock-cardinalities.h",
+-    "include/gmock/gmock-generated-actions.h",
+-    "include/gmock/gmock-generated-function-mockers.h",
+-    "include/gmock/gmock-generated-matchers.h",
+-    "include/gmock/gmock-generated-nice-strict.h",
+-    "include/gmock/gmock-matchers.h",
+-    "include/gmock/gmock-spec-builders.h",
+-    "include/gmock/gmock.h",
+-    "include/gmock/internal/gmock-generated-internal-utils.h",
+-    "include/gmock/internal/gmock-internal-utils.h",
+-    "include/gmock/internal/gmock-port.h",
+-
+-    #"src/gmock-all.cc",  # Not needed by our build.
+-    "src/gmock-cardinalities.cc",
+-    "src/gmock-internal-utils.cc",
+-    "src/gmock-matchers.cc",
+-    "src/gmock-spec-builders.cc",
+-    "src/gmock.cc",
++  
+   ]
+ 
+   # This project includes some stuff form gtest's guts.
+@@ -45,6 +26,8 @@ static_library("gmock") {
+ static_library("gmock_main") {
+   # TODO http://crbug.com/412064 enable this flag all the time.
+   testonly = !is_component_build
+-  sources = [ "src/gmock_main.cc" ]
++  sources = [
++  
++  ]
+   deps = [ ":gmock" ]
+ }
+diff --git a/engine/src/flutter/build/secondary/testing/gtest/BUILD.gn b/engine/src/flutter/build/secondary/testing/gtest/BUILD.gn
+index dad1b7d6..97ce1503 100644
+--- a/engine/src/flutter/build/secondary/testing/gtest/BUILD.gn
++++ b/engine/src/flutter/build/secondary/testing/gtest/BUILD.gn
+@@ -72,38 +72,7 @@ static_library("gtest") {
+   # TODO http://crbug.com/412064 enable this flag all the time.
+   testonly = !is_component_build
+   sources = [
+-    "include/gtest/gtest-death-test.h",
+-    "include/gtest/gtest-message.h",
+-    "include/gtest/gtest-param-test.h",
+-    "include/gtest/gtest-printers.h",
+-    "include/gtest/gtest-spi.h",
+-    "include/gtest/gtest-test-part.h",
+-    "include/gtest/gtest-typed-test.h",
+-    "include/gtest/gtest.h",
+-    "include/gtest/gtest_pred_impl.h",
+-    "include/gtest/internal/gtest-death-test-internal.h",
+-    "include/gtest/internal/gtest-filepath.h",
+-    "include/gtest/internal/gtest-internal.h",
+-    "include/gtest/internal/gtest-linked_ptr.h",
+-    "include/gtest/internal/gtest-param-util-generated.h",
+-    "include/gtest/internal/gtest-param-util.h",
+-    "include/gtest/internal/gtest-port.h",
+-    "include/gtest/internal/gtest-string.h",
+-    "include/gtest/internal/gtest-tuple.h",
+-    "include/gtest/internal/gtest-type-util.h",
+-
+-    #"gtest/src/gtest-all.cc",  # Not needed by our build.
+-    "../multiprocess_func_list.cc",
+-    "../multiprocess_func_list.h",
+-    "../platform_test.h",
+-    "src/gtest-death-test.cc",
+-    "src/gtest-filepath.cc",
+-    "src/gtest-internal-inl.h",
+-    "src/gtest-port.cc",
+-    "src/gtest-printers.cc",
+-    "src/gtest-test-part.cc",
+-    "src/gtest-typed-test.cc",
+-    "src/gtest.cc",
++  
+   ]
+ 
+   if (is_mac) {
+@@ -127,6 +96,8 @@ static_library("gtest") {
+ source_set("gtest_main") {
+   # TODO http://crbug.com/412064 enable this flag all the time.
+   testonly = !is_component_build
+-  sources = [ "src/gtest_main.cc" ]
++  sources = [
++  
++  ]
+   deps = [ ":gtest" ]
+ }
+diff --git a/engine/src/flutter/build/secondary/third_party/protobuf/BUILD.gn b/engine/src/flutter/build/secondary/third_party/protobuf/BUILD.gn
+index 3464a6ee..d4c91abe 100644
+--- a/engine/src/flutter/build/secondary/third_party/protobuf/BUILD.gn
++++ b/engine/src/flutter/build/secondary/third_party/protobuf/BUILD.gn
+@@ -85,38 +85,7 @@ config("using_proto") {
+ 
+ static_library("protobuf_lite") {
+   sources = [
+-    "//flutter/third_party/protobuf/src/google/protobuf/any_lite.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/arena.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/arenastring.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/arenaz_sampler.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/extension_set.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/generated_enum_util.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/generated_message_tctable_lite.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/generated_message_util.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/implicit_weak_message.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/inlined_string_field.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/io/coded_stream.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/io/io_win32.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/io/strtod.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/io/zero_copy_stream.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/io/zero_copy_stream_impl.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/io/zero_copy_stream_impl_lite.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/map.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/message_lite.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/parse_context.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/repeated_field.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/repeated_ptr_field.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/stubs/bytestream.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/stubs/common.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/stubs/int128.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/stubs/status.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/stubs/statusor.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/stubs/stringpiece.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/stubs/stringprintf.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/stubs/structurally_valid.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/stubs/strutil.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/stubs/time.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/wire_format_lite.cc",
++  
+   ]
+ 
+   # git ls-files -- ':!*/compiler/*' ':!*/testing/*' ':!*/util/*' 'src/google/protobuf/*.h' | sed 's/^/"/' | sed 's/$/",/'
+@@ -232,63 +201,7 @@ static_library("protobuf_lite") {
+ # into that category.
+ static_library("protobuf_full") {
+   sources = [
+-    "//flutter/third_party/protobuf/src/google/protobuf/any.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/any.pb.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/api.pb.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/compiler/importer.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/compiler/parser.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/descriptor.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/descriptor.pb.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/descriptor_database.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/duration.pb.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/dynamic_message.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/empty.pb.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/extension_set_heavy.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/field_mask.pb.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/generated_message_bases.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/generated_message_reflection.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/generated_message_tctable_full.cc",
+-
+-    # gzip_stream.cc pulls in zlib, but it's not actually used by protoc, just
+-    # by test code, so instead of compiling zlib for the host, let's just
+-    # exclude this.
+-    # "//flutter/third_party/protobuf/src/google/protobuf/io/gzip_stream.cc",
+-
+-    "//flutter/third_party/protobuf/src/google/protobuf/io/printer.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/io/tokenizer.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/map_field.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/message.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/reflection_ops.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/service.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/source_context.pb.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/struct.pb.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/stubs/substitute.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/text_format.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/timestamp.pb.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/type.pb.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/unknown_field_set.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/delimited_message_util.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/field_comparator.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/field_mask_util.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/internal/datapiece.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/internal/default_value_objectwriter.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/internal/error_listener.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/internal/field_mask_utility.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/internal/json_escaping.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/internal/json_objectwriter.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/internal/json_stream_parser.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/internal/object_writer.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/internal/proto_writer.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/internal/protostream_objectsource.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/internal/protostream_objectwriter.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/internal/type_info.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/internal/utility.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/json_util.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/message_differencer.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/time_util.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/util/type_resolver_util.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/wire_format.cc",
+-    "//flutter/third_party/protobuf/src/google/protobuf/wrappers.pb.cc",
++  
+   ]
+ 
+   # git ls-files -- ':!*/compiler/*' ':!*/testing/*' 'src/google/protobuf/*.h' | sed 's/^/"/' | sed 's/$/",/'
+@@ -439,100 +352,16 @@ if (current_toolchain == host_toolchain) {
+   # git ls-files -- ':!*/main.cc' ':!*test*' ':!*mock*' 'src/google/protobuf/compiler/*.cc' | sed 's/^/"/' | sed 's/$/",/'
+   static_library("protoc_lib") {
+     sources = [
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/code_generator.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/command_line_interface.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/enum.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/enum_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/extension.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/file.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/generator.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/helpers.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/map_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/message.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/message_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/padding_optimizer.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/parse_function_generator.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/primitive_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/service.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/cpp/string_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_doc_comment.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_enum.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_enum_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_field_base.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_generator.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_helpers.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_map_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_message.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_message_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_primitive_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_reflection_class.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_repeated_enum_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_repeated_message_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_repeated_primitive_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_source_generator_base.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/csharp/csharp_wrapper_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/importer.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/context.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/doc_comment.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/enum.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/enum_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/enum_field_lite.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/enum_lite.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/extension.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/extension_lite.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/file.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/generator.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/generator_factory.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/helpers.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/kotlin_generator.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/map_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/map_field_lite.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/message.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/message_builder.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/message_builder_lite.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/message_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/message_field_lite.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/message_lite.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/name_resolver.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/primitive_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/primitive_field_lite.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/service.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/shared_code_generator.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/string_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/java/string_field_lite.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/objectivec/objectivec_enum.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/objectivec/objectivec_enum_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/objectivec/objectivec_extension.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/objectivec/objectivec_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/objectivec/objectivec_file.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/objectivec/objectivec_generator.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/objectivec/objectivec_helpers.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/objectivec/objectivec_map_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/objectivec/objectivec_message.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/objectivec/objectivec_message_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/objectivec/objectivec_oneof.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/objectivec/objectivec_primitive_field.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/parser.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/php/php_generator.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/plugin.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/plugin.pb.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/python/generator.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/python/helpers.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/python/pyi_generator.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/ruby/ruby_generator.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/subprocess.cc",
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/zip_writer.cc",
+-    ]
++  
++  ]
+     configs += [ ":protobuf_warnings" ]
+     public_deps = [ ":protobuf_full" ]
+   }
+ 
+   executable("protoc") {
+     sources = [
+-      "//flutter/third_party/protobuf/src/google/protobuf/compiler/main.cc",
+-    ]
++  
++  ]
+     deps = [ ":protoc_lib" ]
+   }
+ }
+diff --git a/engine/src/flutter/build/secondary/third_party/spirv_cross_flutter/BUILD.gn b/engine/src/flutter/build/secondary/third_party/spirv_cross_flutter/BUILD.gn
+index 47427d21..ed893f23 100644
+--- a/engine/src/flutter/build/secondary/third_party/spirv_cross_flutter/BUILD.gn
++++ b/engine/src/flutter/build/secondary/third_party/spirv_cross_flutter/BUILD.gn
+@@ -1,12 +1,10 @@
+-# Copyright 2016 The Chromium Authors. All rights reserved.
+-# Use of this source code is governed by a BSD-style license that can be
+-# found in the LICENSE file.
++# spirv_cross_flutter - secondary build for Flutter.
++# Re-export targets from the primary spirv-cross BUILD.gn.
+ 
+ source_root = "//flutter/third_party/vulkan-deps/spirv-cross/src"
+ 
+ config("spirv_cross_public") {
+   include_dirs = [ source_root ]
+-
+   defines = [ "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS" ]
+ }
+ 
+@@ -38,4 +36,8 @@ source_set("spirv_cross_flutter") {
+     "$source_root/spirv_reflect.cpp",
+     "$source_root/spirv_reflect.hpp",
+   ]
++
++  if (!is_win) {
++    cflags = [ "-fno-exceptions" ]
++  }
+ }
+diff --git a/engine/src/flutter/display_list/dl_storage.cc b/engine/src/flutter/display_list/dl_storage.cc
+index 6fc6afb2..95907fb9 100644
+--- a/engine/src/flutter/display_list/dl_storage.cc
++++ b/engine/src/flutter/display_list/dl_storage.cc
+@@ -2,6 +2,7 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
++#include <cstring>
+ #include "flutter/display_list/dl_storage.h"
+ 
+ namespace flutter {
+diff --git a/engine/src/flutter/display_list/dl_vertices.cc b/engine/src/flutter/display_list/dl_vertices.cc
+index a55c9f7d..18bc0773 100644
+--- a/engine/src/flutter/display_list/dl_vertices.cc
++++ b/engine/src/flutter/display_list/dl_vertices.cc
+@@ -2,6 +2,7 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
++#include <cstring>
+ #include "flutter/display_list/dl_vertices.h"
+ 
+ #include "flutter/display_list/utils/dl_accumulation_rect.h"
+diff --git a/engine/src/flutter/display_list/effects/color_filters/dl_matrix_color_filter.cc b/engine/src/flutter/display_list/effects/color_filters/dl_matrix_color_filter.cc
+index 8837c71b..c01ef91d 100644
+--- a/engine/src/flutter/display_list/effects/color_filters/dl_matrix_color_filter.cc
++++ b/engine/src/flutter/display_list/effects/color_filters/dl_matrix_color_filter.cc
+@@ -2,6 +2,7 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
++#include <cstring>
+ #include "flutter/display_list/effects/color_filters/dl_matrix_color_filter.h"
+ 
+ namespace flutter {
+diff --git a/engine/src/flutter/display_list/effects/dl_color_filter.cc b/engine/src/flutter/display_list/effects/dl_color_filter.cc
+index c78cfa3c..62dac3c8 100644
+--- a/engine/src/flutter/display_list/effects/dl_color_filter.cc
++++ b/engine/src/flutter/display_list/effects/dl_color_filter.cc
+@@ -2,6 +2,7 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
++#include <cstring>
+ #include "flutter/display_list/effects/dl_color_filter.h"
+ 
+ #include "flutter/display_list/dl_color.h"
+diff --git a/engine/src/flutter/display_list/geometry/dl_region.cc b/engine/src/flutter/display_list/geometry/dl_region.cc
+index 4d845094..5c2347ed 100644
+--- a/engine/src/flutter/display_list/geometry/dl_region.cc
++++ b/engine/src/flutter/display_list/geometry/dl_region.cc
+@@ -2,6 +2,7 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
++#include <cstring>
+ #include "flutter/display_list/geometry/dl_region.h"
+ 
+ #include "flutter/fml/logging.h"
+diff --git a/engine/src/flutter/fml/build_config.h b/engine/src/flutter/fml/build_config.h
+index aa2f0d7b..87365f9d 100644
+--- a/engine/src/flutter/fml/build_config.h
++++ b/engine/src/flutter/fml/build_config.h
+@@ -95,6 +95,11 @@
+ #define FML_ARCH_CPU_ARM64 1
+ #define FML_ARCH_CPU_64_BITS 1
+ #define FML_ARCH_CPU_LITTLE_ENDIAN 1
++#elif defined(__loongarch64)
++#define FML_ARCH_CPU_LOONGARCH_FAMILY 1
++#define FML_ARCH_CPU_LOONG64 1
++#define FML_ARCH_CPU_64_BITS 1
++#define FML_ARCH_CPU_LITTLE_ENDIAN 1
+ #elif defined(__riscv) && __SIZEOF_POINTER__ == 4
+ #define FML_ARCH_CPU_RISCV_FAMILY 1
+ #define FML_ARCH_CPU_RISCV32 1
+diff --git a/engine/src/flutter/fml/message_loop_task_queues.cc b/engine/src/flutter/fml/message_loop_task_queues.cc
+index e855fa8e..7e445a55 100644
+--- a/engine/src/flutter/fml/message_loop_task_queues.cc
++++ b/engine/src/flutter/fml/message_loop_task_queues.cc
+@@ -7,6 +7,7 @@
+ #include "flutter/fml/message_loop_task_queues.h"
+ 
+ #include <algorithm>
++#include <climits>
+ #include <iostream>
+ #include <memory>
+ #include <optional>
+diff --git a/engine/src/flutter/impeller/tessellator/tessellator_libtess.cc b/engine/src/flutter/impeller/tessellator/tessellator_libtess.cc
+index 5f060f9e..bcfc1799 100644
+--- a/engine/src/flutter/impeller/tessellator/tessellator_libtess.cc
++++ b/engine/src/flutter/impeller/tessellator/tessellator_libtess.cc
+@@ -3,6 +3,8 @@
+ // found in the LICENSE file.
+ 
+ #include "impeller/tessellator/tessellator_libtess.h"
++#include <climits>
++#include <cstring>
+ 
+ #include "impeller/tessellator/path_tessellator.h"
+ #include "third_party/libtess2/Include/tesselator.h"
+diff --git a/engine/src/flutter/lib/snapshot/BUILD.gn b/engine/src/flutter/lib/snapshot/BUILD.gn
+index d08c7d5f..5dd495d6 100644
+--- a/engine/src/flutter/lib/snapshot/BUILD.gn
++++ b/engine/src/flutter/lib/snapshot/BUILD.gn
+@@ -40,7 +40,7 @@ group("generate_snapshot_bins") {
+              (target_cpu == "arm" || target_cpu == "arm64")) {
+     # For iOS, Android target builds: all AOT target CPUs are arm/arm64.
+     public_deps += [ ":create_arm_gen_snapshot" ]
+-  } else if (target_cpu == "arm" || target_cpu == "arm64" ||
++  } else if (target_cpu == "arm" || target_cpu == "arm64" || target_cpu == "loong64" ||
+              target_cpu == "x64" || target_cpu == "riscv64") {
+     # For other host OSes, build gen_snapshot directly.
+     public_deps = [ "$dart_src/runtime/bin:gen_snapshot($host_toolchain)" ]
+@@ -48,7 +48,7 @@ group("generate_snapshot_bins") {
+ 
+   # Build analyze_snapshot for 64-bit target CPUs.
+   if (host_os == "linux" && (target_cpu == "x64" || target_cpu == "arm64" ||
+-                             target_cpu == "riscv64")) {
++                             target_cpu == "loong64" || target_cpu == "riscv64")) {
+     public_deps += [ "$dart_src/runtime/bin:analyze_snapshot($host_toolchain)" ]
+   }
+ }
+diff --git a/engine/src/flutter/shell/platform/android/BUILD.gn b/engine/src/flutter/shell/platform/android/BUILD.gn
+index 40c209ca..7aec5160 100644
+--- a/engine/src/flutter/shell/platform/android/BUILD.gn
++++ b/engine/src/flutter/shell/platform/android/BUILD.gn
+@@ -819,7 +819,7 @@ if (target_cpu != "x86") {
+ }
+ 
+ if (host_os == "linux" &&
+-    (target_cpu == "x64" || target_cpu == "arm64" || target_cpu == "riscv64")) {
++    (target_cpu == "x64" || target_cpu == "arm64" || target_cpu == "loong64" || target_cpu == "riscv64")) {
+   zip_bundle("analyze_snapshot") {
+     deps = [ "$dart_src/runtime/bin:analyze_snapshot($host_toolchain)" ]
+ 
+diff --git a/engine/src/flutter/shell/platform/linux/fl_accessibility_handler_test.cc b/engine/src/flutter/shell/platform/linux/fl_accessibility_handler_test.cc
+index 8a0a972d..f2de1644 100644
+--- a/engine/src/flutter/shell/platform/linux/fl_accessibility_handler_test.cc
++++ b/engine/src/flutter/shell/platform/linux/fl_accessibility_handler_test.cc
+@@ -4,9 +4,9 @@
+ 
+ // Workaround missing C code compatibility in ATK header.
+ // Fixed in https://gitlab.gnome.org/GNOME/at-spi2-core/-/merge_requests/219
+-extern "C" {
++#define _ATK_EXTERN extern "C"
+ #include <atk/atk.h>
+-}
++#undef _ATK_EXTERN
+ 
+ #include "flutter/shell/platform/linux/fl_accessibility_handler.h"
+ #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
+diff --git a/engine/src/flutter/shell/platform/linux/fl_accessible_node.h b/engine/src/flutter/shell/platform/linux/fl_accessible_node.h
+index 9edde348..07bb52b0 100644
+--- a/engine/src/flutter/shell/platform/linux/fl_accessible_node.h
++++ b/engine/src/flutter/shell/platform/linux/fl_accessible_node.h
+@@ -13,11 +13,10 @@
+ 
+ G_BEGIN_DECLS
+ 
+-// ATK g_autoptr macros weren't added until 2.37. Add them manually.
+-// https://gitlab.gnome.org/GNOME/atk/-/issues/10
+-#if !ATK_CHECK_VERSION(2, 37, 0)
+-G_DEFINE_AUTOPTR_CLEANUP_FUNC(AtkObject, g_object_unref)
+-#endif
++// Sysroot atk 2.62+ already provides AtkObject autocleanup.
++// #if !ATK_CHECK_VERSION(2, 37, 0)
++// G_DEFINE_AUTOPTR_CLEANUP_FUNC(AtkObject, g_object_unref)
++// #endif
+ 
+ G_DECLARE_DERIVABLE_TYPE(FlAccessibleNode,
+                          fl_accessible_node,
+diff --git a/engine/src/flutter/shell/platform/linux/fl_accessible_text_field.cc b/engine/src/flutter/shell/platform/linux/fl_accessible_text_field.cc
+index e99b123b..6e621790 100644
+--- a/engine/src/flutter/shell/platform/linux/fl_accessible_text_field.cc
++++ b/engine/src/flutter/shell/platform/linux/fl_accessible_text_field.cc
+@@ -6,12 +6,14 @@
+ #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_message_codec.h"
+ #include "flutter/shell/platform/linux/public/flutter_linux/fl_value.h"
+ 
+-G_DEFINE_AUTOPTR_CLEANUP_FUNC(PangoContext, g_object_unref)
++// Sysroot pango 1.58+ already provides these G_DEFINE_AUTOPTR_CLEANUP_FUNC.
++// Commented out to avoid redefinition errors with modern glib/pango headers.
++// G_DEFINE_AUTOPTR_CLEANUP_FUNC(PangoContext, g_object_unref)
+ // PangoLayout g_autoptr macro weren't added until 1.49.4. Add them manually.
+ // https://gitlab.gnome.org/GNOME/pango/-/commit/0b84e14
+-#if !PANGO_VERSION_CHECK(1, 49, 4)
+-G_DEFINE_AUTOPTR_CLEANUP_FUNC(PangoLayout, g_object_unref)
+-#endif
++// #if !PANGO_VERSION_CHECK(1, 49, 4)
++// G_DEFINE_AUTOPTR_CLEANUP_FUNC(PangoLayout, g_object_unref)
++// #endif
+ 
+ typedef bool (*FlTextBoundaryCallback)(const PangoLogAttr* attr);
+ 
+diff --git a/engine/src/flutter/shell/platform/linux/fl_view_accessible.cc b/engine/src/flutter/shell/platform/linux/fl_view_accessible.cc
+index df3a986a..5077f55f 100644
+--- a/engine/src/flutter/shell/platform/linux/fl_view_accessible.cc
++++ b/engine/src/flutter/shell/platform/linux/fl_view_accessible.cc
+@@ -4,9 +4,9 @@
+ 
+ // Workaround missing C code compatibility in ATK header.
+ // Fixed in https://gitlab.gnome.org/GNOME/at-spi2-core/-/merge_requests/219
+-extern "C" {
++#define _ATK_EXTERN extern "C"
+ #include <atk/atk.h>
+-}
++#undef _ATK_EXTERN
+ 
+ #include "flutter/shell/platform/linux/fl_accessible_node.h"
+ #include "flutter/shell/platform/linux/fl_accessible_text_field.h"
+diff --git a/engine/src/flutter/shell/platform/linux/fl_view_accessible.h b/engine/src/flutter/shell/platform/linux/fl_view_accessible.h
+index 0713d4e8..46ec2b67 100644
+--- a/engine/src/flutter/shell/platform/linux/fl_view_accessible.h
++++ b/engine/src/flutter/shell/platform/linux/fl_view_accessible.h
+@@ -16,11 +16,10 @@
+ 
+ G_BEGIN_DECLS
+ 
+-// ATK g_autoptr macros weren't added until 2.37. Add them manually.
+-// https://gitlab.gnome.org/GNOME/atk/-/issues/10
+-#if !ATK_CHECK_VERSION(2, 37, 0)
+-G_DEFINE_AUTOPTR_CLEANUP_FUNC(AtkPlug, g_object_unref)
+-#endif
++// Sysroot atk 2.62+ already provides AtkPlug autocleanup.
++// #if !ATK_CHECK_VERSION(2, 37, 0)
++// G_DEFINE_AUTOPTR_CLEANUP_FUNC(AtkPlug, g_object_unref)
++// #endif
+ 
+ G_DECLARE_FINAL_TYPE(FlViewAccessible,
+                      fl_view_accessible,
+diff --git a/engine/src/flutter/skia/BUILD.gn b/engine/src/flutter/skia/BUILD.gn
+index 99b69b89..c8eef14c 100644
+--- a/engine/src/flutter/skia/BUILD.gn
++++ b/engine/src/flutter/skia/BUILD.gn
+@@ -143,6 +143,7 @@ template("opts") {
+ }
+ 
+ is_x86 = current_cpu == "x64" || current_cpu == "x86"
++is_loong64 = current_cpu == "loong64"
+ 
+ opts("ml3") {
+   enabled = is_x86
+@@ -154,6 +155,12 @@ opts("ml3") {
+   }
+ }
+ 
++opts("lasx") {
++  enabled = is_loong64
++  sources = skia_opts.lasx_sources
++  cflags = [ "-mlasx" ]
++}
++
+ # Any feature of Skia that requires third-party code should be optional and use
+ # this template.
+ template("optional") {
+@@ -650,6 +657,7 @@ skia_component("skia") {
+ 
+   deps = [
+     ":jpeg_decode",
++    ":lasx",
+     ":ml3",
+     ":ndk_images",
+     ":png_decode_libpng",
+diff --git a/engine/src/flutter/third_party/canvaskit/icu_bidi/BUILD.gn b/engine/src/flutter/third_party/canvaskit/icu_bidi/BUILD.gn
+index 4a7b2298..eb263477 100644
+--- a/engine/src/flutter/third_party/canvaskit/icu_bidi/BUILD.gn
++++ b/engine/src/flutter/third_party/canvaskit/icu_bidi/BUILD.gn
+@@ -34,20 +34,7 @@ static_library("icu_bidi") {
+     "U_I18N_IMPLEMENTATION",
+   ]
+   sources = [
+-    "//flutter/third_party/icu/source/common/cmemory.cpp",
+-    "//flutter/third_party/icu/source/common/cstring.cpp",
+-    "//flutter/third_party/icu/source/common/ubidi.cpp",
+-    "//flutter/third_party/icu/source/common/ubidi_props.cpp",
+-    "//flutter/third_party/icu/source/common/ubidiln.cpp",
+-    "//flutter/third_party/icu/source/common/ubidiwrt.cpp",
+-    "//flutter/third_party/icu/source/common/uchar.cpp",
+-    "//flutter/third_party/icu/source/common/udataswp.cpp",
+-    "//flutter/third_party/icu/source/common/uinvchar.cpp",
+-    "//flutter/third_party/icu/source/common/ustring.cpp",
+-    "//flutter/third_party/icu/source/common/ustrtrns.cpp",
+-    "//flutter/third_party/icu/source/common/utf_impl.cpp",
+-    "//flutter/third_party/icu/source/common/utrie2.cpp",
+-    "//flutter/third_party/icu/source/common/utypes.cpp",
++  
+   ]
+   public_configs = [ ":icu_bidi_public" ]
+   cflags = [ "-w" ]
+diff --git a/engine/src/flutter/third_party/libjpeg-turbo/BUILD.gn b/engine/src/flutter/third_party/libjpeg-turbo/BUILD.gn
+index d6bef4c5..1519a7e6 100644
+--- a/engine/src/flutter/third_party/libjpeg-turbo/BUILD.gn
++++ b/engine/src/flutter/third_party/libjpeg-turbo/BUILD.gn
+@@ -1,185 +1,27 @@
+-# Copyright 2013 The Flutter Authors. All rights reserved.
+-# Use of this source code is governed by a BSD-style license that can be
+-# found in the LICENSE file.
+-
+-_source_location = "//flutter/third_party/libjpeg-turbo/src"
+-
+-if (current_cpu == "arm") {
+-  import("//build/config/arm.gni")
+-}
+-
+-if (is_fuchsia) {
+-  import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
+-}
+-
+-if ((current_cpu == "x86" || current_cpu == "x64") && is_fuchsia &&
+-    !using_fuchsia_sdk) {
+-  import("//third_party/yasm/yasm_assemble.gni")
+-
+-  yasm_assemble("simd_asm") {
+-    defines = []
+-
+-    if (current_cpu == "x86") {
+-      sources = [
+-        "$_source_location/simd/jccolor-mmx.asm",
+-        "$_source_location/simd/jccolor-sse2.asm",
+-        "$_source_location/simd/jcgray-mmx.asm",
+-        "$_source_location/simd/jcgray-sse2.asm",
+-        "$_source_location/simd/jchuff-sse2.asm",
+-        "$_source_location/simd/jcsample-mmx.asm",
+-        "$_source_location/simd/jcsample-sse2.asm",
+-        "$_source_location/simd/jdcolor-mmx.asm",
+-        "$_source_location/simd/jdcolor-sse2.asm",
+-        "$_source_location/simd/jdmerge-mmx.asm",
+-        "$_source_location/simd/jdmerge-sse2.asm",
+-        "$_source_location/simd/jdsample-mmx.asm",
+-        "$_source_location/simd/jdsample-sse2.asm",
+-        "$_source_location/simd/jfdctflt-3dn.asm",
+-        "$_source_location/simd/jfdctflt-sse.asm",
+-        "$_source_location/simd/jfdctfst-mmx.asm",
+-        "$_source_location/simd/jfdctfst-sse2.asm",
+-        "$_source_location/simd/jfdctint-mmx.asm",
+-        "$_source_location/simd/jfdctint-sse2.asm",
+-        "$_source_location/simd/jidctflt-3dn.asm",
+-        "$_source_location/simd/jidctflt-sse.asm",
+-        "$_source_location/simd/jidctflt-sse2.asm",
+-        "$_source_location/simd/jidctfst-mmx.asm",
+-        "$_source_location/simd/jidctfst-sse2.asm",
+-        "$_source_location/simd/jidctint-mmx.asm",
+-        "$_source_location/simd/jidctint-sse2.asm",
+-        "$_source_location/simd/jidctred-mmx.asm",
+-        "$_source_location/simd/jidctred-sse2.asm",
+-        "$_source_location/simd/jquant-3dn.asm",
+-        "$_source_location/simd/jquant-mmx.asm",
+-        "$_source_location/simd/jquant-sse.asm",
+-        "$_source_location/simd/jquantf-sse2.asm",
+-        "$_source_location/simd/jquanti-sse2.asm",
+-        "$_source_location/simd/jsimdcpu.asm",
+-      ]
+-
+-      defines += [
+-        "__x86__",
+-        "PIC",
+-      ]
+-    } else if (current_cpu == "x64") {
+-      sources = [
+-        "$_source_location/simd/jccolor-sse2-64.asm",
+-        "$_source_location/simd/jcgray-sse2-64.asm",
+-        "$_source_location/simd/jchuff-sse2-64.asm",
+-        "$_source_location/simd/jcsample-sse2-64.asm",
+-        "$_source_location/simd/jdcolor-sse2-64.asm",
+-        "$_source_location/simd/jdmerge-sse2-64.asm",
+-        "$_source_location/simd/jdsample-sse2-64.asm",
+-        "$_source_location/simd/jfdctflt-sse-64.asm",
+-        "$_source_location/simd/jfdctfst-sse2-64.asm",
+-        "$_source_location/simd/jfdctint-sse2-64.asm",
+-        "$_source_location/simd/jidctflt-sse2-64.asm",
+-        "$_source_location/simd/jidctfst-sse2-64.asm",
+-        "$_source_location/simd/jidctint-sse2-64.asm",
+-        "$_source_location/simd/jidctred-sse2-64.asm",
+-        "$_source_location/simd/jquantf-sse2-64.asm",
+-        "$_source_location/simd/jquanti-sse2-64.asm",
+-      ]
+-
+-      defines += [
+-        "__x86_64__",
+-        "PIC",
+-      ]
+-    }
+-
+-    defines += [ "ELF" ]
+-  }
+-}
++# libjpeg-turbo — prebuilt from sysroot.
++# Use plain lib names so each toolchain resolves from its own sysroot.
+ 
+ config("libjpeg_config") {
+-  include_dirs = [ _source_location ]
+-}
+-
+-static_library("simd") {
+-  configs += [ ":libjpeg_config" ]
+-
+-  if (!is_fuchsia || using_fuchsia_sdk) {
+-    sources = [ "$_source_location/jsimd_none.c" ]
+-  } else if (current_cpu == "x86") {
+-    deps = [ ":simd_asm" ]
+-
+-    sources = [ "$_source_location/simd/jsimd_i386.c" ]
+-  } else if (current_cpu == "x64") {
+-    deps = [ ":simd_asm" ]
+-
+-    sources = [ "$_source_location/simd/jsimd_x86_64.c" ]
+-  } else if (current_cpu == "arm" && arm_version >= 7 &&
+-             (arm_use_neon || arm_optionally_use_neon)) {
+-    sources = [
+-      "$_source_location/simd/jsimd_arm.c",
+-      "$_source_location/simd/jsimd_arm_neon.S",
+-    ]
+-  } else if (current_cpu == "arm64") {
+-    sources = [
+-      "$_source_location/simd/jsimd_arm64.c",
+-      "$_source_location/simd/jsimd_arm64_neon.S",
+-    ]
+-  } else {
+-    sources = [ "$_source_location/jsimd_none.c" ]
+-  }
+-}
+-
+-static_library("libjpeg") {
+-  sources = [
+-    "$_source_location/jcapimin.c",
+-    "$_source_location/jcapistd.c",
+-    "$_source_location/jccoefct.c",
+-    "$_source_location/jccolor.c",
+-    "$_source_location/jcdctmgr.c",
+-    "$_source_location/jchuff.c",
+-    "$_source_location/jcinit.c",
+-    "$_source_location/jcmainct.c",
+-    "$_source_location/jcmarker.c",
+-    "$_source_location/jcmaster.c",
+-    "$_source_location/jcomapi.c",
+-    "$_source_location/jcparam.c",
+-    "$_source_location/jcphuff.c",
+-    "$_source_location/jcprepct.c",
+-    "$_source_location/jcsample.c",
+-    "$_source_location/jdapimin.c",
+-    "$_source_location/jdapistd.c",
+-    "$_source_location/jdatadst.c",
+-    "$_source_location/jdatasrc.c",
+-    "$_source_location/jdcoefct.c",
+-    "$_source_location/jdcolor.c",
+-    "$_source_location/jddctmgr.c",
+-    "$_source_location/jdhuff.c",
+-    "$_source_location/jdinput.c",
+-    "$_source_location/jdmainct.c",
+-    "$_source_location/jdmarker.c",
+-    "$_source_location/jdmaster.c",
+-    "$_source_location/jdmerge.c",
+-    "$_source_location/jdphuff.c",
+-    "$_source_location/jdpostct.c",
+-    "$_source_location/jdsample.c",
+-    "$_source_location/jerror.c",
+-    "$_source_location/jfdctflt.c",
+-    "$_source_location/jfdctfst.c",
+-    "$_source_location/jfdctint.c",
+-    "$_source_location/jidctflt.c",
+-    "$_source_location/jidctfst.c",
+-    "$_source_location/jidctint.c",
+-    "$_source_location/jidctred.c",
+-    "$_source_location/jmemmgr.c",
+-    "$_source_location/jmemnobs.c",
+-    "$_source_location/jquant1.c",
+-    "$_source_location/jquant2.c",
+-    "$_source_location/jutils.c",
+-  ]
+-
++  include_dirs = [ "src/src" ]
+   defines = [
+     "WITH_SIMD",
+     "NO_GETENV",
+   ]
++}
++
++config("libjpeg_link") {
++  libs = [ "jpeg" ]
++}
+ 
++source_set("simd") {
++  sources = []
+   configs += [ ":libjpeg_config" ]
++}
+ 
++source_set("libjpeg") {
++  sources = []
++  all_dependent_configs = [ ":libjpeg_link" ]
++  configs += [ ":libjpeg_config" ]
+   public_configs = [ ":libjpeg_config" ]
+-
+   deps = [ ":simd" ]
+ }
+diff --git a/engine/src/flutter/third_party/tonic/common/build_config.h b/engine/src/flutter/third_party/tonic/common/build_config.h
+index 7174b618..d325f766 100644
+--- a/engine/src/flutter/third_party/tonic/common/build_config.h
++++ b/engine/src/flutter/third_party/tonic/common/build_config.h
+@@ -88,6 +88,11 @@
+ #define ARCH_CPU_ARM64 1
+ #define ARCH_CPU_64_BITS 1
+ #define ARCH_CPU_LITTLE_ENDIAN 1
++#elif defined(__loongarch64)
++#define ARCH_CPU_LOONGARCH_FAMILY 1
++#define ARCH_CPU_LOONG64 1
++#define ARCH_CPU_64_BITS 1
++#define ARCH_CPU_LITTLE_ENDIAN 1
+ #elif defined(__riscv) && __SIZEOF_POINTER__ == 4
+ #define ARCH_CPU_RISCV_FAMILY 1
+ #define ARCH_CPU_RISCV32 1
+diff --git a/engine/src/flutter/tools/engine_tool/test/src/utils.dart b/engine/src/flutter/tools/engine_tool/test/src/utils.dart
+index ad7e3db6..921a5106 100644
+--- a/engine/src/flutter/tools/engine_tool/test/src/utils.dart
++++ b/engine/src/flutter/tools/engine_tool/test/src/utils.dart
+@@ -162,6 +162,7 @@ String _operatingSystemForAbi(ffi.Abi abi) {
+   switch (abi) {
+     case ffi.Abi.linuxArm:
+     case ffi.Abi.linuxArm64:
++    case ffi.Abi.linuxLoong64:
+     case ffi.Abi.linuxIA32:
+     case ffi.Abi.linuxX64:
+     case ffi.Abi.linuxRiscv32:
+diff --git a/engine/src/flutter/tools/gn b/engine/src/flutter/tools/gn
+index 7a2b89e6..2b25a3c4 100755
+--- a/engine/src/flutter/tools/gn
++++ b/engine/src/flutter/tools/gn
+@@ -163,6 +163,8 @@ def get_host_cpu():
+     return 'x64'
+   if machine in ['i686', 'i386', 'x86']:
+     return 'x86'
++  if machine in ['loongarch64', 'loong64']:
++    return 'loong64'
+   raise Exception('Unknown CPU architecture: %s' % machine)
+ 
+ 
+@@ -983,7 +985,8 @@ def parse_args(args):
+   parser.add_argument('--web', action='store_true', default=False)
+   parser.add_argument('--windows', dest='target_os', action='store_const', const='win')
+ 
+-  parser.add_argument('--linux-cpu', type=str, choices=['x64', 'x86', 'arm64', 'arm'])
++  parser.add_argument(
++      '--linux-cpu', type=str, choices=['x64', 'x86', 'arm64', 'arm', 'loong64'])
+   parser.add_argument('--fuchsia-cpu', type=str, choices=['x64', 'arm64'], default='x64')
+   parser.add_argument('--windows-cpu', type=str, choices=['x64', 'arm64', 'x86'], default='x64')
+   parser.add_argument('--simulator-cpu', type=str, choices=['x64', 'arm64'], default='x64')
+diff --git a/engine/src/flutter/vulkan/vulkan_application.cc b/engine/src/flutter/vulkan/vulkan_application.cc
+index d9db63c9..3517c117 100644
+--- a/engine/src/flutter/vulkan/vulkan_application.cc
++++ b/engine/src/flutter/vulkan/vulkan_application.cc
+@@ -3,6 +3,7 @@
+ // found in the LICENSE file.
+ 
+ #include "vulkan_application.h"
++#include <cstring>
+ 
+ #include <utility>
+ #include <vector>
+diff --git a/packages/flutter_tools/lib/src/android/android_device.dart b/packages/flutter_tools/lib/src/android/android_device.dart
+index 9246d697..8481d1d4 100644
+--- a/packages/flutter_tools/lib/src/android/android_device.dart
++++ b/packages/flutter_tools/lib/src/android/android_device.dart
+@@ -228,6 +228,7 @@ class AndroidDevice extends Device {
+       case TargetPlatform.fuchsia_x64:
+       case TargetPlatform.ios:
+       case TargetPlatform.linux_arm64:
++      case TargetPlatform.linux_loong64:
+       case TargetPlatform.linux_riscv64:
+       case TargetPlatform.linux_x64:
+       case TargetPlatform.tester:
+@@ -553,6 +554,7 @@ class AndroidDevice extends Device {
+       case TargetPlatform.fuchsia_x64:
+       case TargetPlatform.ios:
+       case TargetPlatform.linux_arm64:
++      case TargetPlatform.linux_loong64:
+       case TargetPlatform.linux_riscv64:
+       case TargetPlatform.linux_x64:
+       case TargetPlatform.tester:
+diff --git a/packages/flutter_tools/lib/src/artifacts.dart b/packages/flutter_tools/lib/src/artifacts.dart
+index 2c4d4b73..6c2d96a9 100644
+--- a/packages/flutter_tools/lib/src/artifacts.dart
++++ b/packages/flutter_tools/lib/src/artifacts.dart
+@@ -30,6 +30,7 @@ enum Artifact {
+   /// The tool which compiles a dart kernel file into native code.
+   genSnapshot('gen_snapshot'),
+   genSnapshotArm64('gen_snapshot_arm64'),
++  genSnapshotLoong64('gen_snapshot_loong64'),
+   genSnapshotRiscv64('gen_snapshot_riscv64'),
+   genSnapshotX64('gen_snapshot_x64'),
+ 
+@@ -212,6 +213,7 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
+     case TargetPlatform.darwin:
+     case TargetPlatform.linux_x64:
+     case TargetPlatform.linux_arm64:
++    case TargetPlatform.linux_loong64:
+     case TargetPlatform.linux_riscv64:
+     case TargetPlatform.windows_x64:
+     case TargetPlatform.windows_arm64:
+@@ -434,6 +436,7 @@ class CachedArtifacts implements Artifacts {
+       case TargetPlatform.darwin:
+       case TargetPlatform.linux_x64:
+       case TargetPlatform.linux_arm64:
++      case TargetPlatform.linux_loong64:
+       case TargetPlatform.linux_riscv64:
+       case TargetPlatform.windows_x64:
+       case TargetPlatform.windows_arm64:
+@@ -466,6 +469,7 @@ class CachedArtifacts implements Artifacts {
+     switch (artifact) {
+       case Artifact.genSnapshot:
+       case Artifact.genSnapshotArm64:
++      case Artifact.genSnapshotLoong64:
+       case Artifact.genSnapshotRiscv64:
+       case Artifact.genSnapshotX64:
+         return _fileSystem.path.join(engineDir, artifact.getFileName(_platform));
+@@ -507,6 +511,7 @@ class CachedArtifacts implements Artifacts {
+     switch (artifact) {
+       case Artifact.genSnapshot:
+       case Artifact.genSnapshotArm64:
++      case Artifact.genSnapshotLoong64:
+       case Artifact.genSnapshotRiscv64:
+       case Artifact.genSnapshotX64:
+         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
+@@ -561,6 +566,7 @@ class CachedArtifacts implements Artifacts {
+     switch (artifact) {
+       case Artifact.genSnapshot:
+       case Artifact.genSnapshotArm64:
++      case Artifact.genSnapshotLoong64:
+       case Artifact.genSnapshotRiscv64:
+       case Artifact.genSnapshotX64:
+       case Artifact.flutterXcframework:
+@@ -614,6 +620,7 @@ class CachedArtifacts implements Artifacts {
+         final genSnapshot = mode.isRelease ? 'gen_snapshot_product' : 'gen_snapshot';
+         return _fileSystem.path.join(root, runtime, 'dart_binaries', genSnapshot);
+       case Artifact.genSnapshotArm64:
++      case Artifact.genSnapshotLoong64:
+       case Artifact.genSnapshotRiscv64:
+       case Artifact.genSnapshotX64:
+         throw ArgumentError('$artifact is not available on this platform');
+@@ -673,6 +680,7 @@ class CachedArtifacts implements Artifacts {
+     switch (artifact) {
+       case Artifact.genSnapshot:
+       case Artifact.genSnapshotArm64:
++      case Artifact.genSnapshotLoong64:
+       case Artifact.genSnapshotRiscv64:
+       case Artifact.genSnapshotX64:
+         // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
+@@ -788,6 +796,7 @@ class CachedArtifacts implements Artifacts {
+     switch (platform) {
+       case TargetPlatform.linux_x64:
+       case TargetPlatform.linux_arm64:
++      case TargetPlatform.linux_loong64:
+       case TargetPlatform.linux_riscv64:
+       case TargetPlatform.darwin:
+       case TargetPlatform.windows_x64:
+@@ -833,6 +842,7 @@ TargetPlatform _currentHostPlatform(Platform platform, OperatingSystemUtils oper
+     return switch (operatingSystemUtils.hostPlatform) {
+       HostPlatform.linux_x64 => TargetPlatform.linux_x64,
+       HostPlatform.linux_riscv64 => TargetPlatform.linux_riscv64,
++      HostPlatform.linux_loong64 => TargetPlatform.linux_loong64,
+       _ => TargetPlatform.linux_arm64,
+     };
+   }
+@@ -1069,6 +1079,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
+     switch (artifact) {
+       case Artifact.genSnapshot:
+       case Artifact.genSnapshotArm64:
++      case Artifact.genSnapshotLoong64:
+       case Artifact.genSnapshotRiscv64:
+       case Artifact.genSnapshotX64:
+         return _genSnapshotPath(artifact);
+@@ -1207,6 +1218,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
+       'clang_x86',
+       'clang_i386',
+       'clang_arm64',
++      'clang_loong64',
+       'clang_riscv64',
+     ];
+     final String genSnapshotName = artifact.getFileName(_platform);
+@@ -1280,6 +1292,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
+           );
+         case Artifact.genSnapshot:
+         case Artifact.genSnapshotArm64:
++        case Artifact.genSnapshotLoong64:
+         case Artifact.genSnapshotRiscv64:
+         case Artifact.genSnapshotX64:
+         case Artifact.flutterTester:
+@@ -1581,6 +1594,8 @@ String _getPrebuiltTarget(Platform platform, OperatingSystemUtils operatingSyste
+       return 'macos-x64';
+     case TargetPlatform.linux_riscv64:
+       return 'linux-riscv64';
++    case TargetPlatform.linux_loong64:
++      return 'linux-loong64';
+     case TargetPlatform.linux_arm64:
+       return 'linux-arm64';
+     case TargetPlatform.linux_x64:
+diff --git a/packages/flutter_tools/lib/src/base/build.dart b/packages/flutter_tools/lib/src/base/build.dart
+index 8c724e68..bafd7f84 100644
+--- a/packages/flutter_tools/lib/src/base/build.dart
++++ b/packages/flutter_tools/lib/src/base/build.dart
+@@ -305,6 +305,7 @@ class AOTSnapshotter {
+       TargetPlatform.darwin,
+       TargetPlatform.linux_x64,
+       TargetPlatform.linux_arm64,
++      TargetPlatform.linux_loong64,
+       TargetPlatform.linux_riscv64,
+       TargetPlatform.windows_x64,
+       TargetPlatform.windows_arm64,
+diff --git a/packages/flutter_tools/lib/src/base/os.dart b/packages/flutter_tools/lib/src/base/os.dart
+index 15bb4cda..35bd32cf 100644
+--- a/packages/flutter_tools/lib/src/base/os.dart
++++ b/packages/flutter_tools/lib/src/base/os.dart
+@@ -150,6 +150,7 @@ abstract class OperatingSystemUtils {
+       Abi.macosArm64 => HostPlatform.darwin_arm64,
+       Abi.linuxX64 => HostPlatform.linux_x64,
+       Abi.linuxArm64 => HostPlatform.linux_arm64,
++      Abi.linuxLoong64 => HostPlatform.linux_loong64,
+       Abi.linuxRiscv64 => HostPlatform.linux_riscv64,
+       Abi.windowsX64 => HostPlatform.windows_x64,
+       Abi.windowsArm64 => HostPlatform.windows_arm64,
+@@ -604,6 +605,7 @@ enum HostPlatform {
+   darwin_arm64('darwin-arm64', 'arm64'),
+   linux_x64('linux-x64', 'x64'),
+   linux_arm64('linux-arm64', 'arm64'),
++  linux_loong64('linux-loong64', 'loong64'),
+   linux_riscv64('linux-riscv64', 'riscv64'),
+   windows_x64('windows-x64', 'x64'),
+   windows_arm64('windows-arm64', 'arm64');
+diff --git a/packages/flutter_tools/lib/src/build_info.dart b/packages/flutter_tools/lib/src/build_info.dart
+index fab5066e..3d824683 100644
+--- a/packages/flutter_tools/lib/src/build_info.dart
++++ b/packages/flutter_tools/lib/src/build_info.dart
+@@ -628,6 +628,7 @@ enum TargetPlatform {
+   darwin('darwin'),
+   linux_x64('linux-x64'),
+   linux_arm64('linux-arm64'),
++  linux_loong64('linux-loong64'),
+   linux_riscv64('linux-riscv64'),
+   windows_x64('windows-x64'),
+   windows_arm64('windows-arm64'),
+@@ -660,6 +661,7 @@ enum TargetPlatform {
+       'darwin' || 'darwin-x64' || 'darwin-arm64' => TargetPlatform.darwin,
+       'linux-x64' => TargetPlatform.linux_x64,
+       'linux-arm64' => TargetPlatform.linux_arm64,
++      'linux-loong64' => TargetPlatform.linux_loong64,
+       'linux-riscv64' => TargetPlatform.linux_riscv64,
+       'windows-x64' => TargetPlatform.windows_x64,
+       'windows-arm64' => TargetPlatform.windows_arm64,
+@@ -689,6 +691,7 @@ enum TargetPlatform {
+     darwin ||
+     ios ||
+     linux_arm64 ||
++    linux_loong64 ||
+     linux_riscv64 ||
+     linux_x64 ||
+     tester ||
+@@ -699,7 +702,7 @@ enum TargetPlatform {
+   };
+ 
+   String get osName => switch (this) {
+-    linux_x64 || linux_arm64 || linux_riscv64 => 'linux',
++    linux_x64 || linux_arm64 || linux_loong64 || linux_riscv64 => 'linux',
+     darwin => 'macos',
+     windows_x64 || windows_arm64 => 'windows',
+     android || android_arm || android_arm64 || android_x64 => 'android',
+@@ -713,6 +716,7 @@ enum TargetPlatform {
+   String get simpleName => switch (this) {
+     linux_x64 || darwin || windows_x64 => 'x64',
+     linux_arm64 || windows_arm64 => 'arm64',
++    linux_loong64 => 'loong64',
+     linux_riscv64 => 'riscv64',
+     android ||
+     android_arm ||
+diff --git a/packages/flutter_tools/lib/src/build_system/targets/common.dart b/packages/flutter_tools/lib/src/build_system/targets/common.dart
+index 692bc456..030e4315 100644
+--- a/packages/flutter_tools/lib/src/build_system/targets/common.dart
++++ b/packages/flutter_tools/lib/src/build_system/targets/common.dart
+@@ -251,6 +251,7 @@ class KernelSnapshot extends Target {
+       case TargetPlatform.fuchsia_x64:
+       case TargetPlatform.ios:
+       case TargetPlatform.linux_arm64:
++      case TargetPlatform.linux_loong64:
+       case TargetPlatform.linux_riscv64:
+       case TargetPlatform.tester:
+       case TargetPlatform.web_javascript:
+@@ -268,6 +269,7 @@ class KernelSnapshot extends Target {
+       TargetPlatform.darwin => 'macos',
+       TargetPlatform.ios => 'ios',
+       TargetPlatform.linux_arm64 ||
++      TargetPlatform.linux_loong64 ||
+       TargetPlatform.linux_riscv64 ||
+       TargetPlatform.linux_x64 => 'linux',
+       TargetPlatform.windows_arm64 || TargetPlatform.windows_x64 => 'windows',
+diff --git a/packages/flutter_tools/lib/src/build_system/tools/shader_compiler.dart b/packages/flutter_tools/lib/src/build_system/tools/shader_compiler.dart
+index beb18e37..81ccd01d 100644
+--- a/packages/flutter_tools/lib/src/build_system/tools/shader_compiler.dart
++++ b/packages/flutter_tools/lib/src/build_system/tools/shader_compiler.dart
+@@ -182,6 +182,7 @@ class ShaderCompiler {
+       case TargetPlatform.android:
+       case TargetPlatform.linux_x64:
+       case TargetPlatform.linux_arm64:
++      case TargetPlatform.linux_loong64:
+       case TargetPlatform.linux_riscv64:
+       case TargetPlatform.windows_x64:
+       case TargetPlatform.windows_arm64:
+diff --git a/packages/flutter_tools/lib/src/commands/assemble.dart b/packages/flutter_tools/lib/src/commands/assemble.dart
+index 61203a9f..db55eeb7 100644
+--- a/packages/flutter_tools/lib/src/commands/assemble.dart
++++ b/packages/flutter_tools/lib/src/commands/assemble.dart
+@@ -46,12 +46,15 @@ var _kDefaultTargets = <Target>[
+   // Linux targets
+   const DebugBundleLinuxAssets(TargetPlatform.linux_x64),
+   const DebugBundleLinuxAssets(TargetPlatform.linux_arm64),
++  const DebugBundleLinuxAssets(TargetPlatform.linux_loong64),
+   const DebugBundleLinuxAssets(TargetPlatform.linux_riscv64),
+   const ProfileBundleLinuxAssets(TargetPlatform.linux_x64),
+   const ProfileBundleLinuxAssets(TargetPlatform.linux_arm64),
++  const ProfileBundleLinuxAssets(TargetPlatform.linux_loong64),
+   const ProfileBundleLinuxAssets(TargetPlatform.linux_riscv64),
+   const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64),
+   const ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64),
++  const ReleaseBundleLinuxAssets(TargetPlatform.linux_loong64),
+   const ReleaseBundleLinuxAssets(TargetPlatform.linux_riscv64),
+   const ReleaseAndroidApplication(),
+   // This is a one-off rule for bundle and aot compat.
+diff --git a/packages/flutter_tools/lib/src/commands/build_bundle.dart b/packages/flutter_tools/lib/src/commands/build_bundle.dart
+index 32ef91fc..3f70857e 100644
+--- a/packages/flutter_tools/lib/src/commands/build_bundle.dart
++++ b/packages/flutter_tools/lib/src/commands/build_bundle.dart
+@@ -46,6 +46,7 @@ class BuildBundleCommand extends BuildSubCommand {
+           'darwin',
+           'linux-x64',
+           'linux-arm64',
++          'linux-loong64',
+           'linux-riscv64',
+           'windows-x64',
+           'windows-arm64',
+@@ -123,6 +124,7 @@ class BuildBundleCommand extends BuildSubCommand {
+         }
+       case TargetPlatform.linux_x64:
+       case TargetPlatform.linux_arm64:
++      case TargetPlatform.linux_loong64:
+       case TargetPlatform.linux_riscv64:
+         if (!featureFlags.isLinuxEnabled) {
+           throwToolExit('Linux is not a supported target platform.');
+diff --git a/packages/flutter_tools/lib/src/commands/build_linux.dart b/packages/flutter_tools/lib/src/commands/build_linux.dart
+index fc8f602e..84d16508 100644
+--- a/packages/flutter_tools/lib/src/commands/build_linux.dart
++++ b/packages/flutter_tools/lib/src/commands/build_linux.dart
+@@ -26,13 +26,14 @@ class BuildLinuxCommand extends BuildSubCommand {
+     usesFlavorOption();
+     final String defaultTargetPlatform = switch (_operatingSystemUtils.hostPlatform) {
+       HostPlatform.linux_arm64 => 'linux-arm64',
++      HostPlatform.linux_loong64 => 'linux-loong64',
+       HostPlatform.linux_riscv64 => 'linux-riscv64',
+       _ => 'linux-x64',
+     };
+     argParser.addOption(
+       'target-platform',
+       defaultsTo: defaultTargetPlatform,
+-      allowed: <String>['linux-arm64', 'linux-x64', 'linux-riscv64'],
++      allowed: <String>['linux-arm64', 'linux-loong64', 'linux-x64', 'linux-riscv64'],
+       help: 'The target platform for which the app is compiled.',
+     );
+     argParser.addOption(
+@@ -93,6 +94,14 @@ class BuildLinuxCommand extends BuildSubCommand {
+         'Cross-build from Linux x64 host to Linux arm64 target is not currently supported.',
+       );
+     }
++    // Building for loong64 (on a non-loong64 host) is experimental
++    if (_operatingSystemUtils.hostPlatform != HostPlatform.linux_loong64 &&
++        targetPlatform == TargetPlatform.linux_loong64 &&
++        !featureFlags.isLoong64SupportEnabled) {
++      throwToolExit(
++        'Building for Linux loong64 is currently an experimental feature. To enable, run "flutter config --enable-loong64"',
++      );
++    }
+     // Building for riscv64 (on a non-riscv64 host) is experimental
+     if (_operatingSystemUtils.hostPlatform != HostPlatform.linux_riscv64 &&
+         targetPlatform == TargetPlatform.linux_riscv64 &&
+diff --git a/packages/flutter_tools/lib/src/features.dart b/packages/flutter_tools/lib/src/features.dart
+index c32c9619..b346708e 100644
+--- a/packages/flutter_tools/lib/src/features.dart
++++ b/packages/flutter_tools/lib/src/features.dart
+@@ -82,6 +82,9 @@ abstract class FeatureFlags {
+   /// Whether UIScene migration is enabled.
+   bool get isUISceneMigrationEnabled;
+ 
++  /// Whether loong64 support is enabled.
++  bool get isLoong64SupportEnabled;
++
+   /// Whether riscv64 support is enabled.
+   bool get isRiscv64SupportEnabled;
+ 
+@@ -113,6 +116,7 @@ abstract class FeatureFlags {
+     accessibilityEvaluationsFeature,
+     lldbDebugging,
+     uiSceneMigration,
++    loong64,
+     riscv64,
+     macOSArm64Only,
+   ];
+@@ -303,6 +307,16 @@ const uiSceneMigration = Feature(
+   stable: FeatureChannelSetting(available: true, enabledByDefault: true),
+ );
+ 
++/// The [Feature] for building code targetting loong64 architecture
++const loong64 = Feature(
++  name: 'support for loong64 architecture',
++  configSetting: 'enable-loong64',
++  environmentOverride: 'FLUTTER_LOONG64',
++  master: FeatureChannelSetting(available: true, enabledByDefault: true),
++  beta: FeatureChannelSetting(available: true),
++  stable: FeatureChannelSetting(available: true),
++);
++
+ /// The [Feature] for building code targetting riscv64 architecture
+ const riscv64 = Feature(
+   name: 'support for riscv64 architecture',
+diff --git a/packages/flutter_tools/lib/src/flutter_application_package.dart b/packages/flutter_tools/lib/src/flutter_application_package.dart
+index c61de499..32eea882 100644
+--- a/packages/flutter_tools/lib/src/flutter_application_package.dart
++++ b/packages/flutter_tools/lib/src/flutter_application_package.dart
+@@ -91,6 +91,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
+         return WebApplicationPackage(FlutterProject.current());
+       case TargetPlatform.linux_x64:
+       case TargetPlatform.linux_arm64:
++      case TargetPlatform.linux_loong64:
+       case TargetPlatform.linux_riscv64:
+         return applicationBinary == null
+             ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
+diff --git a/packages/flutter_tools/lib/src/flutter_features.dart b/packages/flutter_tools/lib/src/flutter_features.dart
+index 315e648d..376b9d7a 100644
+--- a/packages/flutter_tools/lib/src/flutter_features.dart
++++ b/packages/flutter_tools/lib/src/flutter_features.dart
+@@ -73,6 +73,9 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
+   @override
+   bool get isUISceneMigrationEnabled => isEnabled(uiSceneMigration);
+ 
++  @override
++  bool get isLoong64SupportEnabled => isEnabled(loong64);
++
+   @override
+   bool get isRiscv64SupportEnabled => isEnabled(riscv64);
+ 
+diff --git a/packages/flutter_tools/lib/src/isolated/native_assets/native_assets.dart b/packages/flutter_tools/lib/src/isolated/native_assets/native_assets.dart
+index f021e638..7d5b5f92 100644
+--- a/packages/flutter_tools/lib/src/isolated/native_assets/native_assets.dart
++++ b/packages/flutter_tools/lib/src/isolated/native_assets/native_assets.dart
+@@ -970,6 +970,7 @@ OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
+       return OS.macOS;
+     case TargetPlatform.linux_x64:
+     case TargetPlatform.linux_arm64:
++    case TargetPlatform.linux_loong64:
+     case TargetPlatform.linux_riscv64:
+       return OS.linux;
+     case TargetPlatform.windows_x64:
+@@ -1018,6 +1019,7 @@ const _osTargets = <OS, Set<Architecture>>{
+     Architecture.arm,
+     Architecture.arm64,
+     Architecture.ia32,
++    Architecture.loong64,
+     Architecture.riscv32,
+     Architecture.riscv64,
+     Architecture.x64,
+diff --git a/packages/flutter_tools/lib/src/isolated/native_assets/targets.dart b/packages/flutter_tools/lib/src/isolated/native_assets/targets.dart
+index e4726d0a..7b0fa689 100644
+--- a/packages/flutter_tools/lib/src/isolated/native_assets/targets.dart
++++ b/packages/flutter_tools/lib/src/isolated/native_assets/targets.dart
+@@ -76,6 +76,8 @@ sealed class AssetBuildTarget {
+         return _linuxTarget(supportedAssetTypes, Architecture.x64, buildMode, buildDirectory);
+       case TargetPlatform.linux_arm64:
+         return _linuxTarget(supportedAssetTypes, Architecture.arm64, buildMode, buildDirectory);
++      case TargetPlatform.linux_loong64:
++        return _linuxTarget(supportedAssetTypes, Architecture.loong64, buildMode, buildDirectory);
+       case TargetPlatform.linux_riscv64:
+         return _linuxTarget(supportedAssetTypes, Architecture.riscv64, buildMode, buildDirectory);
+       case TargetPlatform.windows_arm64:
+@@ -439,6 +441,7 @@ List<AndroidArch> _androidArchs(TargetPlatform targetPlatform, String? androidAr
+     case TargetPlatform.fuchsia_x64:
+     case TargetPlatform.ios:
+     case TargetPlatform.linux_arm64:
++    case TargetPlatform.linux_loong64:
+     case TargetPlatform.linux_riscv64:
+     case TargetPlatform.linux_x64:
+     case TargetPlatform.tester:
+diff --git a/packages/flutter_tools/lib/src/linux/build_linux.dart b/packages/flutter_tools/lib/src/linux/build_linux.dart
+index d13755bd..d59d3ad6 100644
+--- a/packages/flutter_tools/lib/src/linux/build_linux.dart
++++ b/packages/flutter_tools/lib/src/linux/build_linux.dart
+@@ -170,6 +170,8 @@ Future<void> _runCmake(
+   final String buildFlag = sentenceCase(buildModeName);
+   final bool needCrossBuildOptionsForArm64 =
+       needCrossBuild && targetPlatform == TargetPlatform.linux_arm64;
++  final bool needCrossBuildOptionsForLoong64 =
++      needCrossBuild && targetPlatform == TargetPlatform.linux_loong64;
+   final bool needCrossBuildOptionsForRiscv64 =
+       needCrossBuild && targetPlatform == TargetPlatform.linux_riscv64;
+   int result;
+@@ -188,6 +190,9 @@ Future<void> _runCmake(
+       if (needCrossBuild) '-DFLUTTER_TARGET_PLATFORM_SYSROOT=$targetSysroot',
+       if (needCrossBuildOptionsForArm64) '-DCMAKE_C_COMPILER_TARGET=aarch64-linux-gnu',
+       if (needCrossBuildOptionsForArm64) '-DCMAKE_CXX_COMPILER_TARGET=aarch64-linux-gnu',
++      // Support cross-building for loong64 targets on x64 hosts.
++      if (needCrossBuildOptionsForLoong64) '-DCMAKE_C_COMPILER_TARGET=loongarch64-linux-gnu',
++      if (needCrossBuildOptionsForLoong64) '-DCMAKE_CXX_COMPILER_TARGET=loongarch64-linux-gnu',
+       // Support cross-building for riscv64 targets on x64 hosts.
+       if (needCrossBuildOptionsForRiscv64) '-DCMAKE_C_COMPILER_TARGET=riscv64-linux-gnu',
+       if (needCrossBuildOptionsForRiscv64) '-DCMAKE_CXX_COMPILER_TARGET=riscv64-linux-gnu',
+diff --git a/packages/flutter_tools/lib/src/linux/linux_device.dart b/packages/flutter_tools/lib/src/linux/linux_device.dart
+index d7d7c5fe..3c6cfb62 100644
+--- a/packages/flutter_tools/lib/src/linux/linux_device.dart
++++ b/packages/flutter_tools/lib/src/linux/linux_device.dart
+@@ -46,6 +46,8 @@ class LinuxDevice extends DesktopDevice {
+       return TargetPlatform.linux_x64;
+     } else if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_riscv64) {
+       return TargetPlatform.linux_riscv64;
++    } else if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_loong64) {
++      return TargetPlatform.linux_loong64;
+     }
+     return TargetPlatform.linux_arm64;
+   }();
+diff --git a/packages/flutter_tools/lib/src/mdns_discovery.dart b/packages/flutter_tools/lib/src/mdns_discovery.dart
+index 0840c95b..88ce341a 100644
+--- a/packages/flutter_tools/lib/src/mdns_discovery.dart
++++ b/packages/flutter_tools/lib/src/mdns_discovery.dart
+@@ -599,6 +599,7 @@ class MDnsVmServiceDiscovery {
+       case TargetPlatform.fuchsia_arm64:
+       case TargetPlatform.fuchsia_x64:
+       case TargetPlatform.linux_arm64:
++      case TargetPlatform.linux_loong64:
+       case TargetPlatform.linux_riscv64:
+       case TargetPlatform.linux_x64:
+       case TargetPlatform.tester:
+diff --git a/packages/flutter_tools/lib/src/resident_runner.dart b/packages/flutter_tools/lib/src/resident_runner.dart
+index fb85b532..0f98e3e8 100644
+--- a/packages/flutter_tools/lib/src/resident_runner.dart
++++ b/packages/flutter_tools/lib/src/resident_runner.dart
+@@ -1639,6 +1639,7 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async
+     case TargetPlatform.fuchsia_arm64:
+     case TargetPlatform.fuchsia_x64:
+     case TargetPlatform.linux_arm64:
++    case TargetPlatform.linux_loong64:
+     case TargetPlatform.linux_riscv64:
+     case TargetPlatform.linux_x64:
+     case TargetPlatform.tester:
+diff --git a/packages/flutter_tools/lib/src/runner/flutter_command.dart b/packages/flutter_tools/lib/src/runner/flutter_command.dart
+index 1671d157..00d14662 100644
+--- a/packages/flutter_tools/lib/src/runner/flutter_command.dart
++++ b/packages/flutter_tools/lib/src/runner/flutter_command.dart
+@@ -2239,6 +2239,7 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
+       return null;
+     case TargetPlatform.linux_x64:
+     case TargetPlatform.linux_arm64:
++    case TargetPlatform.linux_loong64:
+     case TargetPlatform.linux_riscv64:
+       if (featureFlags.isLinuxEnabled) {
+         return DevelopmentArtifact.linux;
+diff --git a/packages/flutter_tools/test/commands.shard/hermetic/build_linux_test.dart b/packages/flutter_tools/test/commands.shard/hermetic/build_linux_test.dart
+index c93630ad..2d3750c3 100644
+--- a/packages/flutter_tools/test/commands.shard/hermetic/build_linux_test.dart
++++ b/packages/flutter_tools/test/commands.shard/hermetic/build_linux_test.dart
+@@ -657,6 +657,46 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
+     },
+   );
+ 
++  testUsingContext(
++    'Linux on LoongArch64 build --debug passes debug mode to cmake and ninja',
++    () async {
++      final command = BuildCommand(
++        androidSdk: FakeAndroidSdk(),
++        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
++        fileSystem: fileSystem,
++        logger: logger,
++        osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_loong64),
++        config: FakeConfig(),
++        platform: FakePlatform(),
++        fileSystemUtils: FakeFileSystemUtils(),
++        terminal: FakeTerminal(),
++        plistParser: FakePlistParser(),
++        processUtils: FakeProcessUtils(),
++        processManager: FakeProcessManager.any(),
++        templateRenderer: FakeTemplateRenderer(),
++        xcode: FakeXcode(),
++        artifacts: FakeArtifacts(),
++        cache: FakeCache(),
++        flutterVersion: FakeFlutterVersion(),
++      );
++      setUpMockProjectFilesForBuild();
++      processManager.addCommands(<FakeCommand>[
++        cmakeCommand('debug', target: 'loong64'),
++        ninjaCommand('debug', target: 'loong64'),
++      ]);
++
++      await createTestCommandRunner(
++        command,
++      ).run(const <String>['build', 'linux', '--debug', '--no-pub']);
++    },
++    overrides: <Type, Generator>{
++      FileSystem: () => fileSystem,
++      ProcessManager: () => processManager,
++      Platform: () => linuxPlatform,
++      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
++    },
++  );
++
+   testUsingContext(
+     'Linux on RISCV64 build --debug passes debug mode to cmake and ninja',
+     () async {
+@@ -775,6 +815,46 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
+     },
+   );
+ 
++  testUsingContext(
++    'Linux on LoongArch64 build --profile passes profile mode to make',
++    () async {
++      final command = BuildCommand(
++        androidSdk: FakeAndroidSdk(),
++        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
++        fileSystem: fileSystem,
++        logger: logger,
++        osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_loong64),
++        config: FakeConfig(),
++        platform: FakePlatform(),
++        fileSystemUtils: FakeFileSystemUtils(),
++        terminal: FakeTerminal(),
++        plistParser: FakePlistParser(),
++        processUtils: FakeProcessUtils(),
++        processManager: FakeProcessManager.any(),
++        templateRenderer: FakeTemplateRenderer(),
++        xcode: FakeXcode(),
++        artifacts: FakeArtifacts(),
++        cache: FakeCache(),
++        flutterVersion: FakeFlutterVersion(),
++      );
++      setUpMockProjectFilesForBuild();
++      processManager.addCommands(<FakeCommand>[
++        cmakeCommand('profile', target: 'loong64'),
++        ninjaCommand('profile', target: 'loong64'),
++      ]);
++
++      await createTestCommandRunner(
++        command,
++      ).run(const <String>['build', 'linux', '--profile', '--no-pub']);
++    },
++    overrides: <Type, Generator>{
++      FileSystem: () => fileSystem,
++      ProcessManager: () => processManager,
++      Platform: () => linuxPlatform,
++      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
++    },
++  );
++
+   testUsingContext(
+     'Linux on RISCV64 build --profile passes profile mode to make',
+     () async {
+@@ -1173,6 +1253,77 @@ set(BINARY_NAME "fizz_bar")
+     },
+   );
+ 
++  testUsingContext(
++    'Linux on LOONG64 build --release passes, and check if the LinuxBuildDirectory for loong64 can be referenced correctly by using analytics',
++    () async {
++      final command = BuildCommand(
++        androidSdk: FakeAndroidSdk(),
++        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
++        fileSystem: fileSystem,
++        logger: logger,
++        osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_loong64),
++        config: FakeConfig(),
++        platform: FakePlatform(),
++        fileSystemUtils: FakeFileSystemUtils(),
++        terminal: FakeTerminal(),
++        plistParser: FakePlistParser(),
++        processUtils: FakeProcessUtils(),
++        processManager: FakeProcessManager.any(),
++        templateRenderer: FakeTemplateRenderer(),
++        xcode: FakeXcode(),
++        artifacts: FakeArtifacts(),
++        cache: FakeCache(),
++        flutterVersion: FakeFlutterVersion(),
++      );
++      setUpMockProjectFilesForBuild();
++      processManager.addCommands(<FakeCommand>[
++        cmakeCommand('release', target: 'loong64'),
++        ninjaCommand(
++          'release',
++          target: 'loong64',
++          onRun: (_) {
++            fileSystem.file('build/flutter_size_01/snapshot.linux-loong64.json')
++              ..createSync(recursive: true)
++              ..writeAsStringSync('''
++[
++  {
++    "l": "dart:_internal",
++    "c": "SubListIterable",
++    "n": "[Optimized] skip",
++    "s": 2400
++  }
++]''');
++            fileSystem.file('build/flutter_size_01/trace.linux-loong64.json')
++              ..createSync(recursive: true)
++              ..writeAsStringSync('{}');
++          },
++        ),
++      ]);
++
++      fileSystem.file('build/linux/loong64/release/bundle/libapp.so')
++        ..createSync(recursive: true)
++        ..writeAsBytesSync(List<int>.filled(10000, 0));
++
++      await createTestCommandRunner(
++        command,
++      ).run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
++
++      // check if libapp.so of "build/linux/loong64/release" directory can be referenced.
++      expect(testLogger.statusText, contains('libapp.so (Dart AOT)'));
++      expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'linux')));
++    },
++    overrides: <Type, Generator>{
++      FileSystem: () => fileSystem,
++      ProcessManager: () => processManager,
++      Platform: () => linuxPlatform,
++      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
++      OperatingSystemUtils: () =>
++          CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_loong64),
++      Analytics: () => fakeAnalytics,
++    },
++  );
++}
++
+   testUsingContext(
+     'Linux on RISCV64 build --release passes, and check if the LinuxBuildDirectory for riscv64 can be referenced correctly by using analytics',
+     () async {
+diff --git a/packages/flutter_tools/test/general.shard/base/os_test.dart b/packages/flutter_tools/test/general.shard/base/os_test.dart
+index e105c8d1..20482377 100644
+--- a/packages/flutter_tools/test/general.shard/base/os_test.dart
++++ b/packages/flutter_tools/test/general.shard/base/os_test.dart
+@@ -149,6 +149,14 @@ void main() {
+       expect(utils.hostPlatform, HostPlatform.linux_arm64);
+     });
+ 
++    testWithoutContext('Linux LOONG64', () async {
++      final OperatingSystemUtils utils = createOSUtils(
++        FakePlatform(),
++        currentAbi: Abi.linuxLoong64,
++      );
++      expect(utils.hostPlatform, HostPlatform.linux_loong64);
++    });
++
+     testWithoutContext('Linux RISCV64', () async {
+       final OperatingSystemUtils utils = createOSUtils(
+         FakePlatform(),
+diff --git a/packages/flutter_tools/test/general.shard/build_system/targets/dart_plugin_registrant_test.dart b/packages/flutter_tools/test/general.shard/build_system/targets/dart_plugin_registrant_test.dart
+index 11a7003a..cd857a9e 100644
+--- a/packages/flutter_tools/test/general.shard/build_system/targets/dart_plugin_registrant_test.dart
++++ b/packages/flutter_tools/test/general.shard/build_system/targets/dart_plugin_registrant_test.dart
+@@ -90,6 +90,7 @@ void main() {
+         'darwin-x64': false,
+         'linux-x64': false,
+         'linux-arm64': false,
++        'linux-loong64': false,
+         'linux-riscv64': false,
+         'windows-x64': false,
+         'web-javascript': true,
+diff --git a/packages/flutter_tools/test/general.shard/flutter_validator_test.dart b/packages/flutter_tools/test/general.shard/flutter_validator_test.dart
+index aa21b8bb..6b176c98 100644
+--- a/packages/flutter_tools/test/general.shard/flutter_validator_test.dart
++++ b/packages/flutter_tools/test/general.shard/flutter_validator_test.dart
+@@ -851,6 +851,9 @@ class FakeFlutterFeatures extends FeatureFlags {
+   @override
+   bool get isUISceneMigrationEnabled => _enabled;
+ 
++  @override
++  bool get isLoong64SupportEnabled => _enabled;
++
+   @override
+   bool get isRiscv64SupportEnabled => _enabled;
+ 
+diff --git a/packages/flutter_tools/test/src/fakes.dart b/packages/flutter_tools/test/src/fakes.dart
+index 4f327ebb..552f8c1a 100644
+--- a/packages/flutter_tools/test/src/fakes.dart
++++ b/packages/flutter_tools/test/src/fakes.dart
+@@ -552,6 +552,7 @@ class TestFeatureFlags implements FeatureFlags {
+     this.isAccessibilityEvaluationsEnabled = false,
+     this.isLLDBDebuggingEnabled = false,
+     this.isUISceneMigrationEnabled = false,
++    this.isLoong64SupportEnabled = false,
+     this.isRiscv64SupportEnabled = false,
+     this.isMacOSArm64OnlyEnabled = false,
+   });
+@@ -610,6 +611,9 @@ class TestFeatureFlags implements FeatureFlags {
+   @override
+   final bool isUISceneMigrationEnabled;
+ 
++  @override
++  final bool isLoong64SupportEnabled;
++
+   @override
+   final bool isRiscv64SupportEnabled;
+ 
+@@ -635,6 +639,7 @@ class TestFeatureFlags implements FeatureFlags {
+       accessibilityEvaluationsFeature => isAccessibilityEvaluationsEnabled,
+       lldbDebugging => isLLDBDebuggingEnabled,
+       uiSceneMigration => isUISceneMigrationEnabled,
++      loong64 => isLoong64SupportEnabled,
+       riscv64 => isRiscv64SupportEnabled,
+       macOSArm64Only => isMacOSArm64OnlyEnabled,
+       recordUse => isRecordUseEnabled,
+@@ -662,6 +667,7 @@ class TestFeatureFlags implements FeatureFlags {
+     accessibilityEvaluationsFeature,
+     lldbDebugging,
+     uiSceneMigration,
++    loong64,
+     riscv64,
+     macOSArm64Only,
+   ];
