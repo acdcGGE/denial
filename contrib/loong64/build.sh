@@ -124,6 +124,15 @@ EOF
     [ -f "$gn_src/flatbuffers/copy_flatc.py" ] && cp -f "$gn_src/flatbuffers/copy_flatc.py" "$tp/flatbuffers/"
   fi
 
+  # 上游源码缺少 loongarch64 架构识别（如 boringssl target.h），按其源码目录布局覆盖
+  local files_src=$FLUTTER/engine/src/flutter/loong64/third_party_files
+  if [ -d "$files_src" ]; then
+    while IFS= read -r f; do
+      mkdir -p "$tp/$(dirname "$f")"
+      cp -f "$files_src/$f" "$tp/$f"
+    done < <(cd "$files_src" && find . -type f)
+  fi
+
   # swiftshader 的真实仓库在 loong64 上会触发内置 LLVM 断言，仅测试需要，用 stub 顶替
   local stub=$FLUTTER/engine/src/flutter/loong64/third_party_stubs/swiftshader
   if [ -d "$stub" ]; then
