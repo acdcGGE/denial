@@ -39,7 +39,7 @@ die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 stage_env() {
   log "检查构建环境"
   local missing=()
-  for t in clang clang++ llvm-ar ninja pkg-config python3 curl unzip git; do
+  for t in clang clang++ llvm-ar ninja pkg-config python3 curl unzip git rustup; do
     command -v "$t" >/dev/null || missing+=("$t")
   done
   command -v "$GN" >/dev/null || missing+=("gn")
