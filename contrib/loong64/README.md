@@ -1,4 +1,4 @@
-# denial loongarch64 原生构建
+# denial loongarch64 
 
 在 x86-64 主机上为 **loongarch64** 交叉编译 denial v0.6.10，包含：
 
