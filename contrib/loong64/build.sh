@@ -166,6 +166,10 @@ YAML
 
 stage_engine() {
   log "编译 loongarch64 引擎与 host 引擎"
+  case "$(command -v python3)" in
+    *depot_tools*)
+      die "PATH 中 depot_tools 排在系统路径之前，python3 会被解析为未初始化的包装脚本；请把 depot_tools 放到 PATH 末尾" ;;
+  esac
   if ! git -C "$FLUTTER" apply --reverse --check \
       "$DENIAL_ROOT/contrib/loong64/flutter-denial-3.47.5-loongarch64.patch" >/dev/null 2>&1; then
     git -C "$FLUTTER" apply "$DENIAL_ROOT/contrib/loong64/flutter-denial-3.47.5-loongarch64.patch"
