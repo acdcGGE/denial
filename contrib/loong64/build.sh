@@ -173,7 +173,7 @@ stage_engine() {
 
   # 引擎构建需要 bootstrap Dart SDK；gclient 的 download_dart_sdk 钩子在 --nohooks 下不会执行
   ensure_tool_dart
-  local boot_sdk=$FLUTTER/engine/src/third_party/dart/tools/sdks/dart-sdk
+  local boot_sdk=$FLUTTER/engine/src/flutter/third_party/dart/tools/sdks/dart-sdk
   if [ ! -x "$boot_sdk/bin/dart" ]; then
     mkdir -p "$(dirname "$boot_sdk")"
     ln -sfn "$WORK/tool-dart-sdk/dart-sdk" "$boot_sdk"
