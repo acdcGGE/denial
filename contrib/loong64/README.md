@@ -7,30 +7,57 @@
 - Rust compositor（`deniald` / `denialctl` / `denial-portal`）
 - 最终 payload 与校验文件
 
-## 依赖
+## 获取工具链与依赖
 
-| 组件 | 说明 |
-| --- | --- |
-| loongarch64 sysroot | 需包含 `libdrm gbm egl libinput libseat libudev xkbcommon gtk+-3.0 fontconfig` 的 pkg-config 与运行库 |
-| clang / lld / llvm-ar | 交叉编译与链接（**不要**用 `loongarch64-linux-gnu-ld`） |
-| gn / ninja | 引擎构建 |
-| Rust | `rustup target add loongarch64-unknown-linux-gnu` |
-| denialwm/flutter | 检出 `denial/3.47.5` 分支（默认 `$WORK/checkout`） |
-| Dart 3.13.4 | 仅用于 `pub`，脚本会自动下载（国内镜像） |
+仓库内不包含任何主机绝对路径，所有路径均由 `WORK` / `SYSROOT` / `FLUTTER` 推导。
+
+### 1. host 工具与 Rust 目标（系统仓库 / 网络）
+
+```bash
+# Arch
+sudo pacman -S --needed clang lld llvm ninja gn pkgconf python curl unzip git rustup aria2
+# Debian/Ubuntu
+sudo apt install clang lld llvm ninja-build gn pkg-config python3 curl unzip git
+
+rustup target add loongarch64-unknown-linux-gnu
+```
+
+### 2. loongarch64 sysroot（目标机导出或网络下载）
+
+需包含 `libdrm gbm egl libinput libseat libudev xkbcommon gtk+-3.0 fontconfig` 的 pkg-config 与运行库，布局为 `usr/lib`、`usr/include`。
+
+```bash
+# 方式一：从目标机导出
+rsync -a --delete root@<target>:/usr "$WORK/sysroot/"
+
+# 方式二：网络下载 rootfs 压缩包（脚本自动解压）
+SYSROOT_URL=https://<mirror>/archlinux-loongarch64-rootfs.tar.zst ./contrib/loong64/build.sh env
+```
+
+### 3. Flutter 引擎源码（网络）
+
+```bash
+git clone -b loong64-native-build https://github.com/acdcGGE/flutter.git "$WORK/flutter"
+cd "$WORK/flutter" && gclient sync -D    # 需要 depot_tools
+```
+
+若 `$FLUTTER` 不存在，脚本会自动 clone（并调用 `gclient sync -D`）。
+
+### 4. Dart 3.13.4
+
+由脚本自动从 `storage.flutter-io.cn` 下载，仅用于 `pub`。
 
 ## 使用
 
 ```bash
-# 全部阶段
 ./contrib/loong64/build.sh all
-
-# 或分阶段执行
+# 或分阶段
 ./contrib/loong64/build.sh env engine tool shell rust payload
 ```
 
-可通过环境变量覆盖路径：`WORK`、`SYSROOT`、`FLUTTER`、`GN`、`JOBS`。
+路径覆盖：`WORK`、`SYSROOT`、`SYSROOT_URL`、`FLUTTER`、`FLUTTER_URL`、`GN`、`JOBS`。默认 `WORK=${XDG_CACHE_HOME:-~/.cache}/denial-loong64`。
 
-产物：`$WORK/payload` 与 `$WORK/denial-linux-loong64.tar.gz`。
+产物：`$WORK/payload`、`$WORK/denial-linux-loong64.tar.gz`；pacman 包用 `./contrib/loong64/package-pkg.sh` 生成到 `$WORK/pkgs`。
 
 ## 关键改动
 

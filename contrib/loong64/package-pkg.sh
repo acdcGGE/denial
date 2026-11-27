@@ -79,7 +79,8 @@ manifest["package"]["architecture"] = "loongarch64"
 manifest["generation"] = "flutter-3.47.5-engine-" + engine_rev[:8] + "-denial-r1-loong64"
 json.dump(manifest, open(os.path.join(share, "manifest.json"), "w"), indent=2)
 PY
-  install -Dm644 "$ENGINE_OUT/args.gn" "$share/args.gn"
+  sed -E 's|^(target_sysroot|custom_sysroot) = ".*"$|\1 = "@SYSROOT@"|' \
+    "$ENGINE_OUT/args.gn" > "$share/args.gn"
 
   cat > /tmp/engine-build-info.md <<EOF
 # Denial Flutter Engine (loongarch64)

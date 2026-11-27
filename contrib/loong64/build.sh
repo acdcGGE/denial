@@ -6,22 +6,26 @@
 #   stage: env | engine | tool | shell | rust | payload | all
 #
 # 可覆盖的环境变量:
-#   WORK           构建根目录            (默认 $HOME/loong64-build/denial-main-build)
-#   SYSROOT        loongarch64 sysroot   (默认 $HOME/loong64-build/sysroot)
-#   FLUTTER        denialwm/flutter 检出  (默认 $WORK/checkout，需为 denial/3.47.5)
+#   WORK           构建根目录            (默认 ${XDG_CACHE_HOME:-~/.cache}/denial-loong64)
+#   SYSROOT        loongarch64 sysroot   (默认 $WORK/sysroot)
+#   SYSROOT_URL    sysroot 压缩包地址     (SYSROOT 不存在时自动下载)
+#   FLUTTER        denialwm/flutter 检出  (默认 $WORK/flutter，不存在时自动 clone)
+#   FLUTTER_URL    flutter 仓库地址       (默认 https://github.com/acdcGGE/flutter.git)
 #   GN             gn 可执行文件         (默认 PATH 中的 gn)
 #   JOBS           并行度                (默认 16)
 set -euo pipefail
 
 DENIAL_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
-WORK=${WORK:-$HOME/loong64-build/denial-main-build}
-SYSROOT=${SYSROOT:-$HOME/loong64-build/sysroot}
-FLUTTER=${FLUTTER:-$WORK/checkout}
+WORK=${WORK:-${XDG_CACHE_HOME:-$HOME/.cache}/denial-loong64}
+SYSROOT=${SYSROOT:-$WORK/sysroot}
+SYSROOT_URL=${SYSROOT_URL:-}
+FLUTTER=${FLUTTER:-$WORK/flutter}
+FLUTTER_URL=${FLUTTER_URL:-https://github.com/acdcGGE/flutter.git}
 GN=${GN:-gn}
 JOBS=${JOBS:-16}
 
 ENGINE_SRC=$FLUTTER/engine/src
-TARGET_OUT=$WORK/checkout/engine/src/flutter/out/denial_linux_loong64_release
+TARGET_OUT=$FLUTTER/engine/src/flutter/out/denial_linux_loong64_release
 HOST_OUT=$WORK/host-build/out/denial_host_release
 VIEW=$WORK/engine-view
 SHELL_OUT=$WORK/shell-assembly
@@ -34,19 +38,54 @@ die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 
 stage_env() {
   log "检查构建环境"
-  for t in clang clang++ llvm-ar ninja pkg-config curl unzip; do
-    command -v "$t" >/dev/null || die "缺少 $t"
+  local missing=()
+  for t in clang clang++ llvm-ar ninja pkg-config python3 curl unzip git; do
+    command -v "$t" >/dev/null || missing+=("$t")
   done
-  [ -d "$SYSROOT/usr/lib" ] || die "sysroot 不存在: $SYSROOT"
-  [ -d "$FLUTTER/engine/src" ] || die "flutter 源码不存在: $FLUTTER"
-  [ -d "$DENIAL_ROOT/dart_shell" ] || die "不是 denial 仓库根目录: $DENIAL_ROOT"
+  command -v "$GN" >/dev/null || missing+=("gn")
+  if [ ${#missing[@]} -gt 0 ]; then
+    cat >&2 <<EOF
+缺少命令: ${missing[*]}
+请从系统仓库安装（包名以发行版为准）:
+  Arch:          pacman -S --needed clang lld llvm ninja gn pkgconf python curl unzip git rustup
+  Debian/Ubuntu: apt install clang lld llvm ninja-build gn pkg-config python3 curl unzip git
+安装 Rust 目标:
+  rustup target add loongarch64-unknown-linux-gnu
+EOF
+    exit 1
+  fi
+
+  if [ ! -d "$SYSROOT/usr/lib" ]; then
+    [ -n "$SYSROOT_URL" ] || die "sysroot 不存在: $SYSROOT（用 SYSROOT 指定，或设置 SYSROOT_URL 自动下载）"
+    mkdir -p "$WORK" "$SYSROOT"
+    local archive=$WORK/sysroot.tar.zst
+    if command -v aria2c >/dev/null; then
+      aria2c -x8 -s8 -o "$(basename "$archive")" -d "$WORK" "$SYSROOT_URL"
+    else
+      curl -L --retry 3 -o "$archive" "$SYSROOT_URL"
+    fi
+    tar -xaf "$archive" -C "$SYSROOT"
+  fi
+
   export PKG_CONFIG_ALLOW_CROSS=1
   export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
   export PKG_CONFIG_LIBDIR=$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/lib/loongarch64-linux-gnu/pkgconfig:$SYSROOT/usr/share/pkgconfig
   for p in libdrm gbm egl libinput libseat libudev xkbcommon gtk+-3.0 fontconfig; do
     pkg-config --exists "$p" || die "sysroot 缺少 pkg-config 依赖: $p"
   done
-  rustup target list --installed | grep -qx "$TARGET_TRIPLE" || rustup target add "$TARGET_TRIPLE"
+
+  if ! rustup target list --installed | grep -qx "$TARGET_TRIPLE"; then
+    rustup target add "$TARGET_TRIPLE"
+  fi
+
+  if [ ! -d "$FLUTTER/engine/src" ]; then
+    git clone --depth 1 -b loong64-native-build "$FLUTTER_URL" "$FLUTTER"
+    if command -v gclient >/dev/null; then
+      ( cd "$FLUTTER" && gclient sync -D )
+    else
+      die "需要 depot_tools 的 gclient 同步引擎依赖（见 README）"
+    fi
+  fi
 }
 
 stage_engine() {
@@ -72,21 +111,19 @@ stage_engine() {
   cp "$DENIAL_ROOT/contrib/loong64/args/denial_host_release.args.gn" > "$HOST_OUT/args.gn"
 
   ( cd "$ENGINE_SRC"
-    "$GN" gen "$TARGET_OUT" --root=. --script-executable=/usr/bin/python3
-    "$GN" gen "$HOST_OUT"   --root=. --script-executable=/usr/bin/python3 )
+    "$GN" gen "$TARGET_OUT" --root=. --script-executable="$(command -v python3)"
+    "$GN" gen "$HOST_OUT"   --root=. --script-executable="$(command -v python3)" )
 
-  export PATH=$HOME/bin:$PATH
   ( cd "$ENGINE_SRC" && ninja -C "$TARGET_OUT" -j"$JOBS" \
       libflutter_engine.so libflutter_linux_gtk.so impellerc flatc \
       gen_snapshot flutter_patched_sdk \
       flutter/shell/platform/linux:publish_headers_linux )
 
   # dds/dartdev 的 AOT snapshot 与 SDK API 不匹配，属于已知无害失败
-  CPATH=$WORK/host-deps/include \
-  ( cd "$ENGINE_SRC" && ninja -C "$HOST_OUT" -k 0 -j"$JOBS" \
+  CPATH=$WORK/host-deps/include ninja -C "$HOST_OUT" -k 0 -j"$JOBS" \
       dart_sdk flutter/sky/packages/sky_engine:sky_engine \
       flutter_patched_sdk/platform_strong.dill gen_snapshot impellerc \
-      flutter/shell/platform/linux:publish_headers_linux ) || true
+      flutter/shell/platform/linux:publish_headers_linux || true
   [ -x "$HOST_OUT/dartvm" ] || die "host 引擎构建失败"
 
   # 生成 flutter 交叉构建视图
