@@ -52,12 +52,14 @@ cd "$WORK/flutter" && gclient sync -D    # 需要 depot_tools
 ```bash
 ./contrib/loong64/build.sh all
 # 或分阶段
-./contrib/loong64/build.sh env engine tool shell rust payload
+./contrib/loong64/build.sh env engine tool shell rust apps payload
 ```
 
 路径覆盖：`WORK`、`SYSROOT`、`SYSROOT_URL`、`FLUTTER`、`FLUTTER_URL`、`GN`、`JOBS`。默认 `WORK=${XDG_CACHE_HOME:-~/.cache}/denial-loong64`。
 
 产物：`$WORK/payload`、`$WORK/denial-linux-loong64.tar.gz`；pacman 包用 `./contrib/loong64/package-pkg.sh` 生成到 `$WORK/pkgs`。
+
+`apps` 阶段交叉编译独立应用：`native_app`（runner，产物 `denial-app`）、`polkit_app` 与 `plugin_manager_app`，组成 `$WORK/apps/{polkit,plugin-manager}` bundle，并并入 payload（`lib/denial/`）与 `denial` 包。
 
 ## 关键改动
 
@@ -88,3 +90,5 @@ DENIAL_SHELL_PROFILE=mobile bin/deniald \
 - `settings`（GPUI）与插件 bundle 不在 payload 范围内。
 - 预编译 payload 与引擎产物见对应 tag 的 Release 附件。
 - sysroot 中的 ICU 头为 80、库为 78，且目标端 `libflutter_engine.so` 未链接 ICU，因此会保留未解析的 `icu_80` 符号。构建与打包不受影响；若运行期在 Unicode 正则、大小写转换等路径出现符号解析失败，需要将 sysroot 的 ICU 头对齐到 78，或为 loong64 构建并链接 ICU 80。
+- `denial-polkit-agent` 依赖 sysroot 中的 `polkit-agent-1` / `polkit-gobject-1`；当前 sysroot 未提供，`apps` 阶段会跳过该后端（polkit 弹窗 bundle 仍会构建）。
+- 5 个内置插件（clock/desktop/launcher/pets/top_bar）由 `dart_shell` 直接依赖并编入 `libapp.so`，无需单独打包；第三方插件的运行时编译需要设备端插件构建套件，而它依赖 loong64 的 Dart 工具链（当前只有 JIT 版 `dartvm`，缺 `dartaotruntime`/`pub`），暂不可用。

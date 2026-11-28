@@ -11,6 +11,7 @@ FLUTTER=${FLUTTER:-$WORK/checkout}
 ENGINE_OUT=${ENGINE_OUT:-$FLUTTER/engine/src/flutter/out/denial_linux_loong64_release}
 RUST_REL=${RUST_REL:-$WORK/rust/loongarch64-unknown-linux-gnu/release}
 SHELL_OUT=${SHELL_OUT:-$WORK/shell-assembly}
+APPS_OUT=${APPS_OUT:-$WORK/apps}
 PKGVER=${1:-0.6.10}
 PKGREL=1
 ARCH=loongarch64
@@ -129,6 +130,23 @@ stage_denial() {
   install -m755 "$SHELL_OUT/lib/libapp.so" "$root/usr/lib/denial/flutter/lib/libapp.so"
   cp -a "$SHELL_OUT/flutter_assets" "$root/usr/lib/denial/flutter/data/flutter_assets"
   chmod -R u=rwX,go=rX "$root/usr/lib/denial/flutter/data/flutter_assets"
+
+  # 独立应用（denial-app runner、polkit、插件管理器）与预编译插件 bundle
+  if [ -x "$RUST_REL/denial-app" ]; then
+    install -Dm755 "$RUST_REL/denial-app" "$root/usr/bin/denial-app"
+    [ -x "$RUST_REL/denial-polkit-agent" ] && \
+      install -Dm755 "$RUST_REL/denial-polkit-agent" "$root/usr/bin/denial-polkit-agent"
+    if [ -d "$APPS_OUT/polkit" ]; then
+      cp -a "$APPS_OUT/polkit" "$root/usr/lib/denial/polkit"
+      chmod -R u=rwX,go=rX "$root/usr/lib/denial/polkit"
+    fi
+    if [ -d "$APPS_OUT/plugin-manager" ]; then
+      cp -a "$APPS_OUT/plugin-manager" "$root/usr/lib/denial/plugin-manager"
+      chmod -R u=rwX,go=rX "$root/usr/lib/denial/plugin-manager"
+      ln -s ../lib/denial/plugin-manager/denial-plugin-manager \
+        "$root/usr/bin/denial-plugin-manager"
+    fi
+  fi
 
   install -Dm644 "$ARCHIVE/denial.desktop" "$root/usr/share/wayland-sessions/denial.desktop"
   install -Dm644 "$ARCHIVE/denial-portals.conf" "$root/usr/share/xdg-desktop-portal/denial-portals.conf"

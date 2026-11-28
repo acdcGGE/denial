@@ -3,7 +3,7 @@
 #
 # 用法:
 #   ./contrib/loong64/build.sh <stage> [stage...]
-#   stage: env | engine | tool | shell | rust | payload | all
+#   stage: env | engine | tool | shell | rust | apps | payload | all
 #
 # 可覆盖的环境变量:
 #   WORK           构建根目录            (默认 ${XDG_CACHE_HOME:-~/.cache}/denial-loong64)
@@ -29,6 +29,7 @@ TARGET_OUT=$FLUTTER/engine/src/flutter/out/denial_linux_loong64_release
 HOST_OUT=$WORK/host-build/out/denial_host_release
 VIEW=$WORK/engine-view
 SHELL_OUT=$WORK/shell-assembly
+APPS_OUT=$WORK/apps
 PAYLOAD=$WORK/payload
 RUST_TARGET_DIR=$WORK/rust
 TARGET_TRIPLE=loongarch64-unknown-linux-gnu
@@ -279,6 +280,27 @@ ensure_tool_dart() {
   fi
 }
 
+# 应用 pubspec 固定 Flutter 3.47.5；检出提交在 tag 之后时 SDK 会自报 dev 版本，
+# 需要把 version 与缓存元数据钉回 3.47.5，否则 pub 版本求解直接失败
+ensure_flutter_version() {
+  echo 3.47.5 > "$FLUTTER/version"
+  git -C "$FLUTTER" tag -f 3.47.5 >/dev/null 2>&1 || true
+  local json=$FLUTTER/bin/cache/flutter.version.json
+  if [ -f "$json" ]; then
+    python3 - "$json" <<'PY'
+import json, sys
+path = sys.argv[1]
+with open(path) as handle:
+    data = json.load(handle)
+data["frameworkVersion"] = "3.47.5"
+data["flutterVersion"] = "3.47.5"
+with open(path, "w") as handle:
+    json.dump(data, handle, indent=2)
+    handle.write("\n")
+PY
+  fi
+}
+
 stage_tool() {
   log "准备 flutter 工具链（Dart 3.13.4 + 引擎自建 dartvm）"
   ensure_tool_dart
@@ -297,8 +319,7 @@ EOF
   chmod +x "$HOST_OUT/dart-sdk/bin/dart"
 
   cd "$FLUTTER"
-  git tag -f 3.47.5 >/dev/null 2>&1 || true
-  echo 3.47.5 > version
+  ensure_flutter_version
   mkdir -p bin/cache
   rm -f bin/cache/flutter.version.json
   rm -rf bin/cache/dart-sdk
@@ -331,8 +352,11 @@ stage_shell() {
     release_bundle_linux-loong64_assets
 }
 
-stage_rust() {
-  log "交叉编译 Rust compositor"
+rust_cross_env() {
+  # 单独运行 rust/apps 阶段时也要有交叉 pkg-config（不依赖先跑 env）
+  export PKG_CONFIG_ALLOW_CROSS=1
+  export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
+  export PKG_CONFIG_LIBDIR=$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/lib/loongarch64-linux-gnu/pkgconfig:$SYSROOT/usr/share/pkgconfig
   export CC_loongarch64_unknown_linux_gnu="clang --target=loongarch64-linux-gnu --sysroot=$SYSROOT"
   export CXX_loongarch64_unknown_linux_gnu="clang++ --target=loongarch64-linux-gnu --sysroot=$SYSROOT"
   export AR_loongarch64_unknown_linux_gnu=llvm-ar
@@ -342,11 +366,77 @@ stage_rust() {
   # __tls_get_addr 仅由 ld-linux 提供，必须忽略目标文件中的未定义符号
   export CARGO_TARGET_LOONGARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS="-C link-arg=--target=loongarch64-linux-gnu -C link-arg=--sysroot=$SYSROOT -C link-arg=-fuse-ld=lld -C link-arg=-L$SYSROOT/usr/lib -C link-arg=-L$SYSROOT/lib -C link-arg=-Wl,-rpath-link,$SYSROOT/usr/lib -C link-arg=-Wl,--unresolved-symbols=ignore-in-object-files"
   export CARGO_TARGET_DIR=$RUST_TARGET_DIR
+}
+
+stage_rust() {
+  log "交叉编译 Rust compositor"
+  rust_cross_env
   cd "$DENIAL_ROOT/compositor"
   cargo build --release --target "$TARGET_TRIPLE" --features flutter \
     --bin deniald --bin denialctl
   cargo build --release --target "$TARGET_TRIPLE" -p denial-portal
 }
+
+# 用与 stage_shell 相同的参数构建任意 Flutter 应用的 assets 与 libapp.so
+assemble_flutter_app() {
+  local app=$1 output=$2
+  # 检出内 HEAD 与 stamp 不一致会让 flutter 包装脚本尝试联网 pub upgrade，
+  # 这里直接用已有快照，避免离线/受限网络下卡住
+  if [ -f "$FLUTTER/bin/cache/flutter_tools.snapshot" ]; then
+    echo "$(git -C "$FLUTTER" rev-parse HEAD):" > "$FLUTTER/bin/cache/flutter_tools.stamp"
+    ensure_flutter_version
+  fi
+  ( cd "$DENIAL_ROOT/$app" && \
+    "$FLUTTER/bin/flutter" pub get >/dev/null && \
+    "$FLUTTER/bin/flutter" assemble \
+      --local-engine-src-path="$VIEW" \
+      --local-engine=denial_linux_loong64_release \
+      --local-engine-host=denial_host_release \
+      --suppress-analytics --resource-pool-size=10 \
+      --output="$output" \
+      -dTargetFile=lib/main.dart -dBuildMode=release \
+      -dTargetPlatform=linux-loong64 -dDartObfuscation=false \
+      -dTrackWidgetCreation=true -dTreeShakeIcons=false \
+      release_bundle_linux-loong64_assets )
+}
+
+# 组装 denial-app 运行的应用 bundle（polkit / 插件管理器）
+compose_app_bundle() {
+  local output=$1 assembly=$2 runner=$3
+  rm -rf "$output"
+  mkdir -p "$output/lib" "$output/data/flutter_assets"
+  install -m755 "$RUST_TARGET_DIR/$TARGET_TRIPLE/release/denial-app" "$output/$runner"
+  install -m755 "$assembly/lib/libapp.so" "$output/lib/"
+  install -m755 "$TARGET_OUT/libflutter_engine.so" "$output/lib/"
+  install -m644 "$ENGINE_SRC/flutter/third_party/icu/flutter/icudtl.dat" "$output/data/"
+  cp -a "$assembly/flutter_assets/." "$output/data/flutter_assets/"
+}
+
+stage_apps() {
+  log "编译独立应用（denial-app / polkit / 插件管理器）"
+  rust_cross_env
+  ( cd "$DENIAL_ROOT" && \
+    cargo build --release --target "$TARGET_TRIPLE" --locked \
+      --manifest-path native_app/Cargo.toml )
+  # polkit 认证后端依赖 sysroot 中的 polkit 库；缺失时跳过（弹窗仍可构建）
+  if pkg-config --exists polkit-agent-1 polkit-gobject-1; then
+    ( cd "$DENIAL_ROOT/compositor" && \
+      cargo build --release --target "$TARGET_TRIPLE" -p denial-polkit-agent )
+  else
+    log "sysroot 缺少 polkit-agent-1/polkit-gobject-1，跳过 denial-polkit-agent"
+  fi
+
+  mkdir -p "$APPS_OUT"
+  assemble_flutter_app polkit_app "$APPS_OUT/polkit-assembly"
+  compose_app_bundle "$APPS_OUT/polkit" "$APPS_OUT/polkit-assembly" denial-app
+  assemble_flutter_app plugin_manager_app "$APPS_OUT/plugin-manager-assembly"
+  compose_app_bundle "$APPS_OUT/plugin-manager" \
+    "$APPS_OUT/plugin-manager-assembly" denial-plugin-manager
+  # 插件管理器后端是 dart compile exe 交叉产物，需要 loong64 的 dartaotruntime；
+  # 引擎当前不产出该运行时，因此这里只构建前端，后端缺失时由应用自身提示。
+  file "$APPS_OUT/polkit/denial-app" "$APPS_OUT/plugin-manager/denial-plugin-manager"
+}
+
 
 stage_payload() {
   log "组装 payload"
@@ -359,7 +449,23 @@ stage_payload() {
   install -m644 "$ENGINE_SRC/flutter/third_party/icu/flutter/icudtl.dat" "$PAYLOAD/bundle/data/"
   cp -a "$SHELL_OUT/flutter_assets/." "$PAYLOAD/bundle/data/flutter_assets/"
   install -m644 "$DENIAL_ROOT/packaging/arch/outputs.conf" "$PAYLOAD/outputs.conf"
-  ( cd "$PAYLOAD" && find bin bundle -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS )
+
+  # 独立应用（缺阶段产物时跳过，保持 payload 可用）
+  if [ -x "$rel/denial-app" ]; then
+    install -m755 "$rel/denial-app" "$PAYLOAD/bin/"
+    if [ -f "$APPS_OUT/polkit/denial-app" ]; then
+      mkdir -p "$PAYLOAD/lib/denial"
+      cp -a "$APPS_OUT/polkit" "$PAYLOAD/lib/denial/polkit"
+      chmod -R u=rwX,go=rX "$PAYLOAD/lib/denial/polkit"
+    fi
+    [ -x "$rel/denial-polkit-agent" ] && install -m755 "$rel/denial-polkit-agent" "$PAYLOAD/bin/"
+    if [ -f "$APPS_OUT/plugin-manager/denial-plugin-manager" ]; then
+      cp -a "$APPS_OUT/plugin-manager" "$PAYLOAD/lib/denial/plugin-manager"
+      chmod -R u=rwX,go=rX "$PAYLOAD/lib/denial/plugin-manager"
+    fi
+  fi
+  ( cd "$PAYLOAD" && find bin bundle lib -type f -print0 2>/dev/null \
+      | sort -z | xargs -0 sha256sum > SHA256SUMS )
   tar -C "$WORK" -czf "$WORK/denial-linux-loong64.tar.gz" payload
   file "$PAYLOAD"/bin/* "$PAYLOAD"/bundle/lib/*
   echo "归档: $WORK/denial-linux-loong64.tar.gz"
@@ -372,9 +478,11 @@ for s in "$@"; do
     tool) stage_tool ;;
     shell) stage_shell ;;
     rust) stage_rust ;;
+    apps) stage_apps ;;
     payload) stage_payload ;;
     all)
-      stage_env; stage_engine; stage_tool; stage_shell; stage_rust; stage_payload ;;
+      stage_env; stage_engine; stage_tool; stage_shell; stage_rust; \
+        stage_apps; stage_payload ;;
     *) die "未知 stage: $s" ;;
   esac
 done
