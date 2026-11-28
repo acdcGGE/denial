@@ -7,7 +7,8 @@ set -euo pipefail
 
 DENIAL_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 WORK=${WORK:-$HOME/loong64-build/denial-main-build}
-ENGINE_OUT=${ENGINE_OUT:-$WORK/checkout/engine/src/flutter/out/denial_linux_loong64_release}
+FLUTTER=${FLUTTER:-$WORK/checkout}
+ENGINE_OUT=${ENGINE_OUT:-$FLUTTER/engine/src/flutter/out/denial_linux_loong64_release}
 RUST_REL=${RUST_REL:-$WORK/rust/loongarch64-unknown-linux-gnu/release}
 SHELL_OUT=${SHELL_OUT:-$WORK/shell-assembly}
 PKGVER=${1:-0.6.10}
@@ -64,7 +65,7 @@ stage_engine() {
 
   local share=$root/usr/share/denial/flutter-engine
   local engine_rev flutter_rev
-  engine_rev=$(cat "$WORK/checkout/bin/internal/engine.version")
+  engine_rev=$(cat "$FLUTTER/bin/internal/engine.version")
   flutter_rev=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["flutter"]["revision"])' "$DENIAL_ROOT/prebuilt/flutter-engine/SOURCE_LOCK.json")
   install -Dm644 "$DENIAL_ROOT/prebuilt/flutter-engine/SOURCE_LOCK.json" "$share/SOURCE_LOCK.json"
   sha256sum "$ENGINE_OUT/libflutter_engine.so" | awk '{print $1}' > /tmp/engine.sha256
