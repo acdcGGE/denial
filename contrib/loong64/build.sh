@@ -229,7 +229,7 @@ stage_engine() {
 
   ( cd "$ENGINE_SRC" && ninja -C "$TARGET_OUT" -j"$JOBS" \
       libflutter_engine.so libflutter_linux_gtk.so impellerc flatc \
-      gen_snapshot flutter_patched_sdk \
+      gen_snapshot dartaotruntime flutter_patched_sdk \
       flutter/shell/platform/linux:publish_headers_linux )
 
   # dds/dartdev 的 AOT snapshot 与 SDK API 不匹配，属于已知无害失败
@@ -449,6 +449,8 @@ stage_payload() {
   install -m644 "$ENGINE_SRC/flutter/third_party/icu/flutter/icudtl.dat" "$PAYLOAD/bundle/data/"
   cp -a "$SHELL_OUT/flutter_assets/." "$PAYLOAD/bundle/data/flutter_assets/"
   install -m644 "$DENIAL_ROOT/packaging/arch/outputs.conf" "$PAYLOAD/outputs.conf"
+  [ -x "$TARGET_OUT/dartaotruntime" ] && \
+    install -m755 "$TARGET_OUT/dartaotruntime" "$PAYLOAD/bin/"
 
   # 独立应用（缺阶段产物时跳过，保持 payload 可用）
   if [ -x "$rel/denial-app" ]; then

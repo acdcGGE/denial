@@ -64,6 +64,9 @@ stage_engine() {
     "$root/usr/lib/denial/flutter/lib/libflutter_engine.so"
   install -Dm644 "$ENGINE_OUT/icudtl.dat" \
     "$root/usr/lib/denial/flutter/data/icudtl.dat"
+  [ -x "$ENGINE_OUT/dartaotruntime" ] && \
+    install -Dm755 "$ENGINE_OUT/dartaotruntime" \
+      "$root/usr/lib/denial/flutter/bin/dartaotruntime"
 
   local share=$root/usr/share/denial/flutter-engine
   local engine_rev flutter_rev

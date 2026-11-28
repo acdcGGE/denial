@@ -90,5 +90,6 @@ DENIAL_SHELL_PROFILE=mobile bin/deniald \
 - `settings`（GPUI）与插件 bundle 不在 payload 范围内。
 - 预编译 payload 与引擎产物见对应 tag 的 Release 附件。
 - sysroot 中的 ICU 头为 80、库为 78，且目标端 `libflutter_engine.so` 未链接 ICU，因此会保留未解析的 `icu_80` 符号。构建与打包不受影响；若运行期在 Unicode 正则、大小写转换等路径出现符号解析失败，需要将 sysroot 的 ICU 头对齐到 78，或为 loong64 构建并链接 ICU 80。
-- `denial-polkit-agent` 依赖 sysroot 中的 `polkit-agent-1` / `polkit-gobject-1`；当前 sysroot 未提供，`apps` 阶段会跳过该后端（polkit 弹窗 bundle 仍会构建）。
-- 5 个内置插件（clock/desktop/launcher/pets/top_bar）由 `dart_shell` 直接依赖并编入 `libapp.so`，无需单独打包；第三方插件的运行时编译需要设备端插件构建套件，而它依赖 loong64 的 Dart 工具链（当前只有 JIT 版 `dartvm`，缺 `dartaotruntime`/`pub`），暂不可用。
+- `denial-polkit-agent` 需要 sysroot 中的 `polkit-agent-1` / `polkit-gobject-1`（Devel 版含头文件与 pkg-config）。可从 Debian sid 的 loong64 包补齐：下载 `libpolkit-gobject-1-0`、`libpolkit-agent-1-0`、`libpolkit-gobject-1-dev`、`libpolkit-agent-1-dev`（`https://deb.debian.org/debian/pool/main/p/policykit-1/`），解包后把 `usr/include/polkit-1` 拷到 `$SYSROOT/usr/include`、`usr/lib/loongarch64-linux-gnu/libpolkit-*` 拷到 `$SYSROOT/usr/lib`，并把 `.pc` 的 `libdir` 改为 `${prefix}/lib`。缺少时 `apps` 阶段会跳过该后端（polkit 弹窗 bundle 仍会构建）。
+- 5 个内置插件（clock/desktop/launcher/pets/top_bar）由 `dart_shell` 直接依赖并编入 `libapp.so`，无需单独打包；第三方插件的运行时编译需要设备端插件构建套件（flutter 工具链 + 3.13.1 前端 + 构建缓存），当前未提供，`denial-plugins` 后端也未随包安装。
+- 引擎阶段会构建 loong64 `dartaotruntime`（`payload/bin/`、engine 包的 `usr/lib/denial/flutter/bin/`），供后续 AOT 使用；注意引擎内 Dart 为 3.13.1，与官方 3.13.4 的 kernel 格式不兼容。
