@@ -65,7 +65,7 @@ cd "$WORK/flutter" && gclient sync -D    # 需要 depot_tools
 - `contrib/loong64/flutter_tools-pubspec_overrides.yaml`：`code_assets` 使用 loong64 分支。
 - `compositor/src/bin/deniald/plugin_bundle.rs`：插件平台字符串增加 `linux-loong64`。
 - Rust 链接需 `-Wl,--unresolved-symbols=ignore-in-object-files`：`__tls_get_addr` 只由 `ld-linux-loongarch-lp64d.so.1` 提供。
-- 引擎 host 构建需要 Vulkan / ICU 头文件；脚本通过 `CPATH` 指向 sysroot 与引擎 ICU 源码。
+- 引擎 host 构建需要的 Vulkan 头由 `CPATH` 指向 sysroot；ICU 头不要在 `CPATH` 中覆盖为引擎内的 ICU 80 头，必须与 host sysroot 的 `libicuuc` 版本一致，否则 `dartvm` / `dartaotruntime` 链接时符号命名空间（`icu_XX`）不匹配。
 - 引擎自建 `dartvm` 已具备 JIT，但缺少 `dartdev`（`pub`），因此提供一层 `dart` 包装脚本：`pub` 交给官方 Dart 3.13.4，其余交给 `dartvm`。
 - `dds` / `dartdev` 的 AOT snapshot 与 SDK API 不匹配属于已知无害失败，脚本以 `-k 0` 继续。
 - `third_party/dart/third_party/devtools` 在上游来自 CIPD（不可达），而 dart 根 `pubspec.yaml` 以 path 依赖 `devtools_shared`；脚本会生成最小 stub（见 `DEPS` 顶部说明，上游源：https://github.com/flutter/devtools ）。
@@ -87,3 +87,4 @@ DENIAL_SHELL_PROFILE=mobile bin/deniald \
 - 构建时关闭了 `TreeShakeIcons`（host 端 `const_finder` / `font-subset` 未构建），仅影响图标字体体积。
 - `settings`（GPUI）与插件 bundle 不在 payload 范围内。
 - 预编译 payload 与引擎产物见对应 tag 的 Release 附件。
+- sysroot 中的 ICU 头为 80、库为 78，且目标端 `libflutter_engine.so` 未链接 ICU，因此会保留未解析的 `icu_80` 符号。构建与打包不受影响；若运行期在 Unicode 正则、大小写转换等路径出现符号解析失败，需要将 sysroot 的 ICU 头对齐到 78，或为 loong64 构建并链接 ICU 80。
