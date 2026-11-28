@@ -29,7 +29,7 @@ final class CompositionBuilder {
     void Function(String)? progress,
   }) async {
     ManagerStore.validateId(id);
-    if (!{'linux-x64', 'linux-arm64'}.contains(platform)) {
+    if (!{'linux-x64', 'linux-arm64', 'linux-loong64'}.contains(platform)) {
       throw const CompositionException('Unsupported target platform');
     }
     if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(engineTarget)) {

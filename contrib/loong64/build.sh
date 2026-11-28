@@ -3,7 +3,7 @@
 #
 # 用法:
 #   ./contrib/loong64/build.sh <stage> [stage...]
-#   stage: env | engine | tool | shell | rust | apps | payload | all
+#   stage: env | engine | tool | shell | rust | apps | kit | payload | all
 #
 # 可覆盖的环境变量:
 #   WORK           构建根目录            (默认 ${XDG_CACHE_HOME:-~/.cache}/denial-loong64)
@@ -34,6 +34,8 @@ PAYLOAD=$WORK/payload
 RUST_TARGET_DIR=$WORK/rust
 ICU80=$WORK/icu80
 TARGET_TRIPLE=loongarch64-unknown-linux-gnu
+KIT_OUT=$APPS_OUT/plugin-build-kit
+DART_SDK_OUT=$WORK/dart-sdk-loong64
 
 log() { printf '\n=== %s ===\n' "$*"; }
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
@@ -246,6 +248,12 @@ stage_engine() {
       libflutter_engine.so libflutter_linux_gtk.so impellerc flatc \
       gen_snapshot dartaotruntime flutter_patched_sdk \
       flutter/shell/platform/linux:publish_headers_linux )
+
+  # 设备端插件构建需要目标架构的 Dart SDK、dartvm 与 font-subset。dds/dartdev
+  # 的 AOT 快照与 SDK API 不匹配（已知无害失败），用 -k 0 保留其余产物。
+  ninja -C "$TARGET_OUT" -k 0 -j"$JOBS" dart_sdk dartvm font-subset || true
+  [ -x "$TARGET_OUT/dartvm" ] && [ -f "$TARGET_OUT/dart-sdk/lib/core/core.dart" ] || \
+    die "目标 Dart SDK 构建失败: $TARGET_OUT/dart-sdk"
 
   # dds/dartdev 的 AOT snapshot 与 SDK API 不匹配，属于已知无害失败
   CPATH=$WORK/host-deps/include ninja -C "$HOST_OUT" -k 0 -j"$JOBS" \
@@ -524,6 +532,44 @@ stage_apps() {
 }
 
 
+# 组装设备端插件构建套件：目标架构的 Flutter SDK、引擎编译器与 Dart SDK。
+# 安装后 denial-plugins 可在设备上编译并应用第三方插件。
+stage_kit() {
+  log "组装插件构建套件 (plugin-build-kit)"
+  local t=$TARGET_OUT
+  local host_dartvm=$HOST_OUT/dartvm
+  local host_dart=$FLUTTER/bin/cache/dart-sdk/bin/dart
+  [ -x "$host_dartvm" ] || die "缺少宿主 dartvm: $host_dartvm（先运行 tool）"
+  [ -x "$host_dart" ] || die "缺少宿主 dart: $host_dart（先运行 tool）"
+  for f in gen_snapshot font-subset impellerc icudtl.dat; do
+    [ -e "$t/$f" ] || die "缺少 $t/$f（先运行 engine）"
+  done
+  [ -d "$t/dart-sdk/lib/core" ] || die "缺少目标 dart-sdk（先运行 engine）"
+
+  # 交叉构建出的 bin/dart 启动器不可用（undefined symbol: main），设备端
+  # 用 dartvm + 包装脚本代替；只保留运行插件构建所需的文件。
+  rm -rf "$DART_SDK_OUT"
+  mkdir -p "$DART_SDK_OUT/bin/snapshots"
+  cp -a "$t/dart-sdk/lib" "$DART_SDK_OUT/lib"
+  install -m755 "$t/dart-sdk/bin/dartvm" "$DART_SDK_OUT/bin/dartvm"
+  install -m755 "$t/dart-sdk/bin/dartaotruntime" "$DART_SDK_OUT/bin/dartaotruntime"
+  install -m755 "$t/dart-sdk/bin/snapshots/frontend_server_aot.dart.snapshot" \
+    "$DART_SDK_OUT/bin/snapshots/"
+  install -m644 "$t/dart-sdk/version" "$DART_SDK_OUT/version"
+  printf '#!/bin/sh\nexec "$(dirname "$0")/dartvm" "$@"\n' > "$DART_SDK_OUT/bin/dart"
+  chmod 755 "$DART_SDK_OUT/bin/dart"
+
+  rm -rf "$KIT_OUT"
+  python3 "$DENIAL_ROOT/contrib/loong64/prepare-plugin-kit" \
+    --denial-root "$DENIAL_ROOT" \
+    --flutter-root "$FLUTTER" \
+    --engine-root "$ENGINE_SRC/flutter" \
+    --engine-target denial_linux_loong64_release \
+    --host-dartvm "$host_dartvm" \
+    --dart "$host_dart" \
+    --output "$KIT_OUT"
+}
+
 stage_payload() {
   log "组装 payload"
   local rel=$RUST_TARGET_DIR/$TARGET_TRIPLE/release
@@ -569,6 +615,19 @@ stage_payload() {
         "$PAYLOAD/lib/denial/plugin-manager/denial-plugin-manager.installation.json"
     fi
   fi
+  # 插件构建套件与设备端 Dart SDK（apply 时由插件管理器使用）
+  if [ -d "$KIT_OUT" ]; then
+    install -d "$PAYLOAD/lib/denial"
+    cp -a "$KIT_OUT" "$PAYLOAD/lib/denial/plugin-build-kit"
+    chmod -R u=rwX,go=rX "$PAYLOAD/lib/denial/plugin-build-kit"
+    install -Dm644 "$KIT_OUT/runtime/.denial-ui-source.json" \
+      "$PAYLOAD/lib/denial/flutter/.denial-ui-source.json"
+  fi
+  if [ -d "$DART_SDK_OUT" ]; then
+    cp -a "$DART_SDK_OUT" "$PAYLOAD/lib/denial/flutter/dart-sdk"
+    chmod -R u=rwX,go=rX "$PAYLOAD/lib/denial/flutter/dart-sdk"
+    ln -sfn ../lib/denial/flutter/dart-sdk/bin/dart "$PAYLOAD/bin/dart"
+  fi
   ( cd "$PAYLOAD" && find bin bundle lib -type f -print0 2>/dev/null \
       | sort -z | xargs -0 sha256sum > SHA256SUMS )
   tar -C "$WORK" -czf "$WORK/denial-linux-loong64.tar.gz" payload
@@ -584,10 +643,11 @@ for s in "$@"; do
     shell) stage_shell ;;
     rust) stage_rust ;;
     apps) stage_apps ;;
+    kit) stage_kit ;;
     payload) stage_payload ;;
     all)
       stage_env; stage_engine; stage_tool; stage_shell; stage_rust; \
-        stage_apps; stage_payload ;;
+        stage_apps; stage_kit; stage_payload ;;
     *) die "未知 stage: $s" ;;
   esac
 done

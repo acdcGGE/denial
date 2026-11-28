@@ -54,7 +54,7 @@ cd "$WORK/flutter" && gclient sync -D    # 需要 depot_tools
 ```bash
 ./contrib/loong64/build.sh all
 # 或分阶段
-./contrib/loong64/build.sh env engine tool shell rust apps payload
+./contrib/loong64/build.sh env engine tool shell rust apps kit payload
 ```
 
 路径覆盖：`WORK`、`SYSROOT`、`SYSROOT_URL`、`FLUTTER`、`FLUTTER_URL`、`GN`、`JOBS`。默认 `WORK=${XDG_CACHE_HOME:-~/.cache}/denial-loong64`。
@@ -62,6 +62,15 @@ cd "$WORK/flutter" && gclient sync -D    # 需要 depot_tools
 产物：`$WORK/payload`、`$WORK/denial-linux-loong64.tar.gz`；pacman 包用 `./contrib/loong64/package-pkg.sh` 生成到 `$WORK/pkgs`。
 
 `apps` 阶段交叉编译独立应用：`native_app`（runner，产物 `denial-app`）、`polkit_app` 与 `plugin_manager_app`，组成 `$WORK/apps/{polkit,plugin-manager}` bundle，并并入 payload（`lib/denial/`）与 `denial` 包。同时把 `packages/denial_plugin_manager` 交叉编成 loong64 AOT ELF（`$WORK/apps/plugin-manager-backend/denial-plugins.so`），随 `denial` 包安装为 `/usr/bin/denial-plugins`（`dartaotruntime` 包装脚本）。
+
+`kit` 阶段组装设备端插件构建套件：`contrib/loong64/prepare-plugin-kit` 把目标 Flutter SDK、引擎编译器（`gen_snapshot` / `impellerc` / `font-subset` / `const_finder`）、已编译的 `flutter_tools.snapshot` 与运行时包打进 `$WORK/apps/plugin-build-kit`，并构造精简的 loong64 Dart SDK（`$WORK/dart-sdk-loong64`）。安装后布局：
+
+- `/usr/lib/denial/plugin-build-kit`：`kit.json` + `runtime/` + `flutter/` + `engine/out/denial_linux_loong64_release/`
+- `/usr/lib/denial/flutter/dart-sdk`：Dart 3.13.1（`bin/dart` 为 `dartvm` 包装脚本，含 `frontend_server_aot.dart.snapshot`）
+- `/usr/bin/dart`：指向上述 SDK，供管理器从 `PATH` 发现
+- `/usr/lib/denial/flutter/.denial-ui-source.json`：与套件一致的运行时身份
+
+插件管理器首次 `apply` 时把套件复制到用户缓存并校验清单哈希，把 `flutter/bin/cache/dart-sdk` 与 `engine/out/<target>/dart-sdk` 链接到系统 Dart SDK，即可在设备上编译并应用第三方插件。
 
 ## 关键改动
 
@@ -89,10 +98,11 @@ DENIAL_SHELL_PROFILE=mobile bin/deniald \
 
 ## 已知限制
 
-- 构建时关闭了 `TreeShakeIcons`（host 端 `const_finder` / `font-subset` 未构建），仅影响图标字体体积。
 - `settings`（GPUI）与插件 bundle 不在 payload 范围内。
 - 预编译 payload 与引擎产物见对应 tag 的 Release 附件。
 - sysroot 中的 ICU 头为 80、库为 78。引擎按引擎内 ICU 80 头编译，因此 `stage_engine` 会用引擎自带的 ICU 80 源码交叉编译 loong64 共享库（`$WORK/icu80`，安装进 sysroot 供链接）。ICU 数据由 Dart/Flutter 启动时通过 `udata_setCommonData` 注入 `icudtl.dat`，所以只携带 ICU 的 stubdata。产物 `libicuuc.so.80` / `libicui18n.so.80` / `libicudata.so.80` 随 `denial-flutter-engine` 安装到 `/usr/lib/denial/flutter/lib`，并通过 `/etc/ld.so.conf.d/denial-flutter-engine.conf` 注册。
 - `denial-polkit-agent` 需要 sysroot 中的 `polkit-agent-1` / `polkit-gobject-1`（Devel 版含头文件与 pkg-config）。可从 Debian sid 的 loong64 包补齐：下载 `libpolkit-gobject-1-0`、`libpolkit-agent-1-0`、`libpolkit-gobject-1-dev`、`libpolkit-agent-1-dev`（`https://deb.debian.org/debian/pool/main/p/policykit-1/`），解包后把 `usr/include/polkit-1` 拷到 `$SYSROOT/usr/include`、`usr/lib/loongarch64-linux-gnu/libpolkit-*` 拷到 `$SYSROOT/usr/lib`，并把 `.pc` 的 `libdir` 改为 `${prefix}/lib`。缺少时 `apps` 阶段会跳过该后端（polkit 弹窗 bundle 仍会构建）。
-- 5 个内置插件（clock/desktop/launcher/pets/top_bar）由 `dart_shell` 直接依赖并编入 `libapp.so`，无需单独打包；第三方插件的运行时编译需要设备端插件构建套件（flutter 工具链 + 3.13.1 前端 + 构建缓存），当前未提供；`denial-plugins` 后端本身已随 `denial` 包安装，可处理状态查询。
+- 5 个内置插件（clock/desktop/launcher/pets/top_bar）由 `dart_shell` 直接依赖并编入 `libapp.so`，无需单独打包；第三方插件由 `kit` 阶段提供的构建套件在设备端编译。
+- 设备端 Dart SDK 由引擎源码构建（3.13.1）。交叉构建出的 `bin/dart` 启动器不可用，安装时替换为 `dartvm` 包装脚本；`dartdev`（`pub`）与 `dds` 未包含，插件构建不需要。
 - 插件管理器后端的 AOT 管线：host 侧用引擎自建的 `frontend_server_aot.dart.snapshot` 编译 kernel（必须 `--target=vm` + `--platform $TARGET_OUT/vm_platform.dill`；用 `flutter_patched_sdk` 会缺 `dart:_builtin`，`dartaotruntime` 启动报错），再用交叉 `gen_snapshot_product_linux_loong64` 产出 app-aot-elf，由 loong64 `dartaotruntime` 运行。引擎内 Dart 为 3.13.1，与官方 SDK 3.13.x 编出的 kernel 不兼容，必须用引擎自己的前端。
+- `kit` 内的 `flutter_tools.snapshot` 用宿主 `dartvm`（同源 3.13.1）以 `--snapshot-kind=kernel` 生成，kernel 与架构无关；`flutter assemble` 已在 qemu 下用套件产物验证可产出 loong64 `libapp.so`。

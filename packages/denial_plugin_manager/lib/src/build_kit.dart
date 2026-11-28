@@ -152,7 +152,11 @@ final class BuildKit implements BuildTools {
     final bytes = File(p.join(source.path, 'kit.json')).readAsBytesSync();
     final manifest = jsonDecode(utf8.decode(bytes)) as Map<String, Object?>;
     if (manifest['schema'] != 1 ||
-        !{'linux-x64', 'linux-arm64'}.contains(manifest['platform']) ||
+        !{
+          'linux-x64',
+          'linux-arm64',
+          'linux-loong64',
+        }.contains(manifest['platform']) ||
         manifest['dartVersion'] is! String ||
         (manifest['dartVersion']! as String).isEmpty ||
         manifest['dartConstraint'] is! String ||

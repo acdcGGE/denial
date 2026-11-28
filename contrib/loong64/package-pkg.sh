@@ -68,6 +68,13 @@ stage_engine() {
   [ -x "$ENGINE_OUT/dartaotruntime" ] && \
     install -Dm755 "$ENGINE_OUT/dartaotruntime" \
       "$root/usr/lib/denial/flutter/bin/dartaotruntime"
+  # 设备端 Dart SDK：插件构建套件从 PATH 发现 dart，并链接它的 SDK 根目录。
+  if [ -d "$WORK/dart-sdk-loong64" ]; then
+    cp -a "$WORK/dart-sdk-loong64" "$root/usr/lib/denial/flutter/dart-sdk"
+    chmod -R u=rwX,go=rX "$root/usr/lib/denial/flutter/dart-sdk"
+    install -d "$root/usr/bin"
+    ln -sfn ../lib/denial/flutter/dart-sdk/bin/dart "$root/usr/bin/dart"
+  fi
   # 插件后端由 dartaotruntime 运行，其安装元数据必须与运行时同目录
   printf '%s\n' '{"schema":1,"buildKit":"../../../denial/plugin-build-kit","denialctl":"../../../../bin/denialctl"}' \
     > "$root/usr/lib/denial/flutter/bin/denial-plugins.installation.json"
@@ -192,6 +199,13 @@ stage_denial() {
     fi
   fi
 
+  # 插件构建套件：设备端编译第三方插件所需的 Flutter SDK 与引擎编译器
+  if [ -d "$WORK/apps/plugin-build-kit" ]; then
+    cp -a "$WORK/apps/plugin-build-kit" "$root/usr/lib/denial/plugin-build-kit"
+    chmod -R u=rwX,go=rX "$root/usr/lib/denial/plugin-build-kit"
+    install -Dm644 "$WORK/apps/plugin-build-kit/runtime/.denial-ui-source.json" \
+      "$root/usr/lib/denial/flutter/.denial-ui-source.json"
+  fi
   install -Dm644 "$ARCHIVE/denial.desktop" "$root/usr/share/wayland-sessions/denial.desktop"
   install -Dm644 "$ARCHIVE/denial-portals.conf" "$root/usr/share/xdg-desktop-portal/denial-portals.conf"
   install -Dm644 "$ARCHIVE/denial.portal" "$root/usr/share/xdg-desktop-portal/portals/denial.portal"
