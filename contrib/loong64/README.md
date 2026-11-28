@@ -37,7 +37,7 @@ SYSROOT_URL=https://<mirror>/archlinux-loongarch64-rootfs.tar.zst ./contrib/loon
 ### 3. Flutter 引擎源码（网络）
 
 ```bash
-git clone -b loong64-cross-build https://github.com/acdcGGE/flutter.git "$WORK/flutter"
+git clone -b loong64-cross-build https://github.com/acdcGGE/denial-flutter.git "$WORK/flutter"
 cd "$WORK/flutter" && gclient sync -D    # 需要 depot_tools
 ```
 

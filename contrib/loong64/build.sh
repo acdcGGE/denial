@@ -10,7 +10,7 @@
 #   SYSROOT        loongarch64 sysroot   (默认 $WORK/sysroot)
 #   SYSROOT_URL    sysroot 压缩包地址     (SYSROOT 不存在时自动下载)
 #   FLUTTER        denialwm/flutter 检出  (默认 $WORK/flutter，不存在时自动 clone)
-#   FLUTTER_URL    flutter 仓库地址       (默认 https://github.com/acdcGGE/flutter.git)
+#   FLUTTER_URL    flutter 仓库地址       (默认 https://github.com/acdcGGE/denial-flutter.git)
 #   GN             gn 可执行文件         (默认 PATH 中的 gn)
 #   JOBS           并行度                (默认 16)
 set -euo pipefail
@@ -20,7 +20,7 @@ WORK=${WORK:-${XDG_CACHE_HOME:-$HOME/.cache}/denial-loong64}
 SYSROOT=${SYSROOT:-$WORK/sysroot}
 SYSROOT_URL=${SYSROOT_URL:-}
 FLUTTER=${FLUTTER:-$WORK/flutter}
-FLUTTER_URL=${FLUTTER_URL:-https://github.com/acdcGGE/flutter.git}
+FLUTTER_URL=${FLUTTER_URL:-https://github.com/acdcGGE/denial-flutter.git}
 GN=${GN:-gn}
 JOBS=${JOBS:-16}
 
@@ -96,7 +96,7 @@ solutions = [
     "deps_file": "DEPS",
     "managed": True,
     "name": ".",
-    "url": "https://github.com/acdcGGE/flutter.git@$rev",
+    "url": "https://github.com/acdcGGE/denial-flutter.git@$rev",
   },
 ]
 EOF
