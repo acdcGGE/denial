@@ -199,12 +199,13 @@ stage_engine() {
   cp "$DENIAL_ROOT/contrib/loong64/flutter_tools-pubspec_overrides.yaml" \
      "$FLUTTER/packages/flutter_tools/pubspec_overrides.yaml"
 
-  # host 编译所需的第三方头文件（Vulkan / ICU）来自 sysroot 与引擎源码
+  # host 编译所需的 Vulkan 头文件来自 sysroot；ICU 头文件不要在此覆盖，
+  # 必须与 host sysroot 中的 libicuuc（系统 ICU）版本一致，否则符号命名空间
+  # （icu_XX）不匹配导致 dartvm/dartaotruntime 链接失败。
   mkdir -p "$WORK/host-deps/include"
   ln -sfn "$SYSROOT/usr/include/vulkan"   "$WORK/host-deps/include/vulkan"
   ln -sfn "$SYSROOT/usr/include/vk_video" "$WORK/host-deps/include/vk_video"
-  ln -sfn "$ENGINE_SRC/flutter/third_party/icu/source/common/unicode" \
-          "$WORK/host-deps/include/unicode"
+  rm -f "$WORK/host-deps/include/unicode"
 
   # 引擎默认从 CIPD 下载 clang；离线/受限网络下回退到系统仓库的 clang
   local bt=$ENGINE_SRC/flutter/buildtools/linux-x64/clang/bin
