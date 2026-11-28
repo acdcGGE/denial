@@ -1,0 +1,21 @@
+#!/bin/sh
+# 插件管理器后端（denial-plugins）启动器。
+# 实际程序是 loong64 AOT ELF，由引擎自带的 dartaotruntime 执行。
+
+self=$(readlink -f "$0")
+dir=$(dirname "$self")
+root=$(dirname "$dir")
+if [ -x "$root/lib/denial/flutter/bin/dartaotruntime" ]; then
+  # 系统安装布局：/usr/bin/denial-plugins -> /usr/lib/denial/...
+  runtime=$root/lib/denial/flutter/bin/dartaotruntime
+  libdir=$root/lib/denial/flutter/lib
+  so=$root/lib/denial/plugin-manager/denial-plugins.so
+else
+  # payload 布局：payload/bin/denial-plugins + payload/bundle/lib
+  runtime=$dir/dartaotruntime
+  libdir=$root/bundle/lib
+  so=$root/lib/denial/plugin-manager/denial-plugins.so
+fi
+
+LD_LIBRARY_PATH="$libdir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+  exec "$runtime" "$so" "$@"

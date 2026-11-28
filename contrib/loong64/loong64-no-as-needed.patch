@@ -1,0 +1,17 @@
+diff --git a/engine/src/build/config/compiler/BUILD.gn b/engine/src/build/config/compiler/BUILD.gn
+index 3faf4f2b..88fd74be 100644
+--- a/engine/src/build/config/compiler/BUILD.gn
++++ b/engine/src/build/config/compiler/BUILD.gn
+@@ -1011,6 +1011,12 @@ if (is_win) {
+       # that some libraries aren't needed when they actually are,
+       # http://crbug.com/234010. As workaround, disable --as-needed.
+       common_optimize_on_ldflags += [ "-Wl,--as-needed" ]
++      if (current_os == "linux" && target_cpu == "loong64") {
++        # loong64 使用 --unresolved-symbols=ignore-in-object-files 时，
++        # --as-needed 会把 ICU/expat 等库从 DT_NEEDED 中丢弃，运行时符号
++        # 无法解析；在其后恢复 --no-as-needed。
++        common_optimize_on_ldflags += [ "-Wl,--no-as-needed" ]
++      }
+     }
+   }
+ }

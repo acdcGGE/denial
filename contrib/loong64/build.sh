@@ -32,6 +32,7 @@ SHELL_OUT=$WORK/shell-assembly
 APPS_OUT=$WORK/apps
 PAYLOAD=$WORK/payload
 RUST_TARGET_DIR=$WORK/rust
+ICU80=$WORK/icu80
 TARGET_TRIPLE=loongarch64-unknown-linux-gnu
 
 log() { printf '\n=== %s ===\n' "$*"; }
@@ -196,6 +197,10 @@ stage_engine() {
       "$DENIAL_ROOT/contrib/loong64/flutter-denial-3.47.5-loongarch64.patch" >/dev/null 2>&1; then
     git -C "$FLUTTER" apply "$DENIAL_ROOT/contrib/loong64/flutter-denial-3.47.5-loongarch64.patch"
   fi
+  if ! git -C "$FLUTTER" apply --reverse --check \
+      "$DENIAL_ROOT/contrib/loong64/loong64-no-as-needed.patch" >/dev/null 2>&1; then
+    git -C "$FLUTTER" apply "$DENIAL_ROOT/contrib/loong64/loong64-no-as-needed.patch"
+  fi
   mkdir -p "$FLUTTER/packages/flutter_tools"
   cp "$DENIAL_ROOT/contrib/loong64/flutter_tools-pubspec_overrides.yaml" \
      "$FLUTTER/packages/flutter_tools/pubspec_overrides.yaml"
@@ -218,6 +223,7 @@ stage_engine() {
   fi
 
   mkdir -p "$TARGET_OUT" "$HOST_OUT"
+  ensure_icu80
   sed "s|@SYSROOT@|$SYSROOT|g" \
       "$DENIAL_ROOT/contrib/loong64/args/denial_linux_loong64_release.args.gn" > "$TARGET_OUT/args.gn"
   sed "s|@SYSROOT@|$SYSROOT|g" \
@@ -226,6 +232,15 @@ stage_engine() {
   ( cd "$ENGINE_SRC"
     "$GN" gen "$TARGET_OUT" --root=. --script-executable="$(command -v python3)"
     "$GN" gen "$HOST_OUT"   --root=. --script-executable="$(command -v python3)" )
+
+  # 引擎补丁用 /tmp/flatc 作为宿主 flatc（只为生成代码，不执行目标端二进制）
+  if [ ! -x /tmp/flatc ]; then
+    if command -v flatc >/dev/null 2>&1; then
+      cp -f "$(command -v flatc)" /tmp/flatc
+    else
+      die "需要宿主 x86 flatc：请安装 flatbuffers，或把 flatc 复制到 /tmp/flatc"
+    fi
+  fi
 
   ( cd "$ENGINE_SRC" && ninja -C "$TARGET_OUT" -j"$JOBS" \
       libflutter_engine.so libflutter_linux_gtk.so impellerc flatc \
@@ -278,6 +293,48 @@ ensure_tool_dart() {
     fi
     unzip -q -o "$zip" -d "$WORK/tool-dart-sdk"
   fi
+}
+
+# 引擎源码使用 ICU 80 头文件（third_party/icu），而 loong64 sysroot 只有 ICU 78
+# （导出符号为 icu_78）。直接用 sysroot 库链接会留下无法解析的 icu_80 符号，
+# 运行时报 undefined symbol。这里用 Flutter 自带的 ICU 80 源码交叉编译出
+# loong64 共享库并安装进 sysroot；ICU 数据由 Dart/Flutter 在启动时通过
+# udata_setCommonData 注入 icudtl.dat，因此使用 ICU 的 stubdata 即可。
+ensure_icu80() {
+  local lib=$SYSROOT/usr/lib
+  if [ -f "$lib/libicuuc.so.80.0.1" ] && [ -f "$lib/libicudata.so.80.0.1" ]; then
+    return
+  fi
+  log "交叉编译 ICU 80 (loong64)"
+  local src=$FLUTTER/engine/src/flutter/third_party/icu/icu4c/source
+  local cl=$FLUTTER/engine/src/flutter/buildtools/linux-x64/clang/bin/clang
+  [ -d "$src" ] || die "缺少 ICU 源码: $src"
+  [ -x "$cl" ] || die "缺少 clang: $cl"
+  rm -rf "$ICU80"
+  mkdir -p "$ICU80"
+  cp -a "$src" "$ICU80/host"
+  ( cd "$ICU80/host" && ./configure --enable-static --disable-shared \
+      --disable-samples --disable-tests --disable-extras > configure.log 2>&1 && \
+    make -j"$JOBS" > build.log 2>&1 ) || die "ICU 80 host 构建失败: $ICU80/host/build.log"
+  cp -a "$src" "$ICU80/target"
+  ( cd "$ICU80/target" && ./configure --host=loongarch64-linux-gnu \
+      CC="$cl --target=loongarch64-linux-gnu --sysroot=$SYSROOT -fPIC" \
+      CXX="$cl++ --target=loongarch64-linux-gnu --sysroot=$SYSROOT -fPIC" \
+      AR="$cl-ar" RANLIB="$cl-ranlib" \
+      LDFLAGS="--target=loongarch64-linux-gnu --sysroot=$SYSROOT -fuse-ld=lld" \
+      LIBS="-L$SYSROOT/usr/lib -L$SYSROOT/lib -lgcc_s" \
+      --with-cross-build="$ICU80/host" --enable-shared --disable-static \
+      --disable-samples --disable-tests --disable-extras > configure.log 2>&1 && \
+    make -j"$JOBS" > build.log 2>&1 || true )
+  [ -f "$ICU80/target/lib/libicuuc.so.80.0.1" ] || die "ICU 80 交叉构建失败: $ICU80/target/build.log"
+  # 只需要库；tools 是 loong64 可执行文件，交叉环境不能运行，失败无碍
+  install -m755 "$ICU80/target/lib/libicuuc.so.80.0.1" "$lib/"
+  install -m755 "$ICU80/target/lib/libicui18n.so.80.0.1" "$lib/"
+  install -m755 "$ICU80/target/stubdata/libicudata.so.80.0.1" "$lib/"
+  ( cd "$lib" && \
+    ln -sfn libicuuc.so.80.0.1 libicuuc.so.80 && ln -sfn libicuuc.so.80 libicuuc.so && \
+    ln -sfn libicui18n.so.80.0.1 libicui18n.so.80 && ln -sfn libicui18n.so.80 libicui18n.so && \
+    ln -sfn libicudata.so.80.0.1 libicudata.so.80 && ln -sfn libicudata.so.80 libicudata.so )
 }
 
 # 应用 pubspec 固定 Flutter 3.47.5；检出提交在 tag 之后时 SDK 会自报 dev 版本，
@@ -412,6 +469,33 @@ compose_app_bundle() {
   cp -a "$assembly/flutter_assets/." "$output/data/flutter_assets/"
 }
 
+# 用 host 上运行的 frontend_server 生成 kernel（目标 vm，平台 dill 用引擎自建的
+# vm_platform.dill），再用交叉 gen_snapshot 产出 loong64 AOT ELF。
+# 不能用 flutter_patched_sdk：它没有 dart:_builtin/dart:cli，dartaotruntime
+# 启动时会报 "library 'dart:_builtin' not found"。
+compile_plugin_backend() {
+  local out=$1
+  log "编译插件管理器后端 (denial-plugins AOT)"
+  local pkg=$DENIAL_ROOT/packages/denial_plugin_manager
+  ensure_tool_dart
+  if [ ! -f "$pkg/.dart_tool/package_config.json" ]; then
+    ( cd "$pkg" && "$WORK/tool-dart-sdk/dart-sdk/bin/dart" pub get )
+  fi
+  local fs=$WORK/plugin-backend.dill
+  printf 'compile %s\n' "$pkg/bin/denial_plugins.dart" | \
+    "$HOST_OUT/dartaotruntime" "$HOST_OUT/gen/frontend_server_aot.dart.snapshot" \
+      --sdk-root "$TARGET_OUT/" \
+      --platform "$TARGET_OUT/vm_platform.dill" \
+      --target=vm --no-print-incremental-dependencies \
+      --packages "$pkg/.dart_tool/package_config.json" \
+      --output-dill "$fs" --aot --tfa --target-os linux --verbosity=error \
+      > "$WORK/plugin-backend.log" 2>&1 || die "frontend_server 失败: $WORK/plugin-backend.log"
+  [ -f "$fs" ] || die "未生成 kernel: $fs"
+  "$HOST_OUT/gen_snapshot_product_linux_loong64" --deterministic \
+    --snapshot-kind=app-aot-elf --elf="$out" --strip "$fs" \
+    > "$WORK/plugin-backend-snapshot.log" 2>&1 || die "gen_snapshot 失败: $WORK/plugin-backend-snapshot.log"
+}
+
 stage_apps() {
   log "编译独立应用（denial-app / polkit / 插件管理器）"
   rust_cross_env
@@ -432,9 +516,11 @@ stage_apps() {
   assemble_flutter_app plugin_manager_app "$APPS_OUT/plugin-manager-assembly"
   compose_app_bundle "$APPS_OUT/plugin-manager" \
     "$APPS_OUT/plugin-manager-assembly" denial-plugin-manager
-  # 插件管理器后端是 dart compile exe 交叉产物，需要 loong64 的 dartaotruntime；
-  # 引擎当前不产出该运行时，因此这里只构建前端，后端缺失时由应用自身提示。
-  file "$APPS_OUT/polkit/denial-app" "$APPS_OUT/plugin-manager/denial-plugin-manager"
+  # 插件管理器后端：Dart 源码交叉编成 loong64 AOT ELF，由 dartaotruntime 执行
+  local backend=$APPS_OUT/plugin-manager-backend/denial-plugins.so
+  mkdir -p "$(dirname "$backend")"
+  compile_plugin_backend "$backend"
+  file "$APPS_OUT/polkit/denial-app" "$APPS_OUT/plugin-manager/denial-plugin-manager" "$backend"
 }
 
 
@@ -451,6 +537,10 @@ stage_payload() {
   install -m644 "$DENIAL_ROOT/packaging/arch/outputs.conf" "$PAYLOAD/outputs.conf"
   [ -x "$TARGET_OUT/dartaotruntime" ] && \
     install -m755 "$TARGET_OUT/dartaotruntime" "$PAYLOAD/bin/"
+  # 引擎 .so 的 DT_NEEDED 是 libicuuc.so.80，宿主/目标系统只有 78，必须自带
+  for f in libicuuc.so.80.0.1 libicui18n.so.80.0.1 libicudata.so.80.0.1; do
+    [ -f "$SYSROOT/usr/lib/$f" ] && install -m755 "$SYSROOT/usr/lib/$f" "$PAYLOAD/bundle/lib/"
+  done
 
   # 独立应用（缺阶段产物时跳过，保持 payload 可用）
   if [ -x "$rel/denial-app" ]; then
@@ -464,6 +554,19 @@ stage_payload() {
     if [ -f "$APPS_OUT/plugin-manager/denial-plugin-manager" ]; then
       cp -a "$APPS_OUT/plugin-manager" "$PAYLOAD/lib/denial/plugin-manager"
       chmod -R u=rwX,go=rX "$PAYLOAD/lib/denial/plugin-manager"
+    fi
+    # 插件管理器后端：AOT ELF + dartaotruntime 包装脚本 + 安装描述
+    if [ -f "$APPS_OUT/plugin-manager-backend/denial-plugins.so" ]; then
+      install -Dm755 "$APPS_OUT/plugin-manager-backend/denial-plugins.so" \
+        "$PAYLOAD/lib/denial/plugin-manager/denial-plugins.so"
+      install -Dm755 "$DENIAL_ROOT/contrib/loong64/denial-plugins" "$PAYLOAD/bin/denial-plugins"
+      # 后端实际由 dartaotruntime 运行，安装元数据必须放在它旁边
+      printf '%s\n' '{"schema":1,"buildKit":"../lib/denial/plugin-build-kit","denialctl":"denialctl"}' \
+        > "$PAYLOAD/bin/denial-plugins.installation.json"
+      printf '%s\n' '{"schema":1,"backend":"../../../bin/denial-plugins"}' \
+        > "$PAYLOAD/lib/denial/plugin-manager/denial-plugin-manager.installation.json"
+      chmod 644 "$PAYLOAD/bin/denial-plugins.installation.json" \
+        "$PAYLOAD/lib/denial/plugin-manager/denial-plugin-manager.installation.json"
     fi
   fi
   ( cd "$PAYLOAD" && find bin bundle lib -type f -print0 2>/dev/null \

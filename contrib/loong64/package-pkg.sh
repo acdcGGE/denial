@@ -8,6 +8,7 @@ set -euo pipefail
 DENIAL_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 WORK=${WORK:-$HOME/loong64-build/denial-main-build}
 FLUTTER=${FLUTTER:-$WORK/checkout}
+SYSROOT=${SYSROOT:-$WORK/sysroot}
 ENGINE_OUT=${ENGINE_OUT:-$FLUTTER/engine/src/flutter/out/denial_linux_loong64_release}
 RUST_REL=${RUST_REL:-$WORK/rust/loongarch64-unknown-linux-gnu/release}
 SHELL_OUT=${SHELL_OUT:-$WORK/shell-assembly}
@@ -67,6 +68,35 @@ stage_engine() {
   [ -x "$ENGINE_OUT/dartaotruntime" ] && \
     install -Dm755 "$ENGINE_OUT/dartaotruntime" \
       "$root/usr/lib/denial/flutter/bin/dartaotruntime"
+  # 插件后端由 dartaotruntime 运行，其安装元数据必须与运行时同目录
+  printf '%s\n' '{"schema":1,"buildKit":"../../../denial/plugin-build-kit","denialctl":"../../../../bin/denialctl"}' \
+    > "$root/usr/lib/denial/flutter/bin/denial-plugins.installation.json"
+  chmod 644 "$root/usr/lib/denial/flutter/bin/denial-plugins.installation.json"
+
+  # 引擎按 ICU 80 头文件编译，系统 ICU 是 78；随引擎分发 ICU 80，并用
+  # ld.so.conf.d 让 libflutter_engine.so / dartaotruntime 能找到它们。
+  # 构建产物在 $WORK/icu80（build.sh 安装进 sysroot 后也可从 sysroot 取）。
+  local icuuc icui18n icudata
+  if [ -f "$WORK/icu80/target/lib/libicuuc.so.80.0.1" ]; then
+    icuuc=$WORK/icu80/target/lib/libicuuc.so.80.0.1
+    icui18n=$WORK/icu80/target/lib/libicui18n.so.80.0.1
+    icudata=$WORK/icu80/target/stubdata/libicudata.so.80.0.1
+  else
+    icuuc=$SYSROOT/usr/lib/libicuuc.so.80.0.1
+    icui18n=$SYSROOT/usr/lib/libicui18n.so.80.0.1
+    icudata=$SYSROOT/usr/lib/libicudata.so.80.0.1
+  fi
+  if [ -f "$icuuc" ] && [ -f "$icudata" ]; then
+    install -Dm755 "$icuuc" "$root/usr/lib/denial/flutter/lib/"
+    install -Dm755 "$icui18n" "$root/usr/lib/denial/flutter/lib/"
+    install -Dm755 "$icudata" "$root/usr/lib/denial/flutter/lib/"
+    ln -sfn libicuuc.so.80.0.1 "$root/usr/lib/denial/flutter/lib/libicuuc.so.80"
+    ln -sfn libicui18n.so.80.0.1 "$root/usr/lib/denial/flutter/lib/libicui18n.so.80"
+    ln -sfn libicudata.so.80.0.1 "$root/usr/lib/denial/flutter/lib/libicudata.so.80"
+    install -Dm644 /dev/stdin "$root/etc/ld.so.conf.d/denial-flutter-engine.conf" <<'EOF'
+/usr/lib/denial/flutter/lib
+EOF
+  fi
 
   local share=$root/usr/share/denial/flutter-engine
   local engine_rev flutter_rev
@@ -149,6 +179,16 @@ stage_denial() {
       chmod -R u=rwX,go=rX "$root/usr/lib/denial/plugin-manager"
       ln -s ../lib/denial/plugin-manager/denial-plugin-manager \
         "$root/usr/bin/denial-plugin-manager"
+    fi
+    # 插件管理器后端：loong64 AOT ELF，由 dartaotruntime 运行
+    if [ -f "$APPS_OUT/plugin-manager-backend/denial-plugins.so" ]; then
+      install -Dm755 "$APPS_OUT/plugin-manager-backend/denial-plugins.so" \
+        "$root/usr/lib/denial/plugin-manager/denial-plugins.so"
+      install -Dm755 "$DENIAL_ROOT/contrib/loong64/denial-plugins" \
+        "$root/usr/bin/denial-plugins"
+      printf '%s\n' '{"schema":1,"backend":"../../../bin/denial-plugins"}' \
+        > "$root/usr/lib/denial/plugin-manager/denial-plugin-manager.installation.json"
+      chmod 644 "$root/usr/lib/denial/plugin-manager/denial-plugin-manager.installation.json"
     fi
   fi
 
