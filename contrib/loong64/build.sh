@@ -246,6 +246,12 @@ stage_engine() {
     n=${p##*/}; [ "$n" = gen_snapshot ] && continue
     ln -sfn "$p" "$VIEW/out/denial_linux_loong64_release/$n"
   done
+  # flutter_tools 在 target out 的 clang_x64/ 下查找能在宿主机运行的 gen_snapshot，
+  # 交叉构建使用 host 上按 loongarch64 目标生成的 product 版
+  local cross_snap=$HOST_OUT/gen_snapshot_product_linux_loong64
+  [ -x "$cross_snap" ] || die "缺少 host 交叉 gen_snapshot: $cross_snap"
+  ln -sfn "$cross_snap" "$TARGET_OUT/clang_x64/gen_snapshot"
+  ln -sfn "$cross_snap" "$TARGET_OUT/clang_x64/gen_snapshot_product"
   ln -sfn "$TARGET_OUT/clang_x64/gen_snapshot" "$VIEW/out/denial_linux_loong64_release/gen_snapshot"
   ln -sfn "$TARGET_OUT/clang_x64/gen_snapshot" "$VIEW/out/denial_linux_loong64_release/gen_snapshot_loong64"
 
@@ -293,6 +299,7 @@ EOF
   cd "$FLUTTER"
   git tag -f 3.47.5 >/dev/null 2>&1 || true
   echo 3.47.5 > version
+  mkdir -p bin/cache
   rm -f bin/cache/flutter.version.json
   rm -rf bin/cache/dart-sdk
   ln -sfn "$HOST_OUT/dart-sdk" bin/cache/dart-sdk
